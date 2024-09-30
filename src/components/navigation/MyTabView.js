@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {StyleSheet, View, Text} from 'react-native';
+import {StyleSheet, View, Text, Dimensions} from 'react-native';
 import {TabView, SceneMap, TabBar} from 'react-native-tab-view';
 import NewTaste from '../foodTab/NewTaste';
 import Popular from '../foodTab/Popular';
@@ -24,10 +24,11 @@ const MyTabView = () => {
       navigationState={{index, routes}}
       renderScene={renderScene}
       onIndexChange={setIndex}
-      initialLayout={{width: styles.fullWidth}}
+      initialLayout={{width: Dimensions.get('window').width}}
       renderTabBar={props => (
         <TabBar
           {...props}
+          key={props.navigationState.index}
           indicatorStyle={{backgroundColor: '#F54B64', height: 3}}
           style={{backgroundColor: 'white'}}
           labelStyle={{color: 'black', fontSize: 12, fontWeight: '500'}}

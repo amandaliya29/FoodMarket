@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
 
   horizontalList: {
     // marginBottom: 10,
-    paddingBottom: 10,
+    paddingBottom: 16,
   },
 });
 
