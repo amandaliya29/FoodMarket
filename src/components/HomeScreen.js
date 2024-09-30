@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import {foodList} from './foodlist';
 import {StarRatingDisplay} from 'react-native-star-rating-widget';
+import MyTabView from './navigation/MyTabView';
 
 const HomeScreen = () => {
   const {width, height} = useWindowDimensions();
@@ -18,6 +19,7 @@ const HomeScreen = () => {
     const isLastItem = index === foodList.length - 1;
     return (
       <View
+        key={item.id.toString()}
         style={[
           styles.box,
           isLastItem && {marginRight: 16},
@@ -34,7 +36,7 @@ const HomeScreen = () => {
               rating={item.rating}
               starSize={20}
               color={'#EB0029'}
-              starStyle={{marginRight: -2, marginLeft: 0}} // Adds 5px gap between stars
+              starStyle={{marginRight: -2, marginLeft: 0}}
             />
             <Text style={{marginLeft: 8, color: 'grey'}}>
               {item.rating.toFixed(1)}
@@ -44,18 +46,6 @@ const HomeScreen = () => {
       </View>
     );
   };
-
-  const renderVerticalItem = ({item}) => (
-    <View style={styles.verticalBox}>
-      <View style={styles.verticalImageContainer(width, height)}>
-        <Image style={styles.verticalImage} source={{uri: item.image}} />
-      </View>
-      <View style={styles.verticalDetails}>
-        <Text style={styles.foodName}>{item.name}</Text>
-        <Text style={styles.foodPrice}>₹{item.total_price}</Text>
-      </View>
-    </View>
-  );
 
   return (
     <SafeAreaView style={styles.container}>
@@ -73,25 +63,20 @@ const HomeScreen = () => {
         />
       </View>
 
-      <FlatList
-        data={foodList}
-        showsVerticalScrollIndicator={false}
-        showsHorizontalScrollIndicator={false}
-        keyExtractor={item => item.id.toString()}
-        renderItem={renderVerticalItem}
-        ListHeaderComponent={() => (
-          <FlatList
-            data={foodList}
-            showsVerticalScrollIndicator={false}
-            showsHorizontalScrollIndicator={false}
-            horizontal={true}
-            keyExtractor={item => item.id.toString()}
-            renderItem={renderHorizontalItem}
-            ItemSeparatorComponent={<View style={{width: 16}}></View>}
-            style={styles.horizontalList}
-          />
-        )}
-      />
+      <View>
+        <FlatList
+          data={foodList}
+          showsVerticalScrollIndicator={false}
+          showsHorizontalScrollIndicator={false}
+          horizontal={true}
+          keyExtractor={item => item.id.toString()}
+          renderItem={renderHorizontalItem}
+          ItemSeparatorComponent={<View style={{width: 16}}></View>}
+          style={styles.horizontalList}
+        />
+      </View>
+
+      <MyTabView />
     </SafeAreaView>
   );
 };
@@ -163,31 +148,10 @@ const styles = StyleSheet.create({
     color: '#888',
     marginTop: 4,
   },
-  verticalBox: {
-    borderRadius: 10,
-    margin: 5,
-    backgroundColor: 'white',
-    padding: 10,
-    flexDirection: 'row',
-  },
-  verticalImageContainer: (width, height) => ({
-    width: width >= 400 ? width * 0.3 : width * 0.2,
-    height: height >= 600 ? height * 0.1 : height * 0.3,
-    borderRadius: 10,
-    overflow: 'hidden',
-    borderWidth: 0.5,
-    borderColor: '#ccc',
-  }),
-  verticalImage: {
-    width: '100%',
-    height: '100%',
-  },
-  verticalDetails: {
-    marginLeft: 20,
-  },
+
   horizontalList: {
-    marginBottom: 10,
-    paddingBottom: 20,
+    // marginBottom: 10,
+    paddingBottom: 10,
   },
 });
 
