@@ -59,7 +59,7 @@ const HomeScreen = () => {
           height={50}
           width={50}
           resizeMode="contain"
-          source={require('../assets/photo.png')}
+          source={require('../assets/photo2.png')}
         />
       </View>
 
