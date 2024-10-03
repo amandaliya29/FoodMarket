@@ -1,19 +1,17 @@
 import React from 'react';
-import {NavigationContainer} from '@react-navigation/native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {StatusBar} from 'react-native';
 import HomeScreen from '../HomeScreen';
-import Icon from 'react-native-vector-icons/Ionicons';
 import CartScreen from '../CartScreen';
 import ProfileScreen from '../ProfileScreen';
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 const Tab = createBottomTabNavigator();
+
 const TabNavigation = () => {
   return (
-    <NavigationContainer>
+    <>
       <StatusBar backgroundColor="#fff" barStyle="dark-content" />
-
       <Tab.Navigator
         screenOptions={{
           headerShown: false,
@@ -60,7 +58,7 @@ const TabNavigation = () => {
           }}
         />
       </Tab.Navigator>
-    </NavigationContainer>
+    </>
   );
 };
 
