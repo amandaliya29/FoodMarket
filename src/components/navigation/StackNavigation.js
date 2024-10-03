@@ -1,15 +1,24 @@
-import {View, Text} from 'react-native';
 import React from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import HomeScreen from '../HomeScreen';
+import SignIn from '../SignIn';
+import TabNavigation from './TabNavigation';
 
 const Stack = createNativeStackNavigator();
+
 const StackNavigation = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator>
-        <Stack.Screen name="Home" component={HomeScreen}></Stack.Screen>
+      <Stack.Navigator
+        initialRouteName="SignIn"
+        screenOptions={{
+          headerShown: false,
+          statusBarColor: 'white',
+          statusBarStyle: 'dark',
+          contentStyle: {backgroundColor: 'white'},
+        }}>
+        <Stack.Screen name="SignIn" component={SignIn} />
+        <Stack.Screen name="TabNavigation" component={TabNavigation} />
       </Stack.Navigator>
     </NavigationContainer>
   );

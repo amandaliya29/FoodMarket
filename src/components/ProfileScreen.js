@@ -1,6 +1,7 @@
 import {Image, StyleSheet, Text, View} from 'react-native';
 import React from 'react';
 import {SafeAreaView} from 'react-native-safe-area-context';
+import ProfileTabBar from './profileTab/ProfileTabBar';
 
 const ProfileScreen = () => {
   return (
@@ -17,6 +18,9 @@ const ProfileScreen = () => {
         </View>
         <Text style={styles.nameText}>FoodMarket</Text>
         <Text style={styles.emailText}>foodmarket123@gmail.com</Text>
+      </View>
+      <View style={{flex: 1, marginTop: 66}}>
+        <ProfileTabBar />
       </View>
     </SafeAreaView>
   );
