@@ -12,6 +12,7 @@ import React, {useState} from 'react';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Icon2 from 'react-native-vector-icons/FontAwesome';
 import {useNavigation} from '@react-navigation/native';
+import ImagePickerComponent from './foodTab/profileImg/ImagePickerComponent';
 
 const SignUp = () => {
   const navigation = useNavigation();
@@ -41,16 +42,7 @@ const SignUp = () => {
           <Text style={styles.letsGetSome}>Register and eat</Text>
         </View>
       </View>
-      <View style={{alignItems: 'center', marginBottom: 16}}>
-        <View style={styles.imageBorder}>
-          <View style={styles.imgContainer}>
-            <View style={styles.picIcon}>
-              <Text style={{fontWeight: '400'}}>Add</Text>
-              <Text style={{fontWeight: '400'}}>Photo</Text>
-            </View>
-          </View>
-        </View>
-      </View>
+      <ImagePickerComponent />
       <View>
         <View style={{marginBottom: 16}}>
           <Text style={styles.title}>Full Name</Text>

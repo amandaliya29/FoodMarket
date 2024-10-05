@@ -20,5 +20,14 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+
+	<!-- Add Camera and Photo Library permissions -->
+	<key>NSCameraUsageDescription</key>
+	<string>We need access to your camera to take photos</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>We need access to your photo library to select photos</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>We need access to your photo library to save photos</string>
+
 </dict>
 </plist>
