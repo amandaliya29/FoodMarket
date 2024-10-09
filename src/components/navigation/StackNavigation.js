@@ -5,6 +5,8 @@ import SignIn from '../SignIn';
 import TabNavigation from './TabNavigation';
 import SignUp from '../SignUp';
 import {ScreenStackHeaderBackButtonImage} from 'react-native-screens';
+import Address from '../pages/Address';
+import FoodDetails from '../pages/FoodDetails';
 
 const Stack = createNativeStackNavigator();
 
@@ -21,6 +23,8 @@ const StackNavigation = () => {
         }}>
         <Stack.Screen name="SignIn" component={SignIn} />
         <Stack.Screen name="SignUp" component={SignUp} />
+        <Stack.Screen name="Address" component={Address} />
+        <Stack.Screen name="FoodDetail" component={FoodDetails} />
         <Stack.Screen name="TabNavigation" component={TabNavigation} />
       </Stack.Navigator>
     </NavigationContainer>

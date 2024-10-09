@@ -7,24 +7,31 @@ import {
   Image,
   FlatList,
   useWindowDimensions,
+  TouchableOpacity,
 } from 'react-native';
 import {foodList} from './foodlist';
 import {StarRatingDisplay} from 'react-native-star-rating-widget';
 import MyTabView from './navigation/MyTabView';
+import {useNavigation} from '@react-navigation/native';
 
 const HomeScreen = () => {
   const {width, height} = useWindowDimensions();
-
+  const navigation = useNavigation();
   const renderHorizontalItem = ({item, index}) => {
     const isLastItem = index === foodList.length - 1;
+
     return (
-      <View
+      <TouchableOpacity
         key={item.id.toString()}
         style={[
           styles.box,
           isLastItem && {marginRight: 16},
-          index == 0 && {marginLeft: 16},
-        ]}>
+          index === 0 && {marginLeft: 16},
+        ]}
+        onPress={() => {
+          // console.warn('Pressed:', item);
+          navigation.navigate('FoodDetail', {item});
+        }}>
         <View style={styles.imageContainer(width, height)}>
           <Image style={styles.image} source={{uri: item.image}} />
         </View>
@@ -43,7 +50,7 @@ const HomeScreen = () => {
             </Text>
           </View>
         </View>
-      </View>
+      </TouchableOpacity>
     );
   };
 
@@ -148,9 +155,7 @@ const styles = StyleSheet.create({
     color: '#888',
     marginTop: 4,
   },
-
   horizontalList: {
-    // marginBottom: 10,
     paddingBottom: 16,
   },
 });

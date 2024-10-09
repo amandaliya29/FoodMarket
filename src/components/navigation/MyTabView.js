@@ -13,19 +13,19 @@ import Popular from '../foodTab/Popular';
 import Recommended from '../foodTab/Recommended';
 
 const MyTabView = () => {
-  const layout = useWindowDimensions(); // Get screen width to calculate tab width
+  const layout = useWindowDimensions();
   const [index, setIndex] = useState(0);
   const [routes] = useState([
     {key: 'newTaster', title: 'New Tester'},
     {key: 'popular', title: 'Popular'},
     {key: 'recommended', title: 'Recommended'},
   ]);
-  const tabTitleWidths = useRef([]); // Store tab title widths for each tab
-  const fixedIndicatorWidth = 40; // Set fixed width for the indicator
+  const tabTitleWidths = useRef([]);
+  const fixedIndicatorWidth = 40;
 
   const handleTextLayout = (event, i) => {
     const {width} = event.nativeEvent.layout;
-    tabTitleWidths.current[i] = width; // Store the width of each tab title
+    tabTitleWidths.current[i] = width;
   };
 
   const renderTabBar = props => {
@@ -42,15 +42,15 @@ const MyTabView = () => {
             ),
           });
 
-          const color = index === i ? '#020202' : '#8D92A3'; // Active tab text color
-          const fontWeight = index === i ? 700 : 400; // Active tab text color
+          const color = index === i ? '#020202' : '#8D92A3';
+          const fontWeight = index === i ? 700 : 400;
           return (
             <TouchableOpacity
               key={route.key}
               style={styles.tabItem}
               onPress={() => setIndex(i)}>
               <Animated.Text
-                style={[{opacity}, {color}, {fontWeight}]}
+                style={[{opacity}, {color}, {fontWeight}, {fontSize: 13}]}
                 onLayout={event => handleTextLayout(event, i)}>
                 {route.title}
               </Animated.Text>
@@ -58,19 +58,17 @@ const MyTabView = () => {
           );
         })}
 
-        {/* Tab Indicator */}
         <Animated.View
           style={[
             styles.indicator,
             {
-              width: fixedIndicatorWidth, // Set the fixed width for the indicator
+              width: fixedIndicatorWidth,
               transform: [
                 {
                   translateX: props.position.interpolate({
                     inputRange,
                     outputRange: inputRange.map(i => {
-                      const titleWidth = tabTitleWidths.current[i] || 0;
-                      const offsetX = (tabWidth - fixedIndicatorWidth) / 2; // Adjust to center the indicator
+                      const offsetX = (tabWidth - fixedIndicatorWidth) / 2;
                       return i * tabWidth + offsetX;
                     }),
                   }),
@@ -95,7 +93,7 @@ const MyTabView = () => {
       renderScene={renderScene}
       renderTabBar={renderTabBar}
       onIndexChange={setIndex}
-      initialLayout={{width: layout.width}} // Set the initial layout width
+      initialLayout={{width: layout.width}}
     />
   );
 };
