@@ -33,6 +33,7 @@ const SignIn = ({navigation}) => {
             value={email}
             onChangeText={setEmail}
             placeholder="Type your email address"
+            placeholderTextColor={'grey'}
             style={styles.input}
           />
         </View>
@@ -45,13 +46,14 @@ const SignIn = ({navigation}) => {
               value={password}
               onChangeText={setPassword}
               placeholder="Type your password"
+              placeholderTextColor={'grey'}
               style={styles.inputWithIcon}
             />
             <TouchableOpacity
               onPress={() => setHidePass(!hidePass)}
               style={styles.iconStyle}>
               <Icon
-                name={hidePass ? 'eye-slash' : 'eye'} // Toggle between 'eye' and 'eye-slash' icon
+                name={hidePass ? 'eye-slash' : 'eye'}
                 size={20}
                 color="grey"
               />

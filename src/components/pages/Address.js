@@ -1,27 +1,24 @@
 import {
+  SafeAreaView,
   StyleSheet,
   Text,
   View,
-  SafeAreaView,
   TouchableOpacity,
   TextInput,
   Pressable,
-  Image,
 } from 'react-native';
 import React, {useState} from 'react';
 import Icon from 'react-native-vector-icons/Ionicons';
-import Icon2 from 'react-native-vector-icons/FontAwesome';
+import DropDown from './DropDown';
 import {useNavigation} from '@react-navigation/native';
-import ImagePickerComponent from './foodTab/profileImg/ImagePickerComponent';
 
-const SignUp = () => {
+const Address = () => {
+  const [phone, setPhone] = useState();
+  const [address, setAddress] = useState();
+  const [house, setHouse] = useState();
+  const [city, setCity] = useState();
+
   const navigation = useNavigation();
-
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
-  const [hidePass, setHidePass] = useState(true);
-
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.head}>
@@ -38,60 +35,51 @@ const SignUp = () => {
         </TouchableOpacity>
 
         <View>
-          <Text style={styles.text}>Sign Up</Text>
-          <Text style={styles.letsGetSome}>Register and eat</Text>
+          <Text style={styles.text}>Address</Text>
+          <Text style={styles.letsGetSome}>Make sure it's valid</Text>
         </View>
       </View>
-      <ImagePickerComponent />
       <View>
         <View style={{marginBottom: 16}}>
-          <Text style={styles.title}>Full Name</Text>
+          <Text style={styles.title}>Phone No</Text>
           <TextInput
-            value={name}
-            onChangeText={setName}
-            placeholder="Type your full name"
+            value={phone}
+            onChangeText={setPhone}
+            placeholder="Type your phone number"
             placeholderTextColor={'grey'}
             style={styles.input}
           />
         </View>
         <View style={{marginBottom: 16}}>
-          <Text style={styles.title}>Email Address</Text>
+          <Text style={styles.title}>Address</Text>
           <TextInput
-            value={email}
-            onChangeText={setEmail}
+            value={address}
+            onChangeText={setAddress}
+            placeholder="Type your address"
             placeholderTextColor={'grey'}
-            placeholder="Type your email address"
             style={styles.input}
           />
         </View>
-
-        <View style={{marginBottom: 16}}>
-          <Text style={styles.title}>Password</Text>
-          <View style={styles.passwordContainer}>
-            <TextInput
-              secureTextEntry={hidePass}
-              value={password}
-              onChangeText={setPassword}
-              placeholder="Type your password"
-              placeholderTextColor={'grey'}
-              style={styles.inputWithIcon}
-            />
-            <TouchableOpacity
-              onPress={() => setHidePass(!hidePass)}
-              style={styles.iconStyle}>
-              <Icon2
-                name={hidePass ? 'eye-slash' : 'eye'}
-                size={20}
-                color="grey"
-              />
-            </TouchableOpacity>
-          </View>
+        <View>
+          <Text style={styles.title}>House No</Text>
+          <TextInput
+            value={house}
+            onChangeText={setHouse}
+            placeholder="Type your house number"
+            placeholderTextColor={'grey'}
+            style={styles.input}
+          />
         </View>
+        <DropDown value={city} setValue={setCity} />
+      </View>
+      <View>
         <Pressable
           style={styles.signInButton}
-          onPress={() => navigation.navigate('Address')}>
+          onPress={() => {
+            navigation.navigate('SignIn');
+          }}>
           <Text style={{color: 'white', fontWeight: '500', fontSize: 14}}>
-            Continue
+            Sign Up Now
           </Text>
         </Pressable>
       </View>
@@ -110,7 +98,7 @@ const SignUp = () => {
   );
 };
 
-export default SignUp;
+export default Address;
 
 const styles = StyleSheet.create({
   container: {
@@ -137,31 +125,6 @@ const styles = StyleSheet.create({
   backButton: {
     marginRight: 26,
   },
-  picIcon: {
-    flex: 1,
-    backgroundColor: '#f0f0f0',
-    width: '100%',
-    height: 90,
-    borderRadius: 45,
-    borderWidth: 0.5,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  imageBorder: {
-    width: 110,
-    height: 110,
-    borderWidth: 1.5,
-    borderRadius: 55,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderStyle: 'dashed',
-    borderColor: '#8D92A3',
-  },
-  imgContainer: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
-  },
   input: {
     margin: 6,
     borderRadius: 10,
@@ -175,24 +138,8 @@ const styles = StyleSheet.create({
     color: '#020202',
     textAlign: 'left',
     marginLeft: 16,
+
     fontWeight: '500',
-  },
-  passwordContainer: {
-    margin: 6,
-    marginHorizontal: 16,
-    position: 'relative',
-  },
-  inputWithIcon: {
-    padding: 10,
-    paddingRight: 40,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: 'rgba(2, 2, 2, 0.28)',
-  },
-  iconStyle: {
-    position: 'absolute',
-    right: 20,
-    top: '30%',
   },
   signInButton: {
     borderRadius: 8,
