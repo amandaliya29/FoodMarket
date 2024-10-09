@@ -86,7 +86,7 @@ const SignUp = () => {
         </View>
         <Pressable
           style={styles.signInButton}
-          onPress={() => navigation.navigate('TabNavigation')}>
+          onPress={() => navigation.navigate('SignIn')}>
           <Text style={{color: 'white', fontWeight: '500', fontSize: 14}}>
             Sign Up
           </Text>
