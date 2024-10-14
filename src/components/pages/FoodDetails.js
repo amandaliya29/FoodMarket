@@ -1,3 +1,4 @@
+import React, {useState} from 'react';
 import {
   Image,
   SafeAreaView,
@@ -6,21 +7,25 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useState} from 'react';
+import {useDispatch} from 'react-redux';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import {StarRatingDisplay} from 'react-native-star-rating-widget';
 import Quentity from './Quentity';
+import {addToCart} from '../redux/cartSlice';
 
 const FoodDetails = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const {item} = route.params;
+  const dispatch = useDispatch();
 
   const [quantity, setQuantity] = useState(1);
 
-  const price = parseFloat(item.total_price);
-  const totalPrice = isNaN(price) ? 0 : price * quantity;
+  const handleAddToCart = () => {
+    dispatch(addToCart({...item, quantity}));
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View>
@@ -82,13 +87,15 @@ const FoodDetails = () => {
           }}>
           <View>
             <Text style={{fontSize: 16, fontWeight: 'bold', color: 'black'}}>
-              Total Price:
+              Price:
             </Text>
-            <Text style={{fontSize: 18, color: 'black'}}>₹{totalPrice}</Text>
+            <Text style={{fontSize: 18, color: 'black'}}>
+              ₹{item.price.toFixed(2)}
+            </Text>
           </View>
-          <TouchableOpacity style={styles.orderNow}>
+          <TouchableOpacity style={styles.addToCart} onPress={handleAddToCart}>
             <Text style={{color: 'white', fontWeight: '500', fontSize: 14}}>
-              Order Now
+              Add To Cart
             </Text>
           </TouchableOpacity>
         </View>
@@ -133,12 +140,13 @@ const styles = StyleSheet.create({
     color: 'gray',
     lineHeight: 20,
   },
-  orderNow: {
+  addToCart: {
     borderRadius: 8,
     paddingHorizontal: 20,
     paddingVertical: 12,
     backgroundColor: '#eb0029',
     alignItems: 'center',
     justifyContent: 'center',
+    flex: 0.5,
   },
 });

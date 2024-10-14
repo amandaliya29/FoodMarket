@@ -1,12 +1,26 @@
-import {StyleSheet, Text, View, FlatList, Image} from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  View,
+  FlatList,
+  Image,
+  TouchableOpacity,
+} from 'react-native';
 import React from 'react';
 import StarRating from 'react-native-star-rating-widget';
 import StarRatingDisplay from 'react-native-star-rating-widget';
 import {foodList} from '../foodlist';
+import {useNavigation} from '@react-navigation/native';
 
 const NewTaste = () => {
+  const navigation = useNavigation();
   const renderVerticalItem = ({item}) => (
-    <View key={item.id.toString()} style={styles.verticalBox}>
+    <TouchableOpacity
+      key={item.id.toString()}
+      style={styles.verticalBox}
+      onPress={() => {
+        navigation.navigate('FoodDetail', {item});
+      }}>
       <View style={styles.verticalImageContainer}>
         <Image style={styles.verticalImage} source={{uri: item.image}} />
       </View>
@@ -19,7 +33,7 @@ const NewTaste = () => {
         }}>
         <View style={styles.verticalDetails}>
           <Text style={styles.foodName}>{item.name}</Text>
-          <Text style={styles.foodPrice}>₹{item.total_price}</Text>
+          <Text style={styles.foodPrice}>₹{item.price.toFixed(2)}</Text>
         </View>
         <View style={{flexDirection: 'row', marginTop: 6}}>
           <StarRatingDisplay
@@ -33,7 +47,7 @@ const NewTaste = () => {
           </Text>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 
   return (

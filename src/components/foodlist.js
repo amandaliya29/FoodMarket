@@ -14,7 +14,7 @@ export const foodList = [
       'Basil',
       'Olive Oil',
     ],
-    total_price: 499, // INR Price
+    price: 499, // INR Price
   },
   {
     id: 2,
@@ -31,7 +31,7 @@ export const foodList = [
       'Parmesan Cheese',
       'Black Pepper',
     ],
-    total_price: 425, // INR Price
+    price: 425, // INR Price
   },
   {
     id: 3,
@@ -48,7 +48,7 @@ export const foodList = [
       'Parmesan Cheese',
       'Lemon Juice',
     ],
-    total_price: 350, // INR Price
+    price: 350, // INR Price
   },
   {
     id: 4,
@@ -66,7 +66,7 @@ export const foodList = [
       'Onion',
       'Toasted Bun',
     ],
-    total_price: 375, // INR Price
+    price: 375, // INR Price
   },
   {
     id: 5,
@@ -84,6 +84,6 @@ export const foodList = [
       'Eggs',
       'Chocolate Frosting',
     ],
-    total_price: 299, // INR Price
+    price: 299, // INR Price
   },
 ];

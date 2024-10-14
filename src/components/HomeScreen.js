@@ -17,6 +17,7 @@ import {useNavigation} from '@react-navigation/native';
 const HomeScreen = () => {
   const {width, height} = useWindowDimensions();
   const navigation = useNavigation();
+
   const renderHorizontalItem = ({item, index}) => {
     const isLastItem = index === foodList.length - 1;
 
@@ -29,7 +30,6 @@ const HomeScreen = () => {
           index === 0 && {marginLeft: 16},
         ]}
         onPress={() => {
-          // console.warn('Pressed:', item);
           navigation.navigate('FoodDetail', {item});
         }}>
         <View style={styles.imageContainer(width, height)}>
