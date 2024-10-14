@@ -17,6 +17,7 @@ import {useNavigation} from '@react-navigation/native';
 const HomeScreen = () => {
   const {width, height} = useWindowDimensions();
   const navigation = useNavigation();
+
   const renderHorizontalItem = ({item, index}) => {
     const isLastItem = index === foodList.length - 1;
 

@@ -1,3 +1,4 @@
+import React, {useState} from 'react';
 import {
   Image,
   SafeAreaView,
@@ -6,22 +7,23 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useState} from 'react';
+import {useDispatch} from 'react-redux';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import {StarRatingDisplay} from 'react-native-star-rating-widget';
 import Quentity from './Quentity';
+import {addToCart} from '../redux/cartSlice';
 
 const FoodDetails = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const {item} = route.params;
+  const dispatch = useDispatch();
 
   const [quantity, setQuantity] = useState(1);
 
-  const price = item.price;
   const handleAddToCart = () => {
-    console.warn('ADDED', item, quantity);
+    dispatch(addToCart({...item, quantity}));
   };
 
   return (
@@ -85,7 +87,7 @@ const FoodDetails = () => {
           }}>
           <View>
             <Text style={{fontSize: 16, fontWeight: 'bold', color: 'black'}}>
-              Total Price:
+              Price:
             </Text>
             <Text style={{fontSize: 18, color: 'black'}}>
               ₹{item.price.toFixed(2)}

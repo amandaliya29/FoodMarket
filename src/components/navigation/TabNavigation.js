@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {View, Text, StatusBar, StyleSheet} from 'react-native';
 import HomeScreen from '../HomeScreen';
@@ -6,11 +6,16 @@ import CartScreen from '../CartScreen';
 import ProfileScreen from '../ProfileScreen';
 import Icon from 'react-native-vector-icons/Ionicons';
 import AddToCart from './AddToCart';
-
+import {useSelector} from 'react-redux';
 const Tab = createBottomTabNavigator();
 
 const TabNavigation = () => {
-  const [cartItemCount, setCartItemCount] = useState(0);
+  const cartItems = useSelector(state => state.cart.items);
+  const cartItemCount = cartItems.reduce(
+    (total, item) => total + item.quantity,
+    0,
+  );
+
   return (
     <>
       <StatusBar backgroundColor="#fff" barStyle="dark-content" />
