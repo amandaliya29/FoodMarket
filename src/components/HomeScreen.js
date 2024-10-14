@@ -29,7 +29,6 @@ const HomeScreen = () => {
           index === 0 && {marginLeft: 16},
         ]}
         onPress={() => {
-          // console.warn('Pressed:', item);
           navigation.navigate('FoodDetail', {item});
         }}>
         <View style={styles.imageContainer(width, height)}>

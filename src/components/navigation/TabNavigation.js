@@ -1,14 +1,16 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {StatusBar} from 'react-native';
+import {View, Text, StatusBar, StyleSheet} from 'react-native';
 import HomeScreen from '../HomeScreen';
 import CartScreen from '../CartScreen';
 import ProfileScreen from '../ProfileScreen';
 import Icon from 'react-native-vector-icons/Ionicons';
+import AddToCart from './AddToCart';
 
 const Tab = createBottomTabNavigator();
 
 const TabNavigation = () => {
+  const [cartItemCount, setCartItemCount] = useState(0);
   return (
     <>
       <StatusBar backgroundColor="#fff" barStyle="dark-content" />
@@ -28,6 +30,26 @@ const TabNavigation = () => {
                 size={24}
                 color={focused ? '#EB0029' : '#8d92a3'}
               />
+            ),
+          }}
+        />
+        <Tab.Screen
+          name="AddToCart"
+          component={AddToCart}
+          options={{
+            tabBarIcon: ({focused}) => (
+              <View>
+                <Icon
+                  name={focused ? 'cart' : 'cart-outline'}
+                  size={24}
+                  color={focused ? '#EB0029' : '#8d92a3'}
+                />
+                {cartItemCount > 0 && (
+                  <View style={styles.badgeContainer}>
+                    <Text style={styles.badgeText}>{cartItemCount}</Text>
+                  </View>
+                )}
+              </View>
             ),
           }}
         />
@@ -61,5 +83,24 @@ const TabNavigation = () => {
     </>
   );
 };
+
+const styles = StyleSheet.create({
+  badgeContainer: {
+    position: 'absolute',
+    right: -6,
+    top: -3,
+    backgroundColor: '#EB0029',
+    borderRadius: 10,
+    width: 20,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  badgeText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+});
 
 export default TabNavigation;

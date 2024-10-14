@@ -6,7 +6,7 @@ const Quentity = ({onChangeQuantity}) => {
   const [count, setCount] = useState(1);
 
   useEffect(() => {
-    onChangeQuantity(count); // Call when count changes
+    onChangeQuantity(count);
   }, [count]);
 
   const increment = () => {
@@ -25,9 +25,9 @@ const Quentity = ({onChangeQuantity}) => {
         justifyContent: 'space-around',
         alignItems: 'center',
       }}>
-      <TouchableOpacity onPress={increment}>
+      <TouchableOpacity onPress={decrement}>
         <Icon
-          name="plus"
+          name="minus"
           size={16}
           color={'black'}
           style={{
@@ -42,9 +42,9 @@ const Quentity = ({onChangeQuantity}) => {
         />
       </TouchableOpacity>
       <Text style={{color: 'black', fontSize: 16}}>{count}</Text>
-      <TouchableOpacity onPress={decrement}>
+      <TouchableOpacity onPress={increment}>
         <Icon
-          name="minus"
+          name="plus"
           size={16}
           color={'black'}
           style={{

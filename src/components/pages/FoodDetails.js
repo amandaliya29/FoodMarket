@@ -19,8 +19,11 @@ const FoodDetails = () => {
 
   const [quantity, setQuantity] = useState(1);
 
-  const price = parseFloat(item.total_price);
-  const totalPrice = isNaN(price) ? 0 : price * quantity;
+  const price = item.price;
+  const handleAddToCart = () => {
+    console.warn('ADDED', item, quantity);
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View>
@@ -84,11 +87,13 @@ const FoodDetails = () => {
             <Text style={{fontSize: 16, fontWeight: 'bold', color: 'black'}}>
               Total Price:
             </Text>
-            <Text style={{fontSize: 18, color: 'black'}}>₹{totalPrice}</Text>
+            <Text style={{fontSize: 18, color: 'black'}}>
+              ₹{item.price.toFixed(2)}
+            </Text>
           </View>
-          <TouchableOpacity style={styles.orderNow}>
+          <TouchableOpacity style={styles.addToCart} onPress={handleAddToCart}>
             <Text style={{color: 'white', fontWeight: '500', fontSize: 14}}>
-              Order Now
+              Add To Cart
             </Text>
           </TouchableOpacity>
         </View>
@@ -133,12 +138,13 @@ const styles = StyleSheet.create({
     color: 'gray',
     lineHeight: 20,
   },
-  orderNow: {
+  addToCart: {
     borderRadius: 8,
     paddingHorizontal: 20,
     paddingVertical: 12,
     backgroundColor: '#eb0029',
     alignItems: 'center',
     justifyContent: 'center',
+    flex: 0.5,
   },
 });
