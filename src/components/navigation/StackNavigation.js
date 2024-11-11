@@ -8,6 +8,8 @@ import {ScreenStackHeaderBackButtonImage} from 'react-native-screens';
 import Address from '../pages/Address';
 import FoodDetails from '../pages/FoodDetails';
 
+import CartScreen from '../CartScreen';
+
 const Stack = createNativeStackNavigator();
 
 const StackNavigation = () => {
@@ -26,6 +28,7 @@ const StackNavigation = () => {
         <Stack.Screen name="Address" component={Address} />
         <Stack.Screen name="FoodDetail" component={FoodDetails} />
         <Stack.Screen name="TabNavigation" component={TabNavigation} />
+        <Stack.Screen name="Order" component={CartScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

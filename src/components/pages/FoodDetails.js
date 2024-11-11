@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   Image,
   SafeAreaView,
@@ -6,13 +6,15 @@ import {
   Text,
   TouchableOpacity,
   View,
+  ToastAndroid, // Import ToastAndroid
 } from 'react-native';
-import {useDispatch} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import Icon from 'react-native-vector-icons/Ionicons';
+import Icon2 from 'react-native-vector-icons/MaterialIcons';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import {StarRatingDisplay} from 'react-native-star-rating-widget';
 import Quentity from './Quentity';
-import {addToCart} from '../redux/cartSlice';
+import {addToCart, addToWishList, removeFromWishList} from '../redux/cartSlice';
 
 const FoodDetails = () => {
   const navigation = useNavigation();
@@ -22,24 +24,64 @@ const FoodDetails = () => {
 
   const [quantity, setQuantity] = useState(1);
 
+  const wishList = useSelector(state => state.cart.wishList);
+  const isFavorited = wishList.some(
+    favoriteItem => favoriteItem.id === item.id,
+  );
+  const showToastWithGravityAndOffset = message => {
+    ToastAndroid.showWithGravityAndOffset(
+      message,
+      ToastAndroid.CENTER,
+      ToastAndroid.BOTTOM,
+      25,
+      50,
+    );
+  };
+
   const handleAddToCart = () => {
     dispatch(addToCart({...item, quantity}));
+    showToastWithGravityAndOffset('Added to Cart!');
+  };
+
+  const handleToggleFavorite = () => {
+    if (isFavorited) {
+      dispatch(removeFromWishList(item));
+      showToastWithGravityAndOffset('Removed from Wishlist!');
+    } else {
+      dispatch(addToWishList(item));
+      showToastWithGravityAndOffset('Added to Wishlist!');
+    }
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <View>
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={styles.backButton}>
-          <Icon
-            name="chevron-back"
-            size={24}
-            color="white"
-            backgroundColor="red"
-            style={{borderRadius: 5}}
-          />
-        </TouchableOpacity>
+        <View>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={styles.backButton}>
+            <Icon
+              name="chevron-back"
+              size={24}
+              color="white"
+              backgroundColor="red"
+              style={{borderRadius: 5}}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.wishButton,
+              {backgroundColor: isFavorited ? 'white' : 'red'},
+            ]}
+            onPress={handleToggleFavorite}>
+            <Icon2
+              name="favorite"
+              size={24}
+              color={isFavorited ? 'red' : 'white'}
+              style={{borderRadius: 5}}
+            />
+          </TouchableOpacity>
+        </View>
         <Image source={{uri: item.image}} style={styles.foodImage} />
       </View>
       <View style={styles.box}>
@@ -117,6 +159,14 @@ const styles = StyleSheet.create({
     top: 16,
     zIndex: 1,
     left: 16,
+  },
+  wishButton: {
+    position: 'absolute',
+    top: 16,
+    zIndex: 1,
+    right: 16,
+    padding: 8,
+    borderRadius: 50,
   },
   foodImage: {
     width: '100%',

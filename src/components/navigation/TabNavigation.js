@@ -5,8 +5,11 @@ import HomeScreen from '../HomeScreen';
 import CartScreen from '../CartScreen';
 import ProfileScreen from '../ProfileScreen';
 import Icon from 'react-native-vector-icons/Ionicons';
+import Icon2 from 'react-native-vector-icons/MaterialIcons';
 import AddToCart from './AddToCart';
 import {useSelector} from 'react-redux';
+import WishList from '../WishList';
+import Search from '../Search';
 const Tab = createBottomTabNavigator();
 
 const TabNavigation = () => {
@@ -59,15 +62,31 @@ const TabNavigation = () => {
           }}
         />
         <Tab.Screen
-          name="Cart"
-          component={CartScreen}
+          name="search"
+          component={Search}
           options={{
             tabBarIcon: ({focused}) => (
-              <Icon
-                name={focused ? 'bag-handle' : 'bag-handle-outline'}
+              <Icon2
+                name={focused ? 'search' : 'search'}
                 size={24}
                 color={focused ? '#EB0029' : '#8d92a3'}
               />
+            ),
+          }}
+        />
+
+        <Tab.Screen
+          name="WishList"
+          component={WishList}
+          options={{
+            tabBarIcon: ({focused}) => (
+              <View>
+                <Icon2
+                  name={focused ? 'favorite' : 'favorite-outline'}
+                  size={24}
+                  color={focused ? '#EB0029' : '#8d92a3'}
+                />
+              </View>
             ),
           }}
         />
