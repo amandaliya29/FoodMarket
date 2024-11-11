@@ -1,15 +1,30 @@
-import {StyleSheet, Text, View} from 'react-native';
+import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import React from 'react';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import OrderTabBar from './orderListTab/OrderTabBar';
+import Icon from 'react-native-vector-icons/Ionicons';
+import {useNavigation} from '@react-navigation/native';
 
 const CartScreen = () => {
+  const navigation = useNavigation();
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.head}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}>
+          <Icon
+            name="chevron-back"
+            size={24}
+            color="white"
+            backgroundColor="red"
+            style={{borderRadius: 5}}
+          />
+        </TouchableOpacity>
+
         <View>
-          <Text style={styles.text}>Your Orders</Text>
-          <Text style={styles.letsGetSome}>Wait for the best meal</Text>
+          <Text style={styles.text}>Your Order</Text>
+          <Text style={styles.letsGetSome}>wait for the best meal</Text>
         </View>
       </View>
       <View
@@ -27,7 +42,7 @@ export default CartScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 8,
+    paddingTop: 0,
     backgroundColor: '#fff',
   },
   text: {
@@ -41,11 +56,12 @@ const styles = StyleSheet.create({
     color: '#8d92a3',
   },
   head: {
-    padding: 16,
-    paddingVertical: 2,
+    paddingLeft: 16,
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 6,
+    marginBottom: 5,
+  },
+  backButton: {
+    marginRight: 16,
   },
 });

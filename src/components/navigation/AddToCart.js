@@ -209,7 +209,7 @@ const AddToCart = () => {
     <SafeAreaView style={styles.container}>
       <View style={styles.head}>
         <View>
-          <Text style={styles.text}>My Cart</Text>
+          <Text style={styles.text}>Cart</Text>
           <Text style={styles.you}>You deserve better meal</Text>
         </View>
       </View>
