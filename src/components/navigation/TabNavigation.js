@@ -10,6 +10,7 @@ import AddToCart from './AddToCart';
 import {useSelector} from 'react-redux';
 import WishList from '../WishList';
 import Search from '../Search';
+import {KeyboardAvoidingView} from 'react-native';
 const Tab = createBottomTabNavigator();
 
 const TabNavigation = () => {
@@ -22,88 +23,97 @@ const TabNavigation = () => {
   return (
     <>
       <StatusBar backgroundColor="#fff" barStyle="dark-content" />
-      <Tab.Navigator
-        screenOptions={{
-          headerShown: false,
-          tabBarShowLabel: false,
-          tabBarStyle: {backgroundColor: '#fff'},
-        }}>
-        <Tab.Screen
-          name="Home"
-          component={HomeScreen}
-          options={{
-            tabBarIcon: ({focused}) => (
-              <Icon
-                name={focused ? 'home' : 'home-outline'}
-                size={24}
-                color={focused ? '#EB0029' : '#8d92a3'}
-              />
-            ),
-          }}
-        />
-        <Tab.Screen
-          name="AddToCart"
-          component={AddToCart}
-          options={{
-            tabBarIcon: ({focused}) => (
-              <View>
+      <KeyboardAvoidingView
+        style={{flex: 1}}
+        behavior={Platform.OS === 'ios' ? 'height' : 'height'}>
+        <Tab.Navigator
+          screenOptions={{
+            headerShown: false,
+            tabBarLabelStyle: {
+              marginTop: -5,
+              marginBottom: 5,
+              fontSize: 12,
+            },
+            tabBarActiveTintColor: '#EB0029',
+            tabBarStyle: {backgroundColor: '#fff'},
+          }}>
+          <Tab.Screen
+            name="Home"
+            component={HomeScreen}
+            options={{
+              tabBarIcon: ({focused}) => (
                 <Icon
-                  name={focused ? 'cart' : 'cart-outline'}
-                  size={24}
+                  name={focused ? 'home' : 'home-outline'}
+                  size={18}
                   color={focused ? '#EB0029' : '#8d92a3'}
                 />
-                {cartItemCount > 0 && (
-                  <View style={styles.badgeContainer}>
-                    <Text style={styles.badgeText}>{cartItemCount}</Text>
-                  </View>
-                )}
-              </View>
-            ),
-          }}
-        />
-        <Tab.Screen
-          name="search"
-          component={Search}
-          options={{
-            tabBarIcon: ({focused}) => (
-              <Icon2
-                name={focused ? 'search' : 'search'}
-                size={24}
-                color={focused ? '#EB0029' : '#8d92a3'}
-              />
-            ),
-          }}
-        />
-
-        <Tab.Screen
-          name="WishList"
-          component={WishList}
-          options={{
-            tabBarIcon: ({focused}) => (
-              <View>
+              ),
+            }}
+          />
+          <Tab.Screen
+            name="Cart"
+            component={AddToCart}
+            options={{
+              tabBarIcon: ({focused}) => (
+                <View>
+                  <Icon
+                    name={focused ? 'cart' : 'cart-outline'}
+                    size={18}
+                    color={focused ? '#EB0029' : '#8d92a3'}
+                  />
+                  {cartItemCount > 0 && (
+                    <View style={styles.badgeContainer}>
+                      <Text style={styles.badgeText}>{cartItemCount}</Text>
+                    </View>
+                  )}
+                </View>
+              ),
+            }}
+          />
+          <Tab.Screen
+            name="Search"
+            component={Search}
+            options={{
+              tabBarIcon: ({focused}) => (
                 <Icon2
-                  name={focused ? 'favorite' : 'favorite-outline'}
-                  size={24}
+                  name={focused ? 'search' : 'search'}
+                  size={18}
                   color={focused ? '#EB0029' : '#8d92a3'}
                 />
-              </View>
-            ),
-          }}
-        />
-        <Tab.Screen
-          name="Profile"
-          component={ProfileScreen}
-          options={{
-            tabBarIcon: ({focused}) => (
-              <Icon
-                name={focused ? 'person' : 'person-outline'}
-                size={24}
-                color={focused ? '#EB0029' : '#8d92a3'}
-              />
-            ),
-          }}
-        />
-      </Tab.Navigator>
+              ),
+            }}
+          />
+
+          <Tab.Screen
+            name="WishList"
+            component={WishList}
+            options={{
+              tabBarIcon: ({focused}) => (
+                <View>
+                  <Icon2
+                    name={focused ? 'favorite' : 'favorite-outline'}
+                    size={18}
+                    color={focused ? '#EB0029' : '#8d92a3'}
+                  />
+                </View>
+              ),
+            }}
+          />
+          <Tab.Screen
+            name="Profile"
+            component={ProfileScreen}
+            options={{
+              tabBarIcon: ({focused}) => (
+                <Icon
+                  name={focused ? 'person' : 'person-outline'}
+                  size={18}
+                  color={focused ? '#EB0029' : '#8d92a3'}
+                />
+              ),
+            }}
+          />
+        </Tab.Navigator>
+      </KeyboardAvoidingView>
     </>
   );
 };

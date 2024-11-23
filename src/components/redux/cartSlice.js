@@ -1,15 +1,15 @@
 import {createSlice} from '@reduxjs/toolkit';
 
 const initialState = {
-  items: [], // Shopping cart items
-  wishList: [], // Wishlist items
+  items: [],
+  wishList: [],
+  searchHistory: [],
 };
 
 const cartSlice = createSlice({
   name: 'cart',
   initialState,
   reducers: {
-    // Add item to the cart or increment quantity if already in the cart
     addToCart: (state, action) => {
       const itemIndex = state.items.findIndex(
         item => item.id === action.payload.id,
@@ -21,12 +21,10 @@ const cartSlice = createSlice({
       }
     },
 
-    // Remove item from the cart
     removeFromCart: (state, action) => {
       state.items = state.items.filter(item => item.id !== action.payload.id);
     },
 
-    // Increment quantity of an item in the cart
     incrementQuantity: (state, action) => {
       const itemIndex = state.items.findIndex(
         item => item.id === action.payload.id,
@@ -36,7 +34,6 @@ const cartSlice = createSlice({
       }
     },
 
-    // Decrement quantity or remove item if quantity is 1
     decrementQuantity: (state, action) => {
       const itemIndex = state.items.findIndex(
         item => item.id === action.payload.id,
@@ -52,7 +49,6 @@ const cartSlice = createSlice({
       }
     },
 
-    // Add item to wishlist if not already present
     addToWishList: (state, action) => {
       const itemIndex = state.wishList.findIndex(
         item => item.id === action.payload.id,
@@ -62,11 +58,26 @@ const cartSlice = createSlice({
       }
     },
 
-    // Remove item from wishlist
     removeFromWishList: (state, action) => {
       state.wishList = state.wishList.filter(
         item => item.id !== action.payload.id,
       );
+    },
+
+    addSearchHistory: (state, action) => {
+      if (!state.searchHistory.includes(action.payload)) {
+        state.searchHistory = [action.payload, ...state.searchHistory];
+      }
+    },
+
+    removeSearchHistoryItem: (state, action) => {
+      state.searchHistory = state.searchHistory.filter(
+        item => item !== action.payload,
+      );
+    },
+
+    clearHistory: state => {
+      state.searchHistory = [];
     },
   },
 });
@@ -78,6 +89,9 @@ export const {
   decrementQuantity,
   addToWishList,
   removeFromWishList,
+  addSearchHistory,
+  removeSearchHistoryItem,
+  clearHistory,
 } = cartSlice.actions;
 
 export default cartSlice.reducer;

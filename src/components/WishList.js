@@ -181,7 +181,7 @@ const WishList = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 0,
+    paddingTop: 8,
     backgroundColor: '#fff',
   },
   text: {
