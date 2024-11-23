@@ -8,6 +8,7 @@ import {
   Image,
   StyleSheet,
   useWindowDimensions,
+  ScrollView,
 } from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import {incrementQuantity, decrementQuantity} from '../redux/cartSlice';
@@ -26,6 +27,74 @@ const AddToCart = () => {
     (total, item) => total + item.price * item.quantity,
     0,
   );
+
+  const Wishlist = () => {
+    const wishlistItems = useSelector(state => state.cart.wishList);
+
+    const renderWishlistItem = ({item, index}) => {
+      const isLastItem = index === wishlistItems.length - 1;
+
+      return (
+        <TouchableOpacity
+          key={item.id.toString()}
+          style={[
+            styles.box,
+            isLastItem && {marginRight: 16},
+            index === 0 && {marginLeft: 16},
+          ]}
+          onPress={() => {
+            navigation.navigate('FoodDetail', {item});
+          }}>
+          <View style={styles.imageContainer(width, height)}>
+            <Image style={styles.image} source={{uri: item.image}} />
+          </View>
+
+          <View style={{paddingLeft: 12}}>
+            <Text style={styles.foodName}>{item.name}</Text>
+            <View style={{flexDirection: 'row', marginTop: 6}}>
+              <StarRatingDisplay
+                rating={item.rating}
+                starSize={20}
+                color={'#EB0029'}
+                starStyle={{marginRight: -2, marginLeft: 0}}
+              />
+              <Text style={{marginLeft: 8, color: 'grey'}}>
+                {item.rating.toFixed(1)}
+              </Text>
+            </View>
+          </View>
+        </TouchableOpacity>
+      );
+    };
+
+    return (
+      <>
+        {wishlistItems.length > 0 ? (
+          <View>
+            <Text
+              style={{
+                marginHorizontal: 16,
+                marginVertical: 16,
+                fontSize: 16,
+                color: '#020202',
+                marginBottom: 10,
+              }}>
+              Wishlist
+            </Text>
+            <FlatList
+              data={wishlistItems}
+              keyExtractor={item => item.id.toString()}
+              renderItem={renderWishlistItem}
+              horizontal={true}
+              showsHorizontalScrollIndicator={false}
+              ItemSeparatorComponent={<View style={{width: 16}} />}
+              style={styles.horizontalList}
+            />
+          </View>
+        ) : null}
+      </>
+    );
+  };
 
   const TopDeal = () => {
     return (
@@ -214,7 +283,7 @@ const AddToCart = () => {
         </View>
       </View>
       {cartItems.length === 0 ? (
-        <View style={{flex: 1}}>
+        <ScrollView style={{flex: 1}}>
           <View style={styles.emptyCartContainer}>
             <Image source={require('../../assets/empty.png')} />
             <View style={{marginTop: 10}}>
@@ -235,7 +304,8 @@ const AddToCart = () => {
             </View>
           </View>
           <TopDeal />
-        </View>
+          <Wishlist />
+        </ScrollView>
       ) : (
         <>
           <FlatList
@@ -243,7 +313,12 @@ const AddToCart = () => {
             data={cartItems}
             keyExtractor={item => item.id.toString()}
             renderItem={renderItem}
-            ListFooterComponent={<TopDeal />}
+            ListFooterComponent={
+              <View>
+                <TopDeal />
+                <Wishlist />
+              </View>
+            }
           />
           <BottomFun />
         </>

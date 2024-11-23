@@ -10,19 +10,18 @@ import {
   FlatList,
   useWindowDimensions,
 } from 'react-native';
-import {foodList} from './foodlist'; // Ensure you have your food data here
+import {foodList} from './foodlist';
 import {StarRatingDisplay} from 'react-native-star-rating-widget';
 import MyTabView from './navigation/MyTabView';
 import {useNavigation} from '@react-navigation/native';
 
 const HomeScreen = () => {
-  const {width} = useWindowDimensions(); // Get the screen width
+  const {width} = useWindowDimensions();
   const navigation = useNavigation();
-  const flatListRef = useRef(null); // Reference for FlatList
-  const scrollX = useRef(new Animated.Value(0)).current; // Animated value for scroll position
+  const flatListRef = useRef(null);
+  const scrollX = useRef(new Animated.Value(0)).current;
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Auto-scroll effect with smooth looping
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentIndex(prevIndex => {
@@ -30,15 +29,14 @@ const HomeScreen = () => {
         flatListRef.current.scrollToIndex({index: newIndex, animated: true});
         return newIndex;
       });
-    }, 3000); // Scroll every 3 seconds
+    }, 3000);
 
-    return () => clearInterval(interval); // Cleanup on unmount
+    return () => clearInterval(interval);
   }, []);
 
-  // Detect scroll end and snap to active item
   const handleScrollEnd = event => {
     const offsetX = event.nativeEvent.contentOffset.x;
-    const newIndex = Math.round(offsetX / width); // Calculate the centered item
+    const newIndex = Math.round(offsetX / width);
     setCurrentIndex(newIndex);
   };
 
@@ -51,8 +49,8 @@ const HomeScreen = () => {
 
     const scale = scrollX.interpolate({
       inputRange,
-      outputRange: [0.5, 1, 0.5], // Shrink when not focused, full size when centered
-      extrapolate: 'clamp', // Prevents values beyond 0.5 to 1 range
+      outputRange: [0.5, 1, 0.5],
+      extrapolate: 'clamp',
     });
 
     return (
@@ -68,8 +66,8 @@ const HomeScreen = () => {
           style={[
             styles.box,
             {
-              transform: [{scale}], // Animate scaling
-              width: width - 64, // Adjust width as needed for centering
+              transform: [{scale}],
+              width: width - 64,
             },
           ]}>
           <View style={styles.imageContainer}>
@@ -107,7 +105,7 @@ const HomeScreen = () => {
           height={50}
           width={50}
           resizeMode="contain"
-          source={require('../assets/photo2.png')} // Ensure the image is available
+          source={require('../assets/photo2.png')}
         />
       </View>
 
@@ -120,14 +118,14 @@ const HomeScreen = () => {
           keyExtractor={item => item.id.toString()}
           renderItem={renderHorizontalItem}
           pagingEnabled={true}
-          snapToAlignment="center" // Center alignment for carousel effect
-          snapToInterval={width} // Width of each item
-          decelerationRate="normal" // Smooth snapping
+          snapToAlignment="center"
+          snapToInterval={width}
+          decelerationRate="normal"
           onScroll={Animated.event(
             [{nativeEvent: {contentOffset: {x: scrollX}}}],
             {useNativeDriver: true},
           )}
-          onMomentumScrollEnd={handleScrollEnd} // Handle end of scroll
+          onMomentumScrollEnd={handleScrollEnd}
           style={styles.horizontalList}
         />
       </View>

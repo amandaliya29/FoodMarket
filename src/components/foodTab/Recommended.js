@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import React from 'react';
-import StarRating from 'react-native-star-rating-widget';
 import StarRatingDisplay from 'react-native-star-rating-widget';
 import {foodList} from '../foodlist';
 import {useNavigation} from '@react-navigation/native';
@@ -35,7 +34,8 @@ const Recommended = () => {
           <Text style={styles.foodName}>{item.name}</Text>
           <Text style={styles.foodPrice}>₹{item.price.toFixed(2)}</Text>
         </View>
-        <View style={{flexDirection: 'row', marginTop: 6}}>
+        <View
+          style={{flexDirection: 'row', marginTop: 6, pointerEvents: 'none'}}>
           <StarRatingDisplay
             rating={item.rating}
             starSize={20}

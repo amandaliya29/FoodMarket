@@ -6,7 +6,7 @@ import {
   Text,
   TouchableOpacity,
   View,
-  ToastAndroid, // Import ToastAndroid
+  ToastAndroid,
 } from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import Icon from 'react-native-vector-icons/Ionicons';
