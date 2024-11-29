@@ -9,6 +9,8 @@ import Address from '../pages/Address';
 import FoodDetails from '../pages/FoodDetails';
 
 import CartScreen from '../CartScreen';
+import PrivacyPolicyScreen from '../foodMarketScreen/PrivacyPolicyScreen';
+import TermsConditionsScreen from '../foodMarketScreen/TermsConditionsScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -29,6 +31,14 @@ const StackNavigation = () => {
         <Stack.Screen name="FoodDetail" component={FoodDetails} />
         <Stack.Screen name="TabNavigation" component={TabNavigation} />
         <Stack.Screen name="Order" component={CartScreen} />
+        <Stack.Screen
+          name="PrivacyPolicyScreen"
+          component={PrivacyPolicyScreen}
+        />
+        <Stack.Screen
+          name="TermsConditionsScreen"
+          component={TermsConditionsScreen}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
