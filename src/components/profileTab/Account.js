@@ -18,14 +18,16 @@ const Account = () => {
       name: 'Order',
       screen: 'Order',
     },
-    // {
-    //   id: 2,
-    //   name: 'Edit Profile',
-    // },
-    // {
-    //   id: 3,
-    //   name: 'Home Address',
-    // },
+    {
+      id: 2,
+      name: 'Home Address',
+      screen: 'Address',
+    },
+    {
+      id: 3,
+      name: 'LogOut',
+      screen: 'SignIn',
+    },
     // {
     //   id: 4,
     //   name: 'Security',

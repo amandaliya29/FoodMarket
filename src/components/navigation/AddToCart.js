@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -9,24 +9,85 @@ import {
   StyleSheet,
   useWindowDimensions,
   ScrollView,
+  Modal,
 } from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
-import {incrementQuantity, decrementQuantity} from '../redux/cartSlice';
+import {
+  incrementQuantity,
+  decrementQuantity,
+  addOrder,
+  clearCart,
+} from '../redux/cartSlice';
 import Icon from 'react-native-vector-icons/Feather';
 import {foodList} from '../foodlist';
 import {StarRatingDisplay} from 'react-native-star-rating-widget';
 import {useNavigation} from '@react-navigation/native';
+import RazorpayCheckout from 'react-native-razorpay';
 
 const AddToCart = () => {
   const cartItems = useSelector(state => state.cart.items);
   const dispatch = useDispatch();
   const {width, height} = useWindowDimensions();
   const navigation = useNavigation();
+  const [isModalVisible, setModalVisible] = useState(false);
 
   const totalCartPrice = cartItems.reduce(
     (total, item) => total + item.price * item.quantity,
     0,
   );
+
+  const handleCheckout = () => {
+    setModalVisible(true);
+  };
+
+  const closeModal = () => {
+    setModalVisible(false);
+  };
+
+  const handlePaymentOption = option => {
+    const orderDetails = {
+      items: cartItems,
+      totalPrice: totalCartPrice,
+      paymentMethod: option,
+      orderDate: (() => {
+        const now = new Date();
+        const date = now.toLocaleDateString(); // Date in readable format
+        const time = now.toLocaleTimeString(); // Time in readable format
+        return `${date} ${time}`; // Combine date and time
+      })(),
+    };
+    closeModal();
+    if (option === 'cash') {
+      dispatch(addOrder(orderDetails));
+      dispatch(clearCart());
+      console.log('Cash on Delivery selected');
+    } else if (option === 'online') {
+      var options = {
+        description: 'Credits towards consultation',
+        image: require('../../assets/vector.png'),
+        currency: 'INR',
+        key: 'rzp_test_1NVuRNQwPb6ps5',
+        amount: (totalCartPrice * 100).toFixed(2),
+        name: 'FoodMarket',
+        prefill: {
+          email: 'void@razorpay.com',
+          contact: '9191919191',
+          name: 'Razorpay Software',
+        },
+        theme: {color: '#eb0029'},
+      };
+      RazorpayCheckout.open(options)
+        .then(data => {
+          dispatch(addOrder(orderDetails));
+          dispatch(clearCart());
+          alert(`Success: ${data.razorpay_payment_id}`);
+        })
+        .catch(error => {
+          // handle failure
+          alert(`Error: ${error.code} | ${error.description}`);
+        });
+    }
+  };
 
   const Wishlist = () => {
     const wishlistItems = useSelector(state => state.cart.wishList);
@@ -265,7 +326,7 @@ const AddToCart = () => {
             ₹{totalCartPrice.toFixed(2)}
           </Text>
         </View>
-        <TouchableOpacity style={styles.addToCart} onPress={() => {}}>
+        <TouchableOpacity style={styles.addToCart} onPress={handleCheckout}>
           <Text style={{color: 'white', fontWeight: '500', fontSize: 14}}>
             Checkout Now
           </Text>
@@ -323,6 +384,30 @@ const AddToCart = () => {
           <BottomFun />
         </>
       )}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={isModalVisible}
+        onRequestClose={closeModal}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Select Payment Method</Text>
+            <TouchableOpacity
+              style={styles.paymentButton}
+              onPress={() => handlePaymentOption('cash')}>
+              <Text style={styles.paymentText}>Cash on Delivery</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.paymentButton}
+              onPress={() => handlePaymentOption('online')}>
+              <Text style={styles.paymentText}>Online Payment</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.closeButton} onPress={closeModal}>
+              <Text style={styles.closeText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -446,5 +531,44 @@ const styles = StyleSheet.create({
   },
   horizontalList: {
     paddingBottom: 16,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, .5)',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+  },
+  modalContainer: {
+    width: '100%',
+    backgroundColor: 'white',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
+  paymentButton: {
+    width: '100%',
+    padding: 15,
+    backgroundColor: '#eb0029',
+    borderRadius: 8,
+    alignItems: 'center',
+    marginVertical: 10,
+  },
+  paymentText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  closeButton: {
+    marginTop: 16,
+  },
+  closeText: {
+    color: '#eb0029',
+    fontSize: 14,
   },
 });

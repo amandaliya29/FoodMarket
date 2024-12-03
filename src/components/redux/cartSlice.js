@@ -4,6 +4,8 @@ const initialState = {
   items: [],
   wishList: [],
   searchHistory: [],
+  orders: [],
+  pastOrders: [], // Added to keep track of canceled orders
 };
 
 const cartSlice = createSlice({
@@ -79,6 +81,28 @@ const cartSlice = createSlice({
     clearHistory: state => {
       state.searchHistory = [];
     },
+
+    addOrder: (state, action) => {
+      state.orders.push(action.payload);
+    },
+
+    clearOrders: state => {
+      state.orders = [];
+    },
+
+    clearCart: state => {
+      state.items = [];
+    },
+
+    cancelOrder: (state, action) => {
+      const orderIndex = state.orders.findIndex(
+        order => order.id === action.payload.id,
+      );
+      if (orderIndex >= 0) {
+        const canceledOrder = state.orders.splice(orderIndex, 1)[0]; // Remove the order from orders
+        state.pastOrders.push(canceledOrder); // Optionally push to past orders
+      }
+    },
   },
 });
 
@@ -92,6 +116,10 @@ export const {
   addSearchHistory,
   removeSearchHistoryItem,
   clearHistory,
+  addOrder,
+  clearOrders,
+  clearCart,
+  cancelOrder,
 } = cartSlice.actions;
 
 export default cartSlice.reducer;

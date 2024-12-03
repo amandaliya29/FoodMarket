@@ -60,13 +60,13 @@ const SignIn = ({navigation}) => {
             </TouchableOpacity>
           </View>
         </View>
-        <Pressable
+        <TouchableOpacity
           style={styles.signInButton}
           onPress={() => navigation.navigate('TabNavigation')}>
           <Text style={{color: 'white', fontWeight: '500', fontSize: 14}}>
             Sign In
           </Text>
-        </Pressable>
+        </TouchableOpacity>
       </View>
       <View style={{alignItems: 'center'}}>
         <Pressable
