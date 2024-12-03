@@ -11,6 +11,7 @@ import FoodDetails from '../pages/FoodDetails';
 import CartScreen from '../CartScreen';
 import PrivacyPolicyScreen from '../foodMarketScreen/PrivacyPolicyScreen';
 import TermsConditionsScreen from '../foodMarketScreen/TermsConditionsScreen';
+import InProgressDetail from '../orderListTab/InProgressDetail';
 
 const Stack = createNativeStackNavigator();
 
@@ -29,6 +30,7 @@ const StackNavigation = () => {
         <Stack.Screen name="SignUp" component={SignUp} />
         <Stack.Screen name="Address" component={Address} />
         <Stack.Screen name="FoodDetail" component={FoodDetails} />
+        <Stack.Screen name="InProgressDetail" component={InProgressDetail} />
         <Stack.Screen name="TabNavigation" component={TabNavigation} />
         <Stack.Screen name="Order" component={CartScreen} />
         <Stack.Screen

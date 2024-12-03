@@ -12,7 +12,12 @@ import {
   Modal,
 } from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
-import {incrementQuantity, decrementQuantity} from '../redux/cartSlice';
+import {
+  incrementQuantity,
+  decrementQuantity,
+  addOrder,
+  clearCart,
+} from '../redux/cartSlice';
 import Icon from 'react-native-vector-icons/Feather';
 import {foodList} from '../foodlist';
 import {StarRatingDisplay} from 'react-native-star-rating-widget';
@@ -40,16 +45,28 @@ const AddToCart = () => {
   };
 
   const handlePaymentOption = option => {
+    const orderDetails = {
+      items: cartItems,
+      totalPrice: totalCartPrice,
+      paymentMethod: option,
+      orderDate: (() => {
+        const now = new Date();
+        const date = now.toLocaleDateString(); // Date in readable format
+        const time = now.toLocaleTimeString(); // Time in readable format
+        return `${date} ${time}`; // Combine date and time
+      })(),
+    };
     closeModal();
     if (option === 'cash') {
-      // Handle Cash on Delivery logic
+      dispatch(addOrder(orderDetails));
+      dispatch(clearCart());
       console.log('Cash on Delivery selected');
     } else if (option === 'online') {
       var options = {
         description: 'Credits towards consultation',
         image: require('../../assets/vector.png'),
         currency: 'INR',
-        key: 'rzp_test_1NVuRNQwPb6ps5', // Your api key
+        key: 'rzp_test_1NVuRNQwPb6ps5',
         amount: (totalCartPrice * 100).toFixed(2),
         name: 'FoodMarket',
         prefill: {
@@ -61,7 +78,8 @@ const AddToCart = () => {
       };
       RazorpayCheckout.open(options)
         .then(data => {
-          // handle success
+          dispatch(addOrder(orderDetails));
+          dispatch(clearCart());
           alert(`Success: ${data.razorpay_payment_id}`);
         })
         .catch(error => {
@@ -516,14 +534,15 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, .5)',
     justifyContent: 'flex-end',
     alignItems: 'center',
   },
   modalContainer: {
     width: '100%',
     backgroundColor: 'white',
-    borderRadius: 10,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
     padding: 20,
     alignItems: 'center',
   },
