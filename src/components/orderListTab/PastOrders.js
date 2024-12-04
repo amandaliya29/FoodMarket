@@ -1,61 +1,102 @@
-import React, {useState} from 'react';
-import {View, Text, FlatList, StyleSheet, Image} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
+import React from 'react';
+import {
+  View,
+  Text,
+  FlatList,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+} from 'react-native';
 import {useSelector} from 'react-redux';
 
 const PastOrders = () => {
   const pastOrders = useSelector(state => state.cart.pastOrders);
+  const navigation = useNavigation();
 
   return (
     <View style={styles.container}>
-      <FlatList
-        data={[...pastOrders].reverse()}
-        keyExtractor={(item, index) => index.toString()}
-        renderItem={({item}) => (
-          <View style={styles.order}>
-            <View style={styles.orderContent}>
-              <View style={styles.imageContainer}>
-                {item.items && item.items.length > 3 ? (
-                  <>
-                    {item.items.slice(0, 3).map((orderItem, index) => (
+      {pastOrders.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <Image
+            source={require('../../assets/orderEmpty.png')}
+            style={styles.emptyImage}
+          />
+          <View style={{marginTop: 10}}>
+            <Text
+              style={[
+                styles.emptyCartText,
+                {
+                  fontSize: 18,
+                  fontWeight: 'bold',
+                  color: '#000',
+                  marginBottom: 10,
+                },
+              ]}>
+              Your Past Order is Empty!
+            </Text>
+            <Text style={styles.emptyCartText}>Seems like you have not</Text>
+            <Text style={styles.emptyCartText}>ordered any food yet</Text>
+          </View>
+        </View>
+      ) : (
+        <FlatList
+          data={[...pastOrders].reverse()}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={({item}) => (
+            <TouchableOpacity
+              style={styles.order}
+              onPress={() => {
+                navigation.navigate('InProgressDetail', {
+                  item,
+                  isPastOrder: true,
+                });
+              }}>
+              <View style={styles.orderContent}>
+                <View style={styles.imageContainer}>
+                  {item.items && item.items.length > 3 ? (
+                    <>
+                      {item.items.slice(0, 3).map((orderItem, index) => (
+                        <Image
+                          key={index}
+                          source={{uri: orderItem.image}}
+                          style={styles.image}
+                        />
+                      ))}
+                      <View style={styles.countContainer}>
+                        <Text style={styles.countText}>
+                          +{item.items.length - 3}
+                        </Text>
+                      </View>
+                    </>
+                  ) : (
+                    item.items.map((orderItem, index) => (
                       <Image
                         key={index}
                         source={{uri: orderItem.image}}
-                        style={styles.image}
+                        style={
+                          item.items.length === 1
+                            ? styles.singleImage
+                            : styles.image
+                        }
                       />
-                    ))}
-                    <View style={styles.countContainer}>
-                      <Text style={styles.countText}>
-                        +{item.items.length - 3}
-                      </Text>
-                    </View>
-                  </>
-                ) : (
-                  item.items.map((orderItem, index) => (
-                    <Image
-                      key={index}
-                      source={{uri: orderItem.image}}
-                      style={
-                        item.items.length === 1
-                          ? styles.singleImage
-                          : styles.image
-                      }
-                    />
-                  ))
-                )}
+                    ))
+                  )}
+                </View>
+                <View style={styles.textContainer}>
+                  <Text style={styles.text}>Order Date: {item.orderDate}</Text>
+                  <Text style={styles.text}>
+                    Total Price: ₹{item.totalPrice.toFixed(2)}
+                  </Text>
+                  <Text style={styles.text}>
+                    Payment Method: {item.paymentMethod}
+                  </Text>
+                </View>
               </View>
-              <View style={styles.textContainer}>
-                <Text style={styles.text}>Order Date: {item.orderDate}</Text>
-                <Text style={styles.text}>
-                  Total Price: ₹{item.totalPrice.toFixed(2)}
-                </Text>
-                <Text style={styles.text}>
-                  Payment Method: {item.paymentMethod}
-                </Text>
-              </View>
-            </View>
-          </View>
-        )}
-      />
+            </TouchableOpacity>
+          )}
+        />
+      )}
     </View>
   );
 };
@@ -65,6 +106,21 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 8,
     paddingTop: 4,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyImage: {
+    width: 200,
+    height: 200,
+    resizeMode: 'contain',
+  },
+  emptyText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: '#666',
   },
   order: {
     marginHorizontal: 8,
@@ -118,5 +174,17 @@ const styles = StyleSheet.create({
     flex: 1,
     marginLeft: 10,
   },
+  text: {
+    fontSize: 14,
+    color: '#333',
+  },
+  emptyCartText: {
+    fontSize: 14,
+    fontWeight: '300',
+    fontFamily: 'Poppins-Light',
+    color: '#8d92a3',
+    textAlign: 'center',
+  },
 });
+
 export default PastOrders;

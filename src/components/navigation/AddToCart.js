@@ -17,6 +17,7 @@ import {
   decrementQuantity,
   addOrder,
   clearCart,
+  moveOrderToPast,
 } from '../redux/cartSlice';
 import Icon from 'react-native-vector-icons/Feather';
 import {foodList} from '../foodlist';
@@ -51,16 +52,20 @@ const AddToCart = () => {
       paymentMethod: option,
       orderDate: (() => {
         const now = new Date();
-        const date = now.toLocaleDateString(); // Date in readable format
-        const time = now.toLocaleTimeString(); // Time in readable format
-        return `${date} ${time}`; // Combine date and time
+        const date = now.toLocaleDateString();
+        const time = now.toLocaleTimeString();
+        return `${date} ${time}`;
       })(),
+      status: 'inProgress',
     };
+
     closeModal();
+
     if (option === 'cash') {
       dispatch(addOrder(orderDetails));
       dispatch(clearCart());
       console.log('Cash on Delivery selected');
+      moveToPastOrdersAfterDelay(orderDetails);
     } else if (option === 'online') {
       var options = {
         description: 'Credits towards consultation',
@@ -81,12 +86,18 @@ const AddToCart = () => {
           dispatch(addOrder(orderDetails));
           dispatch(clearCart());
           alert(`Success: ${data.razorpay_payment_id}`);
+          moveToPastOrdersAfterDelay(orderDetails);
         })
         .catch(error => {
-          // handle failure
           alert(`Error: ${error.code} | ${error.description}`);
         });
     }
+  };
+
+  const moveToPastOrdersAfterDelay = orderDetails => {
+    setTimeout(() => {
+      dispatch(moveOrderToPast(orderDetails));
+    }, 30000);
   };
 
   const Wishlist = () => {
