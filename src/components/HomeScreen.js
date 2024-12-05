@@ -8,6 +8,7 @@ import {
   Animated,
   TouchableOpacity,
   FlatList,
+  RefreshControl,
   useWindowDimensions,
 } from 'react-native';
 import {foodList} from './foodlist';
@@ -21,6 +22,7 @@ const HomeScreen = () => {
   const flatListRef = useRef(null);
   const scrollX = useRef(new Animated.Value(0)).current;
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -38,6 +40,13 @@ const HomeScreen = () => {
     const offsetX = event.nativeEvent.contentOffset.x;
     const newIndex = Math.round(offsetX / width);
     setCurrentIndex(newIndex);
+  };
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 2000);
   };
 
   const renderHorizontalItem = ({item, index}) => {
@@ -126,6 +135,9 @@ const HomeScreen = () => {
             {useNativeDriver: true},
           )}
           onMomentumScrollEnd={handleScrollEnd}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
           style={styles.horizontalList}
         />
       </View>

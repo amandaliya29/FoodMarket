@@ -11,16 +11,15 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {useNavigation} from '@react-navigation/native';
-import React from 'react'; // Remove unnecessary useState
-import {useDispatch} from 'react-redux'; // Import useDispatch from Redux
-import {cancelOrder} from '../redux/cartSlice'; // Import cancelOrder action
+import React from 'react';
+import {useDispatch} from 'react-redux';
+import {cancelOrder} from '../redux/cartSlice';
 
 const InProgressDetail = ({route}) => {
-  const {item} = route.params;
+  const {item, isPastOrder} = route.params;
   const navigation = useNavigation();
-  const dispatch = useDispatch(); // Initialize dispatch function
+  const dispatch = useDispatch();
 
-  // Render vertical items
   const renderVerticalItem = ({item}) => (
     <TouchableOpacity
       onPress={() => {
@@ -46,7 +45,6 @@ const InProgressDetail = ({route}) => {
     </TouchableOpacity>
   );
 
-  // Handle the cancellation of an order
   const handleCancelOrder = () => {
     Alert.alert(
       'Cancel Order',
@@ -59,8 +57,8 @@ const InProgressDetail = ({route}) => {
         {
           text: 'Yes',
           onPress: () => {
-            dispatch(cancelOrder({id: item.id})); // Dispatch the cancel order action
-            navigation.goBack(); // Navigate back to InProgress screen
+            dispatch(cancelOrder({id: item.id, status: 'canceled'}));
+            navigation.goBack();
           },
         },
       ],
@@ -84,8 +82,8 @@ const InProgressDetail = ({route}) => {
           />
         </TouchableOpacity>
         <View>
-          <Text style={styles.text}>Payment</Text>
-          <Text style={styles.you}>You deserve better meal</Text>
+          <Text style={styles.text}>Order Details</Text>
+          <Text style={styles.you}>Track your meal's progress</Text>
         </View>
       </View>
       <ScrollView style={styles.scrollContainer}>
@@ -158,12 +156,32 @@ const InProgressDetail = ({route}) => {
                 : 'Online Payment'}
             </Text>
           </View>
+          {isPastOrder && (
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignContent: 'center',
+                alignItems: 'center',
+                textAlign: 'center',
+                marginTop: 16,
+              }}>
+              <Text style={[styles.sectionTitle, {fontSize: 16}]}>Status:</Text>
+              <Text style={[styles.value, {fontSize: 16}]}>
+                {item.status === 'canceled' ? 'Canceled' : 'Delivered'}
+              </Text>
+            </View>
+          )}
         </View>
       </ScrollView>
 
-      <TouchableOpacity onPress={handleCancelOrder} style={styles.cancelButton}>
-        <Text style={styles.cancelButtonText}>Cancel Order</Text>
-      </TouchableOpacity>
+      {!isPastOrder && (
+        <TouchableOpacity
+          onPress={handleCancelOrder}
+          style={styles.cancelButton}>
+          <Text style={styles.cancelButtonText}>Cancel Order</Text>
+        </TouchableOpacity>
+      )}
     </SafeAreaView>
   );
 };
@@ -177,6 +195,7 @@ const styles = StyleSheet.create({
   },
   head: {
     padding: 16,
+    paddingTop: 2,
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 6,
@@ -204,13 +223,12 @@ const styles = StyleSheet.create({
   },
   section: {
     marginHorizontal: 16,
-    marginBottom: 16,
+    marginBottom: 20,
   },
   sectionTitle: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#000',
-    marginBottom: 8,
   },
   row: {
     flexDirection: 'row',
@@ -305,16 +323,17 @@ const styles = StyleSheet.create({
   },
   cancelButton: {
     position: 'absolute',
-    bottom: 10,
+    bottom: 8,
     left: 10,
     right: 10,
     backgroundColor: '#ff4d4d',
-    padding: 15,
-    borderRadius: 8,
+    padding: 12,
+    borderRadius: 10,
   },
   cancelButtonText: {
     color: '#fff',
     fontSize: 16,
+    fontWeight: 'bold',
     textAlign: 'center',
   },
 });

@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useRef} from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
   useWindowDimensions,
   ScrollView,
   Modal,
+  RefreshControl,
 } from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import {
@@ -17,6 +18,7 @@ import {
   decrementQuantity,
   addOrder,
   clearCart,
+  moveOrderToPast,
 } from '../redux/cartSlice';
 import Icon from 'react-native-vector-icons/Feather';
 import {foodList} from '../foodlist';
@@ -30,6 +32,15 @@ const AddToCart = () => {
   const {width, height} = useWindowDimensions();
   const navigation = useNavigation();
   const [isModalVisible, setModalVisible] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const flatListRef = useRef(null);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 2000);
+  };
 
   const totalCartPrice = cartItems.reduce(
     (total, item) => total + item.price * item.quantity,
@@ -51,16 +62,20 @@ const AddToCart = () => {
       paymentMethod: option,
       orderDate: (() => {
         const now = new Date();
-        const date = now.toLocaleDateString(); // Date in readable format
-        const time = now.toLocaleTimeString(); // Time in readable format
-        return `${date} ${time}`; // Combine date and time
+        const date = now.toLocaleDateString();
+        const time = now.toLocaleTimeString();
+        return `${date} ${time}`;
       })(),
+      status: 'inProgress',
     };
+
     closeModal();
+
     if (option === 'cash') {
       dispatch(addOrder(orderDetails));
       dispatch(clearCart());
       console.log('Cash on Delivery selected');
+      moveToPastOrdersAfterDelay(orderDetails);
     } else if (option === 'online') {
       var options = {
         description: 'Credits towards consultation',
@@ -81,12 +96,18 @@ const AddToCart = () => {
           dispatch(addOrder(orderDetails));
           dispatch(clearCart());
           alert(`Success: ${data.razorpay_payment_id}`);
+          moveToPastOrdersAfterDelay(orderDetails);
         })
         .catch(error => {
-          // handle failure
           alert(`Error: ${error.code} | ${error.description}`);
         });
     }
+  };
+
+  const moveToPastOrdersAfterDelay = orderDetails => {
+    setTimeout(() => {
+      dispatch(moveOrderToPast(orderDetails));
+    }, 30000);
   };
 
   const Wishlist = () => {
@@ -143,6 +164,7 @@ const AddToCart = () => {
               Wishlist
             </Text>
             <FlatList
+              ref={flatListRef}
               data={wishlistItems}
               keyExtractor={item => item.id.toString()}
               renderItem={renderWishlistItem}
@@ -344,7 +366,11 @@ const AddToCart = () => {
         </View>
       </View>
       {cartItems.length === 0 ? (
-        <ScrollView style={{flex: 1}}>
+        <ScrollView
+          style={{flex: 1}}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }>
           <View style={styles.emptyCartContainer}>
             <Image source={require('../../assets/empty.png')} />
             <View style={{marginTop: 10}}>
@@ -370,6 +396,9 @@ const AddToCart = () => {
       ) : (
         <>
           <FlatList
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }
             style={{marginBottom: 50}}
             data={cartItems}
             keyExtractor={item => item.id.toString()}
