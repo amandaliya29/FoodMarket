@@ -18,9 +18,9 @@ const Help = () => {
 
   const toggleFaq = index => {
     if (isFaqOpen === index) {
-      setIsFaqOpen(null); // Close if clicked again
+      setIsFaqOpen(null);
     } else {
-      setIsFaqOpen(index); // Open the clicked FAQ
+      setIsFaqOpen(index);
     }
   };
 
@@ -51,7 +51,6 @@ const Help = () => {
         <Card style={styles.card}>
           <Title style={styles.cardTitle}>Frequently Asked Questions</Title>
           <View style={styles.faqContainer}>
-            {/* Question 1 */}
             <TouchableOpacity onPress={() => toggleFaq(1)}>
               <Text style={styles.faqQuestion}>How do I place an order?</Text>
             </TouchableOpacity>
@@ -63,7 +62,6 @@ const Help = () => {
               </Paragraph>
             )}
 
-            {/* Question 2 */}
             <TouchableOpacity onPress={() => toggleFaq(2)}>
               <Text style={styles.faqQuestion}>
                 What payment methods are available?
@@ -76,7 +74,6 @@ const Help = () => {
               </Paragraph>
             )}
 
-            {/* Question 3 */}
             <TouchableOpacity onPress={() => toggleFaq(3)}>
               <Text style={styles.faqQuestion}>How do I track my order?</Text>
             </TouchableOpacity>
@@ -88,7 +85,6 @@ const Help = () => {
               </Paragraph>
             )}
 
-            {/* Additional Questions */}
             <TouchableOpacity onPress={() => toggleFaq(4)}>
               <Text style={styles.faqQuestion}>
                 Can I change or cancel my order?
@@ -163,8 +159,6 @@ const Help = () => {
             )}
           </View>
         </Card>
-
-        {/* Troubleshooting Section */}
         <Card style={styles.card}>
           <Title style={styles.cardTitle}>Troubleshooting</Title>
           <View style={styles.faqContainer}>
@@ -187,7 +181,6 @@ const Help = () => {
           </View>
         </Card>
 
-        {/* Account Issues Section */}
         <Card style={styles.card}>
           <Title style={styles.cardTitle}>Account Issues</Title>
           <View style={styles.faqContainer}>
@@ -213,7 +206,6 @@ const Help = () => {
           </View>
         </Card>
 
-        {/* Contact Support Section */}
         <Card style={styles.card}>
           <Title style={styles.cardTitle}>Contact Support</Title>
           <Paragraph>
@@ -221,6 +213,12 @@ const Help = () => {
             covered here, feel free to reach out to our support team. We're here
             to help!
           </Paragraph>
+          <Button
+            mode="contained"
+            onPress={() => navigation.navigate('AboutUs')}
+            style={styles.contactButton}>
+            Contact Support
+          </Button>
         </Card>
       </ScrollView>
     </SafeAreaView>
@@ -302,7 +300,7 @@ const styles = StyleSheet.create({
   },
   contactButton: {
     marginTop: 16,
-    backgroundColor: '#6200ea',
+    backgroundColor: 'red',
   },
 });
 
