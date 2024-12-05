@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useRef} from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
   useWindowDimensions,
   ScrollView,
   Modal,
+  RefreshControl,
 } from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import {
@@ -31,6 +32,15 @@ const AddToCart = () => {
   const {width, height} = useWindowDimensions();
   const navigation = useNavigation();
   const [isModalVisible, setModalVisible] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const flatListRef = useRef(null);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 2000);
+  };
 
   const totalCartPrice = cartItems.reduce(
     (total, item) => total + item.price * item.quantity,
@@ -154,6 +164,7 @@ const AddToCart = () => {
               Wishlist
             </Text>
             <FlatList
+              ref={flatListRef}
               data={wishlistItems}
               keyExtractor={item => item.id.toString()}
               renderItem={renderWishlistItem}
@@ -355,7 +366,11 @@ const AddToCart = () => {
         </View>
       </View>
       {cartItems.length === 0 ? (
-        <ScrollView style={{flex: 1}}>
+        <ScrollView
+          style={{flex: 1}}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }>
           <View style={styles.emptyCartContainer}>
             <Image source={require('../../assets/empty.png')} />
             <View style={{marginTop: 10}}>
@@ -381,6 +396,9 @@ const AddToCart = () => {
       ) : (
         <>
           <FlatList
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }
             style={{marginBottom: 50}}
             data={cartItems}
             keyExtractor={item => item.id.toString()}

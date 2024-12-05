@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {useSelector} from 'react-redux';
 import {
   View,
@@ -7,6 +7,8 @@ import {
   StyleSheet,
   Image,
   TouchableOpacity,
+  ScrollView,
+  RefreshControl,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 
@@ -14,6 +16,15 @@ const InProgress = () => {
   const items = useSelector(state => state.cart.orders);
   const [currentItems, setCurrentItems] = useState(items);
   const navigation = useNavigation();
+  const [refreshing, setRefreshing] = useState(false);
+  const flatListRef = useRef(null);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 2000);
+  };
 
   useEffect(() => {
     setCurrentItems(items);
@@ -22,7 +33,11 @@ const InProgress = () => {
   return (
     <View style={styles.container}>
       {items.length === 0 ? (
-        <View style={styles.emptyContainer}>
+        <ScrollView
+          contentContainerStyle={styles.emptyContainer}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }>
           <Image
             source={require('../../assets/orderEmpty.png')}
             style={styles.emptyImage}
@@ -43,9 +58,12 @@ const InProgress = () => {
             <Text style={styles.emptyCartText}>Seems like you have not</Text>
             <Text style={styles.emptyCartText}>ordered any food yet</Text>
           </View>
-        </View>
+        </ScrollView>
       ) : (
         <FlatList
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
           data={[...currentItems].reverse()}
           keyExtractor={(item, index) => index.toString()}
           renderItem={({item}) => (

@@ -1,5 +1,5 @@
 import {useNavigation} from '@react-navigation/native';
-import React from 'react';
+import React, {useRef, useState} from 'react';
 import {
   View,
   Text,
@@ -7,17 +7,32 @@ import {
   StyleSheet,
   Image,
   TouchableOpacity,
+  ScrollView,
+  RefreshControl,
 } from 'react-native';
 import {useSelector} from 'react-redux';
 
 const PastOrders = () => {
   const pastOrders = useSelector(state => state.cart.pastOrders);
   const navigation = useNavigation();
+  const [refreshing, setRefreshing] = useState(false);
+  const flatListRef = useRef(null);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 2000);
+  };
 
   return (
     <View style={styles.container}>
       {pastOrders.length === 0 ? (
-        <View style={styles.emptyContainer}>
+        <ScrollView
+          contentContainerStyle={styles.emptyContainer}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }>
           <Image
             source={require('../../assets/orderEmpty.png')}
             style={styles.emptyImage}
@@ -38,9 +53,12 @@ const PastOrders = () => {
             <Text style={styles.emptyCartText}>Seems like you have not</Text>
             <Text style={styles.emptyCartText}>ordered any food yet</Text>
           </View>
-        </View>
+        </ScrollView>
       ) : (
         <FlatList
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
           data={[...pastOrders].reverse()}
           keyExtractor={(item, index) => index.toString()}
           renderItem={({item}) => (

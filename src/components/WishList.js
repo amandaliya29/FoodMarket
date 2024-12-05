@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useRef, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {addToWishList, removeFromWishList} from './redux/cartSlice';
 import {
@@ -11,6 +11,7 @@ import {
   SafeAreaView,
   useWindowDimensions,
   ScrollView,
+  RefreshControl,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {foodList} from './foodlist';
@@ -21,6 +22,15 @@ const WishList = () => {
   const width = useWindowDimensions().width;
   const height = useWindowDimensions().height;
   const wishListItems = useSelector(state => state.cart.wishList);
+  const [refreshing, setRefreshing] = useState(false);
+  const flatListRef = useRef(null);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 2000);
+  };
 
   const handleAddToWishList = item => {
     dispatch(addToWishList(item));
@@ -133,6 +143,9 @@ const WishList = () => {
       </View>
       {wishListItems.length === 0 ? (
         <ScrollView
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
           showsHorizontalScrollIndicator={false}
           showsVerticalScrollIndicator={false}>
           <View style={{flex: 1}}>
@@ -165,6 +178,9 @@ const WishList = () => {
       ) : (
         <>
           <FlatList
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }
             data={wishListItems}
             showsVerticalScrollIndicator={false}
             showsHorizontalScrollIndicator={false}
