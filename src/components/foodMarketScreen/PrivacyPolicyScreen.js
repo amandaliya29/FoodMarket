@@ -30,7 +30,7 @@ const PrivacyPolicyScreen = () => {
         </TouchableOpacity>
 
         <View>
-          <Text style={styles.headText}>Privacy Policy</Text>
+          <Text style={styles.headText}>Privacy & Policy</Text>
           <Text style={styles.letsGetSome}>You deserve better meal</Text>
         </View>
       </View>

@@ -6,10 +6,33 @@ import {
   TouchableOpacity,
   StyleSheet,
   Modal,
-  Pressable,
+  PermissionsAndroid,
+  Platform,
 } from 'react-native';
 import {launchImageLibrary, launchCamera} from 'react-native-image-picker';
 import Icon from 'react-native-vector-icons/Ionicons';
+
+const requestCameraPermission = async () => {
+  try {
+    if (Platform.OS === 'android') {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.CAMERA,
+        {
+          title: 'Camera Permission',
+          message: 'This app needs access to your camera to take photos.',
+          buttonNeutral: 'Ask Me Later',
+          buttonNegative: 'Cancel',
+          buttonPositive: 'OK',
+        },
+      );
+      return granted === PermissionsAndroid.RESULTS.GRANTED;
+    }
+    return true; // iOS permissions are handled in Info.plist
+  } catch (err) {
+    console.warn(err);
+    return false;
+  }
+};
 
 const ImagePickerComponent = () => {
   const [imageUri, setImageUri] = useState(null);
@@ -29,20 +52,22 @@ const ImagePickerComponent = () => {
     });
   };
 
-  const openCamera = () => {
-    const options = {
-      mediaType: 'photo',
-      quality: 1,
-    };
+  const openCamera = async () => {
+    const hasPermission = await requestCameraPermission();
+    if (!hasPermission) {
+      alert('Camera permission is required.');
+      return;
+    }
 
+    const options = {mediaType: 'photo', quality: 1};
     launchCamera(options, response => {
+      console.log('Camera Response:', response);
       if (response.assets && response.assets.length > 0) {
         setImageUri(response.assets[0].uri);
         setModalVisible(false);
       }
     });
   };
-
   return (
     <View style={styles.container}>
       <TouchableOpacity
@@ -58,7 +83,6 @@ const ImagePickerComponent = () => {
         )}
       </TouchableOpacity>
 
-      {/* Modal for selecting image source */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -67,17 +91,17 @@ const ImagePickerComponent = () => {
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Choose Photo Source</Text>
-            <Pressable style={styles.modalButton} onPress={selectImage}>
+            <TouchableOpacity style={styles.modalButton} onPress={selectImage}>
               <Text style={styles.buttonText}>Open Gallery</Text>
-            </Pressable>
-            <Pressable style={styles.modalButton} onPress={openCamera}>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.modalButton} onPress={openCamera}>
               <Text style={styles.buttonText}>Open Camera</Text>
-            </Pressable>
-            <Pressable
+            </TouchableOpacity>
+            <TouchableOpacity
               style={styles.closeButton}
               onPress={() => setModalVisible(false)}>
               <Text style={styles.closeButtonText}>Cancel</Text>
-            </Pressable>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
