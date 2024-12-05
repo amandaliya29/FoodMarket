@@ -7,15 +7,16 @@ import {
   TouchableOpacity,
   Pressable,
   Image,
+  useWindowDimensions,
 } from 'react-native';
 import React, {useState} from 'react';
-import Icon from 'react-native-vector-icons/FontAwesome'; // Import FontAwesome icons
-import TabNavigation from './navigation/TabNavigation';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 const SignIn = ({navigation}) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [hidePass, setHidePass] = useState(true); // Manage password visibility
+  const [hidePass, setHidePass] = useState(true);
+  const {width, height} = useWindowDimensions();
 
   return (
     <SafeAreaView style={styles.container}>
@@ -26,103 +27,126 @@ const SignIn = ({navigation}) => {
         </View>
       </View>
 
-      <View>
-        <View style={{marginBottom: 16}}>
-          <Text style={styles.title}>Email Address</Text>
-          <TextInput
-            value={email}
-            onChangeText={setEmail}
-            placeholder="Type your email address"
-            placeholderTextColor={'grey'}
-            style={styles.input}
-          />
-        </View>
-
-        <View style={{marginBottom: 16}}>
-          <Text style={styles.title}>Password</Text>
-          <View style={styles.passwordContainer}>
-            <TextInput
-              secureTextEntry={hidePass}
-              value={password}
-              onChangeText={setPassword}
-              placeholder="Type your password"
-              placeholderTextColor={'grey'}
-              style={styles.inputWithIcon}
-            />
-            <TouchableOpacity
-              onPress={() => setHidePass(!hidePass)}
-              style={styles.iconStyle}>
-              <Icon
-                name={hidePass ? 'eye-slash' : 'eye'}
-                size={20}
-                color="grey"
-              />
-            </TouchableOpacity>
-          </View>
-        </View>
-        <TouchableOpacity
-          style={styles.signInButton}
-          onPress={() => navigation.navigate('TabNavigation')}>
-          <Text style={{color: 'white', fontWeight: '500', fontSize: 14}}>
-            Sign In
-          </Text>
-        </TouchableOpacity>
-      </View>
-      <View style={{alignItems: 'center'}}>
-        <Pressable
-          onPress={() => {
-            console.warn('forgot Password');
-          }}>
-          <Text style={styles.forgotPassword}>Forgot Password</Text>
-        </Pressable>
-      </View>
-      <View>
-        <Text style={styles.orContinueWith}>- OR Continue with -</Text>
-      </View>
       <View
         style={{
-          flexDirection: 'row',
-          gap: 10,
-          marginHorizontal: 60,
-          marginVertical: 20,
-          marginBottom: 24,
+          alignContent: 'center',
+          alignItems: 'center',
+          justifyContent: 'center',
         }}>
-        <Pressable
-          onPress={() => {
-            console.warn('google');
-          }}
-          style={styles.google}>
-          <View style={styles.google1Parent}>
-            <Image
-              style={styles.google1Icon}
-              resizeMode="cover"
-              source={require('../assets/google1.png')}
-            />
-            <Text style={styles.google1}>Google</Text>
+        <View
+          style={[
+            styles.formBox,
+            {
+              width: width >= 400 ? 500 : width - 20,
+            },
+          ]}>
+          <View>
+            <View
+              style={{
+                alignContent: 'center',
+                alignItems: 'center',
+                marginBottom: 16,
+              }}>
+              <Text style={styles.text}>Sign In</Text>
+            </View>
+            <View style={{marginBottom: 16}}>
+              <Text style={styles.title}>Email Address</Text>
+              <TextInput
+                value={email}
+                onChangeText={setEmail}
+                placeholder="Type your email address"
+                placeholderTextColor={'grey'}
+                style={styles.input}
+              />
+            </View>
+
+            <View style={{marginBottom: 16}}>
+              <Text style={styles.title}>Password</Text>
+              <View style={styles.passwordContainer}>
+                <TextInput
+                  secureTextEntry={hidePass}
+                  value={password}
+                  onChangeText={setPassword}
+                  placeholder="Type your password"
+                  placeholderTextColor={'grey'}
+                  style={styles.inputWithIcon}
+                />
+                <TouchableOpacity
+                  onPress={() => setHidePass(!hidePass)}
+                  style={styles.iconStyle}>
+                  <Icon
+                    name={hidePass ? 'eye-slash' : 'eye'}
+                    size={20}
+                    color="grey"
+                  />
+                </TouchableOpacity>
+              </View>
+            </View>
+            <TouchableOpacity
+              style={styles.signInButton}
+              onPress={() => navigation.navigate('TabNavigation')}>
+              <Text style={{color: 'white', fontWeight: '500', fontSize: 14}}>
+                Sign In
+              </Text>
+            </TouchableOpacity>
           </View>
-        </Pressable>
-        <Pressable
-          onPress={() => {
-            console.warn('facebook');
-          }}
-          style={styles.google}>
-          <View style={styles.google1Parent}>
-            <Image
-              style={[styles.google1Icon]}
-              resizeMode="cover"
-              source={require('../assets/facebook1.png')}
-            />
-            <Text style={styles.google1}>Facebook</Text>
+          <View style={{alignItems: 'center'}}>
+            <Pressable
+              onPress={() => {
+                console.warn('forgot Password');
+              }}>
+              <Text style={styles.forgotPassword}>Forgot Password</Text>
+            </Pressable>
           </View>
-        </Pressable>
-      </View>
-      <View style={styles.createAnAccount}>
-        <Text style={[styles.createAnAccount1, styles.signUpTypo]}>
-          Create An Account
-        </Text>
-        <Pressable onPress={() => navigation.navigate('SignUp')}>
-          <Text style={[styles.signUp, styles.signUpTypo]}>Sign Up</Text>
-        </Pressable>
+          <View>
+            <Text style={styles.orContinueWith}>- OR Continue with -</Text>
+          </View>
+          <View
+            style={{
+              flexDirection: 'row',
+              gap: 10,
+              marginHorizontal: 60,
+              marginVertical: 20,
+              marginBottom: 24,
+            }}>
+            <Pressable
+              onPress={() => {
+                console.warn('google');
+              }}
+              style={styles.google}>
+              <View style={styles.google1Parent}>
+                <Image
+                  style={styles.google1Icon}
+                  resizeMode="cover"
+                  source={require('../assets/google1.png')}
+                />
+                <Text style={styles.google1}>Google</Text>
+              </View>
+            </Pressable>
+            <Pressable
+              onPress={() => {
+                console.warn('facebook');
+              }}
+              style={styles.google}>
+              <View style={styles.google1Parent}>
+                <Image
+                  style={[styles.google1Icon]}
+                  resizeMode="cover"
+                  source={require('../assets/facebook1.png')}
+                />
+                <Text style={styles.google1}>Facebook</Text>
+              </View>
+            </Pressable>
+          </View>
+          <View style={styles.createAnAccount}>
+            <Text style={[styles.createAnAccount1, styles.signUpTypo]}>
+              Create An Account
+            </Text>
+            <Pressable onPress={() => navigation.navigate('SignUp')}>
+              <Text style={[styles.signUp, styles.signUpTypo]}>Sign Up</Text>
+            </Pressable>
+          </View>
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -153,6 +177,16 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 60,
+  },
+  formBox: {
+    marginHorizontal: 10,
+    padding: 8,
+    borderRadius: 10,
+    backgroundColor: '#f9f9f9',
+    elevation: 2,
+  },
+  inputWrapper: {
+    marginBottom: 16,
   },
   input: {
     margin: 6,
@@ -237,7 +271,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   createAnAccount1: {
-    fontFamily: 'Poppins-Regular',
     color: '#575757',
   },
   signUp: {
@@ -245,9 +278,10 @@ const styles = StyleSheet.create({
     color: '#eb0029',
   },
   createAnAccount: {
-    flex: 1,
     justifyContent: 'center',
     flexDirection: 'row',
     gap: 5,
+    marginTop: 8,
+    marginBottom: 8,
   },
 });

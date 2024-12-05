@@ -5,8 +5,8 @@ import {
   SafeAreaView,
   TouchableOpacity,
   TextInput,
-  Pressable,
   Image,
+  useWindowDimensions,
 } from 'react-native';
 import React, {useState} from 'react';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -21,6 +21,7 @@ const SignUp = () => {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [hidePass, setHidePass] = useState(true);
+  const {width, height} = useWindowDimensions();
 
   return (
     <SafeAreaView style={styles.container}>
@@ -42,69 +43,91 @@ const SignUp = () => {
           <Text style={styles.letsGetSome}>Register and eat</Text>
         </View>
       </View>
-      <ImagePickerComponent />
-      <View>
-        <View style={{marginBottom: 16}}>
-          <Text style={styles.title}>Full Name</Text>
-          <TextInput
-            value={name}
-            onChangeText={setName}
-            placeholder="Type your full name"
-            placeholderTextColor={'grey'}
-            style={styles.input}
-          />
-        </View>
-        <View style={{marginBottom: 16}}>
-          <Text style={styles.title}>Email Address</Text>
-          <TextInput
-            value={email}
-            onChangeText={setEmail}
-            placeholderTextColor={'grey'}
-            placeholder="Type your email address"
-            style={styles.input}
-          />
-        </View>
-
-        <View style={{marginBottom: 16}}>
-          <Text style={styles.title}>Password</Text>
-          <View style={styles.passwordContainer}>
-            <TextInput
-              secureTextEntry={hidePass}
-              value={password}
-              onChangeText={setPassword}
-              placeholder="Type your password"
-              placeholderTextColor={'grey'}
-              style={styles.inputWithIcon}
-            />
-            <TouchableOpacity
-              onPress={() => setHidePass(!hidePass)}
-              style={styles.iconStyle}>
-              <Icon2
-                name={hidePass ? 'eye-slash' : 'eye'}
-                size={20}
-                color="grey"
+      <View
+        style={{
+          alignContent: 'center',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
+        <View
+          style={[
+            styles.formBox,
+            {
+              width: width >= 400 ? 500 : width - 20,
+            },
+          ]}>
+          <View>
+            <View
+              style={{
+                alignContent: 'center',
+                alignItems: 'center',
+                marginBottom: 16,
+              }}>
+              <Text style={styles.text}>Sign Up</Text>
+            </View>
+            <View style={{marginBottom: 16}}>
+              <Text style={styles.title}>Full Name</Text>
+              <TextInput
+                value={name}
+                onChangeText={setName}
+                placeholder="Type your full name"
+                placeholderTextColor={'grey'}
+                style={styles.input}
               />
+            </View>
+            <View style={{marginBottom: 16}}>
+              <Text style={styles.title}>Email Address</Text>
+              <TextInput
+                value={email}
+                onChangeText={setEmail}
+                placeholderTextColor={'grey'}
+                placeholder="Type your email address"
+                style={styles.input}
+              />
+            </View>
+
+            <View style={{marginBottom: 16}}>
+              <Text style={styles.title}>Password</Text>
+              <View style={styles.passwordContainer}>
+                <TextInput
+                  secureTextEntry={hidePass}
+                  value={password}
+                  onChangeText={setPassword}
+                  placeholder="Type your password"
+                  placeholderTextColor={'grey'}
+                  style={styles.inputWithIcon}
+                />
+                <TouchableOpacity
+                  onPress={() => setHidePass(!hidePass)}
+                  style={styles.iconStyle}>
+                  <Icon2
+                    name={hidePass ? 'eye-slash' : 'eye'}
+                    size={20}
+                    color="grey"
+                  />
+                </TouchableOpacity>
+              </View>
+            </View>
+            <TouchableOpacity
+              style={styles.signInButton}
+              onPress={() => navigation.navigate('Address')}>
+              <Text style={{color: 'white', fontWeight: '500', fontSize: 14}}>
+                Continue
+              </Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.createAnAccount}>
+            <Text style={[styles.createAnAccount1, styles.signUpTypo]}>
+              I Already Have an Account
+            </Text>
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate('SignIn');
+              }}>
+              <Text style={[styles.signUp, styles.signUpTypo]}>Log in</Text>
             </TouchableOpacity>
           </View>
         </View>
-        <Pressable
-          style={styles.signInButton}
-          onPress={() => navigation.navigate('Address')}>
-          <Text style={{color: 'white', fontWeight: '500', fontSize: 14}}>
-            Continue
-          </Text>
-        </Pressable>
-      </View>
-      <View style={styles.createAnAccount}>
-        <Text style={[styles.createAnAccount1, styles.signUpTypo]}>
-          I Already Have an Account
-        </Text>
-        <Pressable
-          onPress={() => {
-            navigation.navigate('SignIn');
-          }}>
-          <Text style={[styles.signUp, styles.signUpTypo]}>Log in</Text>
-        </Pressable>
       </View>
     </SafeAreaView>
   );
@@ -117,6 +140,13 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: 8,
     backgroundColor: '#fff',
+  },
+  formBox: {
+    marginHorizontal: 10,
+    padding: 8,
+    borderRadius: 10,
+    backgroundColor: '#f9f9f9',
+    elevation: 2,
   },
   text: {
     fontSize: 20,
@@ -216,9 +246,10 @@ const styles = StyleSheet.create({
     color: '#eb0029',
   },
   createAnAccount: {
-    flex: 1,
     justifyContent: 'center',
     flexDirection: 'row',
     gap: 5,
+    marginTop: 8,
+    marginBottom: 8,
   },
 });

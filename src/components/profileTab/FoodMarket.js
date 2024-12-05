@@ -16,19 +16,16 @@ const FoodMarket = () => {
       name: 'Terms & Conditions',
       screen: 'TermsConditionsScreen',
     },
-    // {
-    //   id: 3,
-    //   name: 'LogOut',
-    //   screen: 'SignIn',
-    // },
-    // {
-    //   id: 4,
-    //   name: 'Security',
-    // },
-    // {
-    //   id: 5,
-    //   name: 'Payments',
-    // },
+    {
+      id: 3,
+      name: 'Help & Support',
+      screen: 'Help',
+    },
+    {
+      id: 4,
+      name: 'About Us',
+      screen: 'AboutUs',
+    },
   ];
 
   return (

@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   TextInput,
   Pressable,
+  useWindowDimensions,
 } from 'react-native';
 import React, {useState} from 'react';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -17,6 +18,7 @@ const Address = () => {
   const [address, setAddress] = useState();
   const [house, setHouse] = useState();
   const [city, setCity] = useState();
+  const {width, height} = useWindowDimensions();
 
   const navigation = useNavigation();
   return (
@@ -39,60 +41,83 @@ const Address = () => {
           <Text style={styles.letsGetSome}>Make sure it's valid</Text>
         </View>
       </View>
-      <View>
-        <View style={{marginBottom: 16}}>
-          <Text style={styles.title}>Phone No</Text>
-          <TextInput
-            value={phone}
-            onChangeText={setPhone}
-            placeholder="Type your phone number"
-            placeholderTextColor={'grey'}
-            style={styles.input}
-          />
+      <View
+        style={{
+          alignContent: 'center',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
+        <View
+          style={[
+            styles.formBox,
+            {
+              width: width >= 400 ? 500 : width - 20,
+            },
+          ]}>
+          <View>
+            <View
+              style={{
+                alignContent: 'center',
+                alignItems: 'center',
+                marginBottom: 16,
+              }}>
+              <Text style={styles.text}>Address</Text>
+            </View>
+            <View style={{marginBottom: 16}}>
+              <Text style={styles.title}>Phone No</Text>
+              <TextInput
+                value={phone}
+                onChangeText={setPhone}
+                placeholder="Type your phone number"
+                placeholderTextColor={'grey'}
+                style={styles.input}
+              />
+            </View>
+            <View style={{marginBottom: 16}}>
+              <Text style={styles.title}>Address</Text>
+              <TextInput
+                value={address}
+                onChangeText={setAddress}
+                placeholder="Type your address"
+                placeholderTextColor={'grey'}
+                style={styles.input}
+              />
+            </View>
+            <View>
+              <Text style={styles.title}>House No</Text>
+              <TextInput
+                value={house}
+                onChangeText={setHouse}
+                placeholder="Type your house number"
+                placeholderTextColor={'grey'}
+                style={styles.input}
+              />
+            </View>
+            <DropDown value={city} setValue={setCity} />
+          </View>
+          <View>
+            <Pressable
+              style={styles.signInButton}
+              onPress={() => {
+                navigation.navigate('SignIn');
+              }}>
+              <Text style={{color: 'white', fontWeight: '500', fontSize: 14}}>
+                Sign Up Now
+              </Text>
+            </Pressable>
+          </View>
+          <View style={styles.createAnAccount}>
+            <Text style={[styles.createAnAccount1, styles.signUpTypo]}>
+              I Already Have an Account
+            </Text>
+            <Pressable
+              onPress={() => {
+                navigation.navigate('SignIn');
+              }}>
+              <Text style={[styles.signUp, styles.signUpTypo]}>Log in</Text>
+            </Pressable>
+          </View>
         </View>
-        <View style={{marginBottom: 16}}>
-          <Text style={styles.title}>Address</Text>
-          <TextInput
-            value={address}
-            onChangeText={setAddress}
-            placeholder="Type your address"
-            placeholderTextColor={'grey'}
-            style={styles.input}
-          />
-        </View>
-        <View>
-          <Text style={styles.title}>House No</Text>
-          <TextInput
-            value={house}
-            onChangeText={setHouse}
-            placeholder="Type your house number"
-            placeholderTextColor={'grey'}
-            style={styles.input}
-          />
-        </View>
-        <DropDown value={city} setValue={setCity} />
-      </View>
-      <View>
-        <Pressable
-          style={styles.signInButton}
-          onPress={() => {
-            navigation.navigate('SignIn');
-          }}>
-          <Text style={{color: 'white', fontWeight: '500', fontSize: 14}}>
-            Sign Up Now
-          </Text>
-        </Pressable>
-      </View>
-      <View style={styles.createAnAccount}>
-        <Text style={[styles.createAnAccount1, styles.signUpTypo]}>
-          I Already Have an Account
-        </Text>
-        <Pressable
-          onPress={() => {
-            navigation.navigate('SignIn');
-          }}>
-          <Text style={[styles.signUp, styles.signUpTypo]}>Log in</Text>
-        </Pressable>
       </View>
     </SafeAreaView>
   );
@@ -105,6 +130,13 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: 8,
     backgroundColor: '#fff',
+  },
+  formBox: {
+    marginHorizontal: 10,
+    padding: 8,
+    borderRadius: 10,
+    backgroundColor: '#f9f9f9',
+    elevation: 2,
   },
   text: {
     fontSize: 20,
@@ -163,9 +195,10 @@ const styles = StyleSheet.create({
     color: '#eb0029',
   },
   createAnAccount: {
-    flex: 1,
     justifyContent: 'center',
     flexDirection: 'row',
     gap: 5,
+    marginTop: 8,
+    marginBottom: 8,
   },
 });

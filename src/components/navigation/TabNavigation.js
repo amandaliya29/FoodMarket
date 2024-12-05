@@ -34,6 +34,7 @@ const TabNavigation = () => {
               marginBottom: 5,
               fontSize: 12,
             },
+            tabBarLabelPosition: 'below-icon',
             tabBarActiveTintColor: '#EB0029',
             tabBarStyle: {backgroundColor: '#fff'},
           }}>
