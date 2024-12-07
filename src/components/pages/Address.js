@@ -11,7 +11,7 @@ import {
 import React, {useState} from 'react';
 import Icon from 'react-native-vector-icons/Ionicons';
 import DropDown from './DropDown';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 
 const Address = () => {
   const [phone, setPhone] = useState();
@@ -19,8 +19,9 @@ const Address = () => {
   const [house, setHouse] = useState();
   const [city, setCity] = useState();
   const {width, height} = useWindowDimensions();
-
   const navigation = useNavigation();
+  const route = useRoute();
+  const hideAccountSection = route.params?.hideAccountSection || false;
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.head}>
@@ -99,24 +100,30 @@ const Address = () => {
             <Pressable
               style={styles.signInButton}
               onPress={() => {
-                navigation.navigate('SignIn');
+                {
+                  !hideAccountSection
+                    ? navigation.navigate('SignIn')
+                    : navigation.goBack();
+                }
               }}>
               <Text style={{color: 'white', fontWeight: '500', fontSize: 14}}>
-                Sign Up Now
+                {!hideAccountSection ? 'Sign Up Now' : 'Update'}
               </Text>
             </Pressable>
           </View>
-          <View style={styles.createAnAccount}>
-            <Text style={[styles.createAnAccount1, styles.signUpTypo]}>
-              I Already Have an Account
-            </Text>
-            <Pressable
-              onPress={() => {
-                navigation.navigate('SignIn');
-              }}>
-              <Text style={[styles.signUp, styles.signUpTypo]}>Log in</Text>
-            </Pressable>
-          </View>
+          {!hideAccountSection && (
+            <View style={styles.createAnAccount}>
+              <Text style={[styles.createAnAccount1, styles.signUpTypo]}>
+                I Already Have an Account
+              </Text>
+              <Pressable
+                onPress={() => {
+                  navigation.navigate('SignIn');
+                }}>
+                <Text style={[styles.signUp, styles.signUpTypo]}>Log in</Text>
+              </Pressable>
+            </View>
+          )}
         </View>
       </View>
     </SafeAreaView>
@@ -155,7 +162,7 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   backButton: {
-    marginRight: 26,
+    marginRight: 16,
   },
   input: {
     margin: 6,

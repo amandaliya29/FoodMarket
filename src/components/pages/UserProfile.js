@@ -1,28 +1,25 @@
 import {
+  SafeAreaView,
   StyleSheet,
   Text,
-  View,
-  SafeAreaView,
-  TouchableOpacity,
   TextInput,
-  Image,
+  TouchableOpacity,
   useWindowDimensions,
+  View,
 } from 'react-native';
-import React, {useState} from 'react';
 import Icon from 'react-native-vector-icons/Ionicons';
-import Icon2 from 'react-native-vector-icons/FontAwesome';
+
+import React, {useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
-import ImagePickerComponent from './foodTab/profileImg/ImagePickerComponent';
+import ImagePickerComponent from '../foodTab/profileImg/ImagePickerComponent';
 
-const SignUp = () => {
+const UserProfile = () => {
   const navigation = useNavigation();
-
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
-  const [hidePass, setHidePass] = useState(true);
   const {width, height} = useWindowDimensions();
-
+  const [phone, setPhone] = useState();
+  const [Name, setName] = useState();
+  const [Email, setEmail] = useState();
+  const [city, setCity] = useState();
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.head}>
@@ -39,8 +36,8 @@ const SignUp = () => {
         </TouchableOpacity>
 
         <View>
-          <Text style={styles.text}>Sign Up</Text>
-          <Text style={styles.letsGetSome}>Register and eat</Text>
+          <Text style={styles.text}>Profile</Text>
+          <Text style={styles.letsGetSome}>Make sure it's valid</Text>
         </View>
       </View>
       <View
@@ -63,69 +60,49 @@ const SignUp = () => {
                 alignItems: 'center',
                 marginBottom: 16,
               }}>
-              <Text style={styles.text}>Sign Up</Text>
+              <Text style={styles.text}>Profile</Text>
             </View>
             <ImagePickerComponent />
-            <View style={{marginTop: 8, marginBottom: 16}}>
-              <Text style={styles.title}>Full Name</Text>
+            <View style={{marginTop: 12, marginBottom: 16}}>
+              <Text style={styles.title}>Name</Text>
               <TextInput
-                value={name}
+                value={Name}
                 onChangeText={setName}
-                placeholder="Type your full name"
+                placeholder="Type your Name"
                 placeholderTextColor={'grey'}
                 style={styles.input}
               />
             </View>
             <View style={{marginBottom: 16}}>
-              <Text style={styles.title}>Email Address</Text>
+              <Text style={styles.title}>Email</Text>
               <TextInput
-                value={email}
+                value={Email}
                 onChangeText={setEmail}
+                placeholder="Type your Email"
                 placeholderTextColor={'grey'}
-                placeholder="Type your email address"
                 style={styles.input}
               />
             </View>
-
             <View style={{marginBottom: 16}}>
-              <Text style={styles.title}>Password</Text>
-              <View style={styles.passwordContainer}>
-                <TextInput
-                  secureTextEntry={hidePass}
-                  value={password}
-                  onChangeText={setPassword}
-                  placeholder="Type your password"
-                  placeholderTextColor={'grey'}
-                  style={styles.inputWithIcon}
-                />
-                <TouchableOpacity
-                  onPress={() => setHidePass(!hidePass)}
-                  style={styles.iconStyle}>
-                  <Icon2
-                    name={hidePass ? 'eye-slash' : 'eye'}
-                    size={20}
-                    color="grey"
-                  />
-                </TouchableOpacity>
-              </View>
+              <Text style={styles.title}>Phone No</Text>
+              <TextInput
+                value={phone}
+                onChangeText={setPhone}
+                placeholder="Type your phone number"
+                placeholderTextColor={'grey'}
+                style={styles.input}
+              />
             </View>
+          </View>
+          <View>
             <TouchableOpacity
               style={styles.signInButton}
-              onPress={() => navigation.navigate('Address')}>
-              <Text style={{color: 'white', fontWeight: '500', fontSize: 14}}>
-                Continue
-              </Text>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.createAnAccount}>
-            <Text style={[styles.createAnAccount1, styles.signUpTypo]}>
-              I Already Have an Account
-            </Text>
-            <TouchableOpacity
               onPress={() => {
-                navigation.navigate('SignIn');
+                navigation.goBack();
               }}>
-              <Text style={[styles.signUp, styles.signUpTypo]}>Log in</Text>
+              <Text style={{color: 'white', fontWeight: '500', fontSize: 14}}>
+                Update
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -134,7 +111,7 @@ const SignUp = () => {
   );
 };
 
-export default SignUp;
+export default UserProfile;
 
 const styles = StyleSheet.create({
   container: {
@@ -168,30 +145,12 @@ const styles = StyleSheet.create({
   backButton: {
     marginRight: 16,
   },
-  picIcon: {
-    flex: 1,
-    backgroundColor: '#f0f0f0',
-    width: '100%',
-    height: 90,
-    borderRadius: 45,
-    borderWidth: 0.5,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  imageBorder: {
-    width: 110,
-    height: 110,
-    borderWidth: 1.5,
-    borderRadius: 55,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderStyle: 'dashed',
-    borderColor: '#8D92A3',
-  },
-  imgContainer: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
+  formBox: {
+    marginHorizontal: 10,
+    padding: 8,
+    borderRadius: 10,
+    backgroundColor: '#f9f9f9',
+    elevation: 2,
   },
   input: {
     margin: 6,
@@ -206,24 +165,8 @@ const styles = StyleSheet.create({
     color: '#020202',
     textAlign: 'left',
     marginLeft: 16,
+
     fontWeight: '500',
-  },
-  passwordContainer: {
-    margin: 6,
-    marginHorizontal: 16,
-    position: 'relative',
-  },
-  inputWithIcon: {
-    padding: 10,
-    paddingRight: 40,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: 'rgba(2, 2, 2, 0.28)',
-  },
-  iconStyle: {
-    position: 'absolute',
-    right: 20,
-    top: '30%',
   },
   signInButton: {
     borderRadius: 8,

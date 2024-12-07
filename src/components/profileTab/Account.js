@@ -20,22 +20,20 @@ const Account = () => {
     },
     {
       id: 2,
-      name: 'Home Address',
-      screen: 'Address',
+      name: 'Edit Profile',
+      screen: 'UserProfile',
     },
     {
       id: 3,
+      name: 'Home Address',
+      screen: 'Address',
+      params: {hideAccountSection: true},
+    },
+    {
+      id: 4,
       name: 'LogOut',
       screen: 'SignIn',
     },
-    // {
-    //   id: 4,
-    //   name: 'Security',
-    // },
-    // {
-    //   id: 5,
-    //   name: 'Payments',
-    // },
   ];
 
   return (
@@ -46,7 +44,7 @@ const Account = () => {
         renderItem={({item}) => (
           <TouchableOpacity
             onPress={() => {
-              navigation.navigate(item.screen);
+              navigation.navigate(item.screen, item.params || {});
             }}
             style={styles.itemContainer}>
             <View style={styles.row}>

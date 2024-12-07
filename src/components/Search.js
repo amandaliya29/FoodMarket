@@ -95,21 +95,12 @@ const Search = () => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <View style={styles.nameHead}>
+        <Text style={styles.text}>Search</Text>
+        <Text style={styles.letsGetSome}>Let's get some foods</Text>
+      </View>
       <View style={styles.head}>
-        <TouchableOpacity
-          onPress={() => {
-            navigation.goBack();
-          }}
-          style={styles.backButton}>
-          <Icon
-            name="chevron-back"
-            size={24}
-            color="white"
-            backgroundColor="red"
-            style={{borderRadius: 5}}
-          />
-        </TouchableOpacity>
-        <View style={[styles.searchContainer, {width: width - 70}]}>
+        <View style={[styles.searchContainer, {width: width - 30}]}>
           <Icon2
             name="search"
             size={24}
@@ -175,6 +166,20 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: 8,
     backgroundColor: '#fff',
+  },
+  nameHead: {
+    paddingLeft: 16,
+    marginBottom: 16,
+  },
+  text: {
+    fontSize: 20,
+    fontWeight: '500',
+    color: 'black',
+  },
+  letsGetSome: {
+    fontSize: 13,
+    fontWeight: '300',
+    color: '#8d92a3',
   },
   head: {
     paddingLeft: 16,
