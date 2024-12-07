@@ -47,10 +47,10 @@ const PrivacyPolicyScreen = () => {
 
         <Text style={styles.sectionTitle}>1. Information We Collect</Text>
         <Text style={styles.text}>
-          - **Personal Information:** When you sign up, we collect details such
-          as your name, email, and contact information.
-          {'\n'}- **Payment Information:** For processing payments securely.
-          {'\n'}- **Device Information:** To enhance app performance and user
+          - Personal Information: {'\n'}When you sign up, we collect details
+          such as your name, email, and contact information.
+          {'\n'}- Payment Information: {'\n'}For processing payments securely.
+          {'\n'}- Device Information: {'\n'}To enhance app performance and user
           experience.
         </Text>
 

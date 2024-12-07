@@ -10,7 +10,6 @@ import {
   Platform,
 } from 'react-native';
 import {launchImageLibrary, launchCamera} from 'react-native-image-picker';
-import Icon from 'react-native-vector-icons/Ionicons';
 
 const requestCameraPermission = async () => {
   try {
@@ -27,16 +26,24 @@ const requestCameraPermission = async () => {
       );
       return granted === PermissionsAndroid.RESULTS.GRANTED;
     }
-    return true; // iOS permissions are handled in Info.plist
+    return true;
   } catch (err) {
     console.warn(err);
     return false;
   }
 };
 
-const ImagePickerComponent = () => {
+const ImagePickerComponent = ({userName = 'Food Market'}) => {
   const [imageUri, setImageUri] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
+
+  const getInitials = name => {
+    const nameParts = name.trim().split(' ');
+    const initials =
+      (nameParts[0]?.[0] || '') +
+      (nameParts.length > 1 ? nameParts[1]?.[0] || '' : '');
+    return initials.toUpperCase();
+  };
 
   const selectImage = () => {
     const options = {
@@ -61,13 +68,13 @@ const ImagePickerComponent = () => {
 
     const options = {mediaType: 'photo', quality: 1};
     launchCamera(options, response => {
-      console.log('Camera Response:', response);
       if (response.assets && response.assets.length > 0) {
         setImageUri(response.assets[0].uri);
         setModalVisible(false);
       }
     });
   };
+
   return (
     <View style={styles.container}>
       <TouchableOpacity
@@ -77,8 +84,7 @@ const ImagePickerComponent = () => {
           <Image source={{uri: imageUri}} style={styles.image} />
         ) : (
           <View style={styles.placeholder}>
-            <Icon name="image-outline" size={24} color="#8D92A3" />
-            <Text style={styles.addPhotoText}>Add Photo</Text>
+            <Text style={styles.initials}>{getInitials(userName)}</Text>
           </View>
         )}
       </TouchableOpacity>
@@ -124,13 +130,17 @@ const styles = StyleSheet.create({
     borderStyle: 'dashed',
   },
   placeholder: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: 'white',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  addPhotoText: {
-    marginTop: 5,
+  initials: {
     color: '#8D92A3',
-    fontSize: 14,
+    fontSize: 40,
+    fontWeight: 'bold',
   },
   image: {
     width: 100,
@@ -141,7 +151,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // semi-transparent background
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContent: {
     width: '80%',

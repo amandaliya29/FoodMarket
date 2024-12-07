@@ -5,14 +5,24 @@ import DropDownPicker from 'react-native-dropdown-picker';
 const DropDown = ({value, setValue}) => {
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState([
-    {label: 'Mumbai', value: 'Mumbai'},
-    {label: 'Delhi', value: 'Delhi'},
+    {label: 'Agra', value: 'Agra'},
+    {label: 'Ahmedabad', value: 'Ahmedabad'},
     {label: 'Bangalore', value: 'Bangalore'},
-    {label: 'Hyderabad', value: 'Hyderabad'},
+    {label: 'Bhopal', value: 'Bhopal'},
     {label: 'Chennai', value: 'Chennai'},
-    {label: 'Kolkata', value: 'Kolkata'},
-    {label: 'Pune', value: 'Pune'},
+    {label: 'Delhi', value: 'Delhi'},
+    {label: 'Hyderabad', value: 'Hyderabad'},
     {label: 'Jaipur', value: 'Jaipur'},
+    {label: 'Kolkata', value: 'Kolkata'},
+    {label: 'Lucknow', value: 'Lucknow'},
+    {label: 'Mumbai', value: 'Mumbai'},
+    {label: 'Pune', value: 'Pune'},
+    {label: 'Ranchi', value: 'Ranchi'},
+    {label: 'Surat', value: 'Surat'},
+    {label: 'Thiruvananthapuram', value: 'Thiruvananthapuram'},
+    {label: 'Vadodara', value: 'Vadodara'},
+    {label: 'Varanasi', value: 'Varanasi'},
+    {label: 'Visakhapatnam', value: 'Visakhapatnam'},
   ]);
 
   return (
