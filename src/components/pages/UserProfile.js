@@ -12,7 +12,7 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 import React, {useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
-import UserAvatar from 'react-native-user-avatar';
+import UserAvatar from '../pages/UserAvatar';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 
 const UserProfile = () => {
@@ -93,11 +93,7 @@ const UserProfile = () => {
                     style={styles.defaultAvatar}
                   />
                 ) : (
-                  <UserAvatar
-                    size={100}
-                    name={Name || 'User'}
-                    style={styles.defaultAvatar}
-                  />
+                  <UserAvatar size={100} name={Name || 'Food Market'} />
                 )}
               </TouchableOpacity>
             </View>
