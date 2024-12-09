@@ -19,6 +19,7 @@ const SignUp = () => {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [conformPassword, setConformPassword] = useState('');
   const [name, setName] = useState('');
   const [hidePass, setHidePass] = useState(true);
   const {width, height} = useWindowDimensions();
@@ -26,18 +27,6 @@ const SignUp = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.head}>
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={styles.backButton}>
-          <Icon
-            name="chevron-back"
-            size={24}
-            color="white"
-            backgroundColor="red"
-            style={{borderRadius: 5}}
-          />
-        </TouchableOpacity>
-
         <View>
           <Text style={styles.text}>Sign Up</Text>
           <Text style={styles.letsGetSome}>Register and eat</Text>
@@ -57,14 +46,6 @@ const SignUp = () => {
             },
           ]}>
           <View>
-            <View
-              style={{
-                alignContent: 'center',
-                alignItems: 'center',
-                marginBottom: 16,
-              }}>
-              <Text style={styles.text}>Sign Up</Text>
-            </View>
             <ImagePickerComponent />
             <View style={{marginTop: 8, marginBottom: 16}}>
               <Text style={styles.title}>Full Name</Text>
@@ -109,9 +90,31 @@ const SignUp = () => {
                 </TouchableOpacity>
               </View>
             </View>
+            <View style={{marginBottom: 16}}>
+              <Text style={styles.title}>Conform Password</Text>
+              <View style={styles.passwordContainer}>
+                <TextInput
+                  secureTextEntry={hidePass}
+                  value={conformPassword}
+                  onChangeText={setConformPassword}
+                  placeholder="Retype your password"
+                  placeholderTextColor={'grey'}
+                  style={styles.inputWithIcon}
+                />
+                <TouchableOpacity
+                  onPress={() => setHidePass(!hidePass)}
+                  style={styles.iconStyle}>
+                  <Icon2
+                    name={hidePass ? 'eye-slash' : 'eye'}
+                    size={20}
+                    color="grey"
+                  />
+                </TouchableOpacity>
+              </View>
+            </View>
             <TouchableOpacity
               style={styles.signInButton}
-              onPress={() => navigation.navigate('Address')}>
+              onPress={() => navigation.navigate('TabNavigation')}>
               <Text style={{color: 'white', fontWeight: '500', fontSize: 14}}>
                 Continue
               </Text>
@@ -146,8 +149,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
     padding: 8,
     borderRadius: 10,
-    backgroundColor: '#f9f9f9',
-    elevation: 2,
+    backgroundColor: '#fff',
   },
   text: {
     fontSize: 20,
@@ -160,13 +162,12 @@ const styles = StyleSheet.create({
     color: '#8d92a3',
   },
   head: {
-    paddingLeft: 16,
+    padding: 16,
+    paddingVertical: 2,
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 40,
-  },
-  backButton: {
-    marginRight: 16,
+    marginBottom: 30,
   },
   picIcon: {
     flex: 1,

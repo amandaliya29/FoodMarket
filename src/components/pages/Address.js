@@ -56,14 +56,6 @@ const Address = () => {
             },
           ]}>
           <View>
-            <View
-              style={{
-                alignContent: 'center',
-                alignItems: 'center',
-                marginBottom: 16,
-              }}>
-              <Text style={styles.text}>Address</Text>
-            </View>
             <View style={{marginBottom: 16}}>
               <Text style={styles.title}>Phone No</Text>
               <TextInput
@@ -142,8 +134,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
     padding: 8,
     borderRadius: 10,
-    backgroundColor: '#f9f9f9',
-    elevation: 2,
+    backgroundColor: '#fff',
   },
   text: {
     fontSize: 20,
