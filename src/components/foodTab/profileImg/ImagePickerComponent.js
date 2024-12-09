@@ -13,8 +13,8 @@ import {launchImageLibrary, launchCamera} from 'react-native-image-picker';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 const requestCameraPermission = async () => {
-  try {
-    if (Platform.OS === 'android') {
+  if (Platform.OS === 'android') {
+    try {
       const granted = await PermissionsAndroid.request(
         PermissionsAndroid.PERMISSIONS.CAMERA,
         {
@@ -26,48 +26,51 @@ const requestCameraPermission = async () => {
         },
       );
       return granted === PermissionsAndroid.RESULTS.GRANTED;
+    } catch (err) {
+      console.warn(err);
+      return false;
     }
-    return true; // iOS permissions are handled in Info.plist
-  } catch (err) {
-    console.warn(err);
-    return false;
   }
+  return true;
 };
 
-const ImagePickerComponent = () => {
-  const [imageUri, setImageUri] = useState(null);
+const ImagePickerComponent = ({imageUri, setImageUri, setFileDetails}) => {
   const [modalVisible, setModalVisible] = useState(false);
 
-  const selectImage = () => {
-    const options = {
-      mediaType: 'photo',
-      quality: 1,
-    };
-
-    launchImageLibrary(options, response => {
-      if (response.assets && response.assets.length > 0) {
-        setImageUri(response.assets[0].uri);
-        setModalVisible(false);
-      }
-    });
-  };
-
-  const openCamera = async () => {
-    const hasPermission = await requestCameraPermission();
-    if (!hasPermission) {
-      alert('Camera permission is required.');
-      return;
-    }
-
+  const pickImage = async source => {
     const options = {mediaType: 'photo', quality: 1};
-    launchCamera(options, response => {
-      console.log('Camera Response:', response);
-      if (response.assets && response.assets.length > 0) {
-        setImageUri(response.assets[0].uri);
-        setModalVisible(false);
+
+    if (source === 'gallery') {
+      launchImageLibrary(options, handleImageResponse);
+    } else if (source === 'camera') {
+      const hasPermission = await requestCameraPermission();
+      if (!hasPermission) {
+        alert('Camera permission is required.');
+        return;
       }
-    });
+      launchCamera(options, handleImageResponse);
+    }
   };
+
+  const handleImageResponse = response => {
+    if (response.didCancel) {
+      console.log('User canceled image selection.');
+    } else if (response.errorMessage) {
+      console.log('Error: ', response.errorMessage);
+    } else if (response.assets && response.assets.length > 0) {
+      const asset = response.assets[0];
+      console.log('response', asset);
+
+      setImageUri(asset.uri);
+      setFileDetails({
+        fileName: asset.fileName,
+        fileSize: asset.fileSize,
+        type: asset.type,
+      });
+      setModalVisible(false);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <TouchableOpacity
@@ -91,10 +94,14 @@ const ImagePickerComponent = () => {
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Choose Photo Source</Text>
-            <TouchableOpacity style={styles.modalButton} onPress={selectImage}>
+            <TouchableOpacity
+              style={styles.modalButton}
+              onPress={() => pickImage('gallery')}>
               <Text style={styles.buttonText}>Open Gallery</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.modalButton} onPress={openCamera}>
+            <TouchableOpacity
+              style={styles.modalButton}
+              onPress={() => pickImage('camera')}>
               <Text style={styles.buttonText}>Open Camera</Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -141,7 +148,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // semi-transparent background
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContent: {
     width: '80%',
