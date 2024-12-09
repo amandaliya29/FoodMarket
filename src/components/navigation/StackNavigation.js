@@ -15,6 +15,7 @@ import InProgressDetail from '../orderListTab/InProgressDetail';
 import Help from '../foodMarketScreen/Help';
 import AboutUs from '../foodMarketScreen/AboutUs';
 import UserProfile from '../pages/UserProfile';
+import ForgotPassword from '../ForgotPassword';
 
 const Stack = createNativeStackNavigator();
 
@@ -39,6 +40,7 @@ const StackNavigation = () => {
         <Stack.Screen name="Help" component={Help} />
         <Stack.Screen name="AboutUs" component={AboutUs} />
         <Stack.Screen name="UserProfile" component={UserProfile} />
+        <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
         <Stack.Screen
           name="PrivacyPolicyScreen"
           component={PrivacyPolicyScreen}

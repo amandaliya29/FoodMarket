@@ -17,14 +17,12 @@ const SignIn = ({navigation}) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [hidePass, setHidePass] = useState(true);
-  const [modalVisible, setModalVisible] = useState(false); // Modal visibility state
+  const [modalVisible, setModalVisible] = useState(false);
   const {width, height} = useWindowDimensions();
 
-  // Function to handle forgot password
   const handleForgotPassword = () => {
-    console.warn('Forgot password clicked');
-    // Here, you can integrate Firebase password reset logic
-    setModalVisible(false); // Close modal after submitting
+    navigation.navigate('ForgotPassword');
+    setModalVisible(false);
   };
 
   return (
