@@ -6,20 +6,56 @@ import {
   TouchableOpacity,
   useWindowDimensions,
   View,
+  Modal,
+  Image,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-
 import React, {useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
-import ImagePickerComponent from '../foodTab/profileImg/ImagePickerComponent';
+import UserAvatar from 'react-native-user-avatar';
+import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 
 const UserProfile = () => {
   const navigation = useNavigation();
-  const {width, height} = useWindowDimensions();
+  const {width} = useWindowDimensions();
   const [phone, setPhone] = useState();
   const [Name, setName] = useState();
   const [Email, setEmail] = useState();
-  const [city, setCity] = useState();
+  const [imageUri, setImageUri] = useState('');
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const handleOpenGallery = () => {
+    launchImageLibrary(
+      {
+        mediaType: 'photo',
+      },
+      response => {
+        if (response.assets && response.assets.length > 0) {
+          setImageUri(response.assets[0].uri);
+        }
+        setModalVisible(false);
+      },
+    );
+  };
+
+  const handleOpenCamera = () => {
+    launchCamera(
+      {
+        mediaType: 'photo',
+      },
+      response => {
+        if (response.assets && response.assets.length > 0) {
+          setImageUri(response.assets[0].uri);
+        }
+        setModalVisible(false);
+      },
+    );
+  };
+
+  const handleImagePress = () => {
+    setModalVisible(true);
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.head}>
@@ -40,12 +76,7 @@ const UserProfile = () => {
           <Text style={styles.letsGetSome}>Make sure it's valid</Text>
         </View>
       </View>
-      <View
-        style={{
-          alignContent: 'center',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}>
+      <View style={styles.centerContent}>
         <View
           style={[
             styles.formBox,
@@ -54,15 +85,23 @@ const UserProfile = () => {
             },
           ]}>
           <View>
-            <View
-              style={{
-                alignContent: 'center',
-                alignItems: 'center',
-                marginBottom: 16,
-              }}>
-              <Text style={styles.text}>Profile</Text>
+            <View style={styles.avatarContainer}>
+              <TouchableOpacity onPress={handleImagePress}>
+                {imageUri ? (
+                  <Image
+                    source={{uri: imageUri}}
+                    style={styles.defaultAvatar}
+                  />
+                ) : (
+                  <UserAvatar
+                    size={100}
+                    name={Name || 'User'}
+                    style={styles.defaultAvatar}
+                  />
+                )}
+              </TouchableOpacity>
             </View>
-            <ImagePickerComponent />
+
             <View style={{marginTop: 12, marginBottom: 16}}>
               <Text style={styles.title}>Name</Text>
               <TextInput
@@ -100,13 +139,37 @@ const UserProfile = () => {
               onPress={() => {
                 navigation.goBack();
               }}>
-              <Text style={{color: 'white', fontWeight: '500', fontSize: 14}}>
-                Update
-              </Text>
+              <Text style={styles.buttonText}>Update</Text>
             </TouchableOpacity>
           </View>
         </View>
       </View>
+      {/* Modal for selecting image */}
+      <Modal
+        visible={modalVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setModalVisible(false)}>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <TouchableOpacity
+              style={styles.modalButton}
+              onPress={handleOpenGallery}>
+              <Text style={styles.modalButtonText}>Open Gallery</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.modalButton}
+              onPress={handleOpenCamera}>
+              <Text style={styles.modalButtonText}>Open Camera</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.modalButton, {backgroundColor: 'red'}]}
+              onPress={() => setModalVisible(false)}>
+              <Text style={styles.modalButtonText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -119,13 +182,6 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     backgroundColor: '#fff',
   },
-  formBox: {
-    marginHorizontal: 10,
-    padding: 8,
-    borderRadius: 10,
-    backgroundColor: '#f9f9f9',
-    elevation: 2,
-  },
   text: {
     fontSize: 20,
     fontWeight: '500',
@@ -136,6 +192,8 @@ const styles = StyleSheet.create({
     fontWeight: '300',
     color: '#8d92a3',
   },
+  avatarContainer: {alignItems: 'center', marginBottom: 16},
+  defaultAvatar: {width: 110, height: 110, borderRadius: 60},
   head: {
     paddingLeft: 16,
     flexDirection: 'row',
@@ -149,8 +207,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
     padding: 8,
     borderRadius: 10,
-    backgroundColor: '#f9f9f9',
-    elevation: 2,
+    backgroundColor: '#fff',
   },
   input: {
     margin: 6,
@@ -165,7 +222,6 @@ const styles = StyleSheet.create({
     color: '#020202',
     textAlign: 'left',
     marginLeft: 16,
-
     fontWeight: '500',
   },
   signInButton: {
@@ -177,23 +233,39 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  signUpTypo: {
-    textAlign: 'center',
+  buttonText: {
+    color: 'white',
+    fontWeight: '500',
     fontSize: 14,
   },
-  createAnAccount1: {
-    fontFamily: 'Poppins-Regular',
-    color: '#575757',
-  },
-  signUp: {
-    fontWeight: 'bold',
-    color: '#eb0029',
-  },
-  createAnAccount: {
+  modalContainer: {
+    flex: 1,
     justifyContent: 'center',
-    flexDirection: 'row',
-    gap: 5,
-    marginTop: 8,
-    marginBottom: 8,
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    width: '80%',
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 20,
+    alignItems: 'center',
+  },
+  modalButton: {
+    padding: 12,
+    marginVertical: 8,
+    borderRadius: 6,
+    backgroundColor: '#eb0029',
+    width: '100%',
+    alignItems: 'center',
+  },
+  modalButtonText: {
+    color: 'white',
+    fontWeight: '500',
+  },
+  centerContent: {
+    alignContent: 'center',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

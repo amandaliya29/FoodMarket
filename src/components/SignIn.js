@@ -8,6 +8,7 @@ import {
   Pressable,
   Image,
   useWindowDimensions,
+  Modal,
 } from 'react-native';
 import React, {useState} from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -16,7 +17,15 @@ const SignIn = ({navigation}) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [hidePass, setHidePass] = useState(true);
+  const [modalVisible, setModalVisible] = useState(false); // Modal visibility state
   const {width, height} = useWindowDimensions();
+
+  // Function to handle forgot password
+  const handleForgotPassword = () => {
+    console.warn('Forgot password clicked');
+    // Here, you can integrate Firebase password reset logic
+    setModalVisible(false); // Close modal after submitting
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -34,21 +43,8 @@ const SignIn = ({navigation}) => {
           justifyContent: 'center',
         }}>
         <View
-          style={[
-            styles.formBox,
-            {
-              width: width >= 400 ? 500 : width - 20,
-            },
-          ]}>
+          style={[styles.formBox, {width: width >= 400 ? 500 : width - 20}]}>
           <View>
-            <View
-              style={{
-                alignContent: 'center',
-                alignItems: 'center',
-                marginBottom: 16,
-              }}>
-              <Text style={styles.text}>Sign In</Text>
-            </View>
             <View style={{marginBottom: 16}}>
               <Text style={styles.title}>Email Address</Text>
               <TextInput
@@ -82,6 +78,7 @@ const SignIn = ({navigation}) => {
                 </TouchableOpacity>
               </View>
             </View>
+
             <TouchableOpacity
               style={styles.signInButton}
               onPress={() => navigation.navigate('TabNavigation')}>
@@ -90,14 +87,46 @@ const SignIn = ({navigation}) => {
               </Text>
             </TouchableOpacity>
           </View>
+
           <View style={{alignItems: 'center'}}>
-            <Pressable
-              onPress={() => {
-                console.warn('forgot Password');
-              }}>
+            <Pressable onPress={() => setModalVisible(true)}>
               <Text style={styles.forgotPassword}>Forgot Password</Text>
             </Pressable>
           </View>
+
+          <Modal
+            transparent={true}
+            visible={modalVisible}
+            animationType="slide"
+            onRequestClose={() => setModalVisible(false)}>
+            <View style={styles.modalBackground}>
+              <View style={styles.modalContainer}>
+                <Text style={styles.modalTitle}>Reset Password</Text>
+                <Text style={styles.modalMessage}>
+                  Please check your email to reset your password.
+                </Text>
+                <TextInput
+                  value={email}
+                  onChangeText={setEmail}
+                  placeholder="Enter your email"
+                  placeholderTextColor={'grey'}
+                  style={[styles.input, {width: '100%', marginBottom: 16}]}
+                />
+                <TouchableOpacity
+                  style={styles.resetButton}
+                  onPress={handleForgotPassword}>
+                  <Text style={{color: 'white'}}>Send Reset Link</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.closeButton}
+                  onPress={() => setModalVisible(false)}>
+                  <Text style={{color: 'black'}}>Close</Text>
+                </TouchableOpacity>
+                <View style={{height: 50}} />
+              </View>
+            </View>
+          </Modal>
+
           <View>
             <Text style={styles.orContinueWith}>- OR Continue with -</Text>
           </View>
@@ -110,9 +139,7 @@ const SignIn = ({navigation}) => {
               marginBottom: 24,
             }}>
             <Pressable
-              onPress={() => {
-                console.warn('google');
-              }}
+              onPress={() => console.warn('google')}
               style={styles.google}>
               <View style={styles.google1Parent}>
                 <Image
@@ -124,13 +151,11 @@ const SignIn = ({navigation}) => {
               </View>
             </Pressable>
             <Pressable
-              onPress={() => {
-                console.warn('facebook');
-              }}
+              onPress={() => console.warn('facebook')}
               style={styles.google}>
               <View style={styles.google1Parent}>
                 <Image
-                  style={[styles.google1Icon]}
+                  style={styles.google1Icon}
                   resizeMode="cover"
                   source={require('../assets/facebook1.png')}
                 />
@@ -138,6 +163,7 @@ const SignIn = ({navigation}) => {
               </View>
             </Pressable>
           </View>
+
           <View style={styles.createAnAccount}>
             <Text style={[styles.createAnAccount1, styles.signUpTypo]}>
               Create An Account
@@ -155,21 +181,9 @@ const SignIn = ({navigation}) => {
 export default SignIn;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingTop: 8,
-    backgroundColor: '#fff',
-  },
-  text: {
-    fontSize: 20,
-    fontWeight: '500',
-    color: 'black',
-  },
-  letsGetSome: {
-    fontSize: 13,
-    fontWeight: '300',
-    color: '#8d92a3',
-  },
+  container: {flex: 1, paddingTop: 8, backgroundColor: '#fff'},
+  text: {fontSize: 20, fontWeight: '500', color: 'black'},
+  letsGetSome: {fontSize: 13, fontWeight: '300', color: '#8d92a3'},
   head: {
     padding: 16,
     paddingVertical: 2,
@@ -182,12 +196,9 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
     padding: 8,
     borderRadius: 10,
-    backgroundColor: '#f9f9f9',
-    elevation: 2,
+    backgroundColor: '#fff',
   },
-  inputWrapper: {
-    marginBottom: 16,
-  },
+  inputWrapper: {marginBottom: 16},
   input: {
     margin: 6,
     borderRadius: 10,
@@ -203,11 +214,7 @@ const styles = StyleSheet.create({
     marginLeft: 16,
     fontWeight: '500',
   },
-  passwordContainer: {
-    margin: 6,
-    marginHorizontal: 16,
-    position: 'relative',
-  },
+  passwordContainer: {margin: 6, marginHorizontal: 16, position: 'relative'},
   inputWithIcon: {
     padding: 10,
     paddingRight: 40,
@@ -215,11 +222,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(2, 2, 2, 0.28)',
   },
-  iconStyle: {
-    position: 'absolute',
-    right: 20,
-    top: '30%',
-  },
+  iconStyle: {position: 'absolute', right: 20, top: '30%'},
   signInButton: {
     borderRadius: 8,
     margin: 16,
@@ -241,21 +244,14 @@ const styles = StyleSheet.create({
     color: '#575757',
     textAlign: 'center',
   },
-  google1Icon: {
-    width: 24,
-    height: 24,
-  },
+  google1Icon: {width: 24, height: 24},
   google1: {
     fontSize: 12,
     color: '#575757',
     textAlign: 'center',
     fontWeight: '500',
   },
-  google1Parent: {
-    flexDirection: 'row',
-    gap: 10,
-    alignItems: 'center',
-  },
+  google1Parent: {flexDirection: 'row', gap: 10, alignItems: 'center'},
   google: {
     borderRadius: 50,
     backgroundColor: 'rgba(235, 0, 41, 0.1)',
@@ -266,22 +262,44 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     alignItems: 'center',
   },
-  signUpTypo: {
-    textAlign: 'center',
-    fontSize: 14,
-  },
-  createAnAccount1: {
-    color: '#575757',
-  },
-  signUp: {
-    fontWeight: 'bold',
-    color: '#eb0029',
-  },
+  signUpTypo: {textAlign: 'center', fontSize: 14},
+  createAnAccount1: {color: '#575757'},
+  signUp: {fontWeight: 'bold', color: '#eb0029'},
   createAnAccount: {
     justifyContent: 'center',
     flexDirection: 'row',
     gap: 5,
     marginTop: 8,
     marginBottom: 8,
+  },
+  modalBackground: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, .5)',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+  },
+  modalContainer: {
+    width: '100%',
+    backgroundColor: 'white',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
+    alignItems: 'center',
+  },
+  modalTitle: {fontSize: 18, fontWeight: '500', marginBottom: 12},
+  modalMessage: {fontSize: 14, marginBottom: 12, color: '#575757'},
+  resetButton: {
+    backgroundColor: '#eb0029',
+    borderRadius: 8,
+    padding: 10,
+    width: '100%',
+    alignItems: 'center',
+  },
+  closeButton: {
+    marginTop: 10,
+    borderRadius: 8,
+    padding: 10,
+    width: '100%',
+    alignItems: 'center',
   },
 });
