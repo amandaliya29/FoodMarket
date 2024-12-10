@@ -12,7 +12,7 @@ import React, {useState} from 'react';
 import Icon2 from 'react-native-vector-icons/FontAwesome';
 import {useNavigation} from '@react-navigation/native';
 import ImagePickerComponent from './foodTab/profileImg/ImagePickerComponent';
-import axios from 'axios';
+import axios from '../components/axios/axiosInstance';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SignUp = () => {
@@ -99,15 +99,11 @@ const SignUp = () => {
           type: imageDetail.type,
         });
 
-        const response = await axios.post(
-          'http://10.0.2.2:8000/api/register',
-          formData,
-          {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-            },
+        const response = await axios.post('/api/register', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
           },
-        );
+        });
 
         const userDetails = response.data;
 
@@ -265,6 +261,7 @@ const styles = StyleSheet.create({
     padding: 10,
     marginHorizontal: 16,
     borderColor: 'rgba(2, 2, 2, 0.28)',
+    color: 'black',
   },
   title: {
     fontSize: 16,
@@ -284,6 +281,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 1,
     borderColor: 'rgba(2, 2, 2, 0.28)',
+    color: 'black',
   },
   iconStyle: {
     position: 'absolute',

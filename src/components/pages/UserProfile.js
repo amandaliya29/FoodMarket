@@ -124,6 +124,7 @@ const UserProfile = () => {
                 value={phone}
                 onChangeText={setPhone}
                 placeholder="Type your phone number"
+                keyboardType="phone-pad"
                 placeholderTextColor={'grey'}
                 style={styles.input}
               />
@@ -212,6 +213,7 @@ const styles = StyleSheet.create({
     padding: 10,
     marginHorizontal: 16,
     borderColor: 'rgba(2, 2, 2, 0.28)',
+    color: 'black',
   },
   title: {
     fontSize: 16,

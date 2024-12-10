@@ -133,6 +133,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginVertical: 10,
+    color: '#666',
   },
   text: {
     fontSize: 16,

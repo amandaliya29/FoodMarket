@@ -61,31 +61,33 @@ const Address = () => {
               <TextInput
                 value={phone}
                 onChangeText={setPhone}
+                keyboardType="number-pad"
                 placeholder="Type your phone number"
                 placeholderTextColor={'grey'}
                 style={styles.input}
               />
             </View>
-            <View style={{marginBottom: 16}}>
-              <Text style={styles.title}>Address</Text>
-              <TextInput
-                value={address}
-                onChangeText={setAddress}
-                placeholder="Type your address"
-                placeholderTextColor={'grey'}
-                style={styles.input}
-              />
-            </View>
-            <View>
-              <Text style={styles.title}>House No</Text>
-              <TextInput
-                value={house}
-                onChangeText={setHouse}
-                placeholder="Type your house number"
-                placeholderTextColor={'grey'}
-                style={styles.input}
-              />
-            </View>
+            <Text style={styles.title}>House No</Text>
+            <TextInput
+              value={house}
+              onChangeText={setHouse}
+              placeholder="Type your house number"
+              keyboardType="name-number-pad"
+              placeholderTextColor={'grey'}
+              style={styles.input}
+            />
+          </View>
+          <View style={{marginTop: 16}}>
+            <Text style={styles.title}>Address</Text>
+            <TextInput
+              value={address}
+              onChangeText={setAddress}
+              placeholder="Type your address"
+              placeholderTextColor={'grey'}
+              style={styles.input}
+            />
+          </View>
+          <View>
             <DropDown value={city} setValue={setCity} />
           </View>
           <View>
@@ -162,6 +164,7 @@ const styles = StyleSheet.create({
     padding: 10,
     marginHorizontal: 16,
     borderColor: 'rgba(2, 2, 2, 0.28)',
+    color: 'black',
   },
   title: {
     fontSize: 16,
