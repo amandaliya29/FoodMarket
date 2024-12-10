@@ -9,9 +9,12 @@ import {
   Image,
   useWindowDimensions,
   Modal,
+  ToastAndroid,
 } from 'react-native';
 import React, {useState} from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SignIn = ({navigation}) => {
   const [email, setEmail] = useState('');
@@ -19,6 +22,78 @@ const SignIn = ({navigation}) => {
   const [hidePass, setHidePass] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
   const {width, height} = useWindowDimensions();
+
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+
+  const validate = () => {
+    let isValid = true;
+
+    if (!email) {
+      setEmailError('Email is required');
+      isValid = false;
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      setEmailError('Please enter a valid email');
+      isValid = false;
+    } else {
+      setEmailError('');
+    }
+
+    if (!password) {
+      setPasswordError('Password is required');
+      isValid = false;
+    } else if (password.length < 8) {
+      setPasswordError('Password must be at least 8 characters');
+      isValid = false;
+    } else {
+      setPasswordError('');
+    }
+
+    return isValid;
+  };
+
+  const showToastWithGravityAndOffset = message => {
+    ToastAndroid.showWithGravityAndOffset(
+      message,
+      ToastAndroid.CENTER,
+      ToastAndroid.BOTTOM,
+      25,
+      50,
+    );
+  };
+
+  const onSignInHandler = async () => {
+    if (validate()) {
+      try {
+        const formData = new FormData();
+
+        formData.append('email', email);
+        formData.append('password', password);
+
+        const response = await axios.post(
+          'http://10.0.2.2:8000/api/login',
+          formData,
+          {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          },
+        );
+
+        const userDetails = response.data;
+
+        await AsyncStorage.setItem('userDetails', JSON.stringify(userDetails));
+
+        showToastWithGravityAndOffset('SignIn Successfully');
+
+        navigation.navigate('TabNavigation');
+      } catch (error) {
+        console.warn(error);
+      }
+    } else {
+      showToastWithGravityAndOffset('Please fill all fields correctly');
+    }
+  };
 
   const handleForgotPassword = () => {
     navigation.navigate('ForgotPassword');
@@ -43,7 +118,7 @@ const SignIn = ({navigation}) => {
         <View
           style={[styles.formBox, {width: width >= 400 ? 500 : width - 20}]}>
           <View>
-            <View style={{marginBottom: 16}}>
+            <View style={{marginBottom: 8}}>
               <Text style={styles.title}>Email Address</Text>
               <TextInput
                 value={email}
@@ -52,9 +127,10 @@ const SignIn = ({navigation}) => {
                 placeholderTextColor={'grey'}
                 style={styles.input}
               />
+              <Text style={styles.errorText}>{emailError}</Text>
             </View>
 
-            <View style={{marginBottom: 16}}>
+            <View style={{marginBottom: 8}}>
               <Text style={styles.title}>Password</Text>
               <View style={styles.passwordContainer}>
                 <TextInput
@@ -75,11 +151,12 @@ const SignIn = ({navigation}) => {
                   />
                 </TouchableOpacity>
               </View>
+              <Text style={styles.errorText}>{passwordError}</Text>
             </View>
 
             <TouchableOpacity
               style={styles.signInButton}
-              onPress={() => navigation.navigate('TabNavigation')}>
+              onPress={onSignInHandler}>
               <Text style={{color: 'white', fontWeight: '500', fontSize: 14}}>
                 Sign In
               </Text>
@@ -299,5 +376,10 @@ const styles = StyleSheet.create({
     padding: 10,
     width: '100%',
     alignItems: 'center',
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 12,
+    marginLeft: 16,
   },
 });

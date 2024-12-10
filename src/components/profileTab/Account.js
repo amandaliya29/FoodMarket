@@ -5,13 +5,40 @@ import {
   FlatList,
   Pressable,
   TouchableOpacity,
+  Alert,
+  ToastAndroid,
 } from 'react-native';
 import React from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {useNavigation} from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Account = () => {
   const navigation = useNavigation();
+
+  const showToastWithGravityAndOffset = message => {
+    ToastAndroid.showWithGravityAndOffset(
+      message,
+      ToastAndroid.CENTER,
+      ToastAndroid.BOTTOM,
+      25,
+      50,
+    );
+  };
+
+  const handleLogout = async () => {
+    try {
+      await AsyncStorage.removeItem('userDetails');
+      showToastWithGravityAndOffset('You have been successfully logged out.');
+      navigation.reset({
+        index: 0,
+        routes: [{name: 'SignIn'}],
+      });
+    } catch (error) {
+      console.error('Error during logout:', error);
+    }
+  };
+
   const DATA = [
     {
       id: 1,
@@ -32,7 +59,7 @@ const Account = () => {
     {
       id: 4,
       name: 'LogOut',
-      screen: 'SignIn',
+      action: handleLogout,
     },
   ];
 
@@ -44,7 +71,11 @@ const Account = () => {
         renderItem={({item}) => (
           <TouchableOpacity
             onPress={() => {
-              navigation.navigate(item.screen, item.params || {});
+              if (item.action) {
+                item.action();
+              } else {
+                navigation.navigate(item.screen, item.params || {});
+              }
             }}
             style={styles.itemContainer}>
             <View style={styles.row}>

@@ -15,6 +15,7 @@ import {foodList} from './foodlist';
 import {StarRatingDisplay} from 'react-native-star-rating-widget';
 import MyTabView from './navigation/MyTabView';
 import {useNavigation} from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const HomeScreen = () => {
   const {width} = useWindowDimensions();
@@ -23,8 +24,23 @@ const HomeScreen = () => {
   const scrollX = useRef(new Animated.Value(0)).current;
   const [currentIndex, setCurrentIndex] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
+  const [userDetails, setUserDetail] = useState(null);
+  const [imageUri, setImageUri] = useState('');
 
+  const fetchUserDetails = async () => {
+    try {
+      const userDetails = await AsyncStorage.getItem('userDetails');
+      if (userDetails) {
+        const parsedDetails = JSON.parse(userDetails);
+        setUserDetail(parsedDetails);
+        setImageUri(parsedDetails.data.user.avatar);
+      }
+    } catch (error) {
+      console.warn('Failed to load user details', error);
+    }
+  };
   useEffect(() => {
+    fetchUserDetails();
     const interval = setInterval(() => {
       setCurrentIndex(prevIndex => {
         const newIndex = prevIndex === foodList.length - 1 ? 0 : prevIndex + 1;
@@ -113,8 +129,8 @@ const HomeScreen = () => {
           style={styles.profileImage}
           height={50}
           width={50}
-          resizeMode="contain"
-          source={require('../assets/photo2.png')}
+          resizeMode="cover"
+          source={imageUri ? {uri: imageUri} : require('../assets/pic.png')}
         />
       </View>
 

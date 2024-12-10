@@ -1,10 +1,10 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import SignIn from '../SignIn';
 import TabNavigation from './TabNavigation';
 import SignUp from '../SignUp';
-import {ScreenStackHeaderBackButtonImage} from 'react-native-screens';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Address from '../pages/Address';
 import FoodDetails from '../pages/FoodDetails';
 
@@ -20,10 +20,34 @@ import ForgotPassword from '../ForgotPassword';
 const Stack = createNativeStackNavigator();
 
 const StackNavigation = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(null);
+
+  useEffect(() => {
+    const checkAuthentication = async () => {
+      try {
+        const userData = await AsyncStorage.getItem('userDetails');
+        if (userData) {
+          setIsAuthenticated(true);
+        } else {
+          setIsAuthenticated(false);
+        }
+      } catch (error) {
+        console.error('Error reading AsyncStorage data', error);
+        setIsAuthenticated(false);
+      }
+    };
+
+    checkAuthentication();
+  }, []);
+
+  if (isAuthenticated === null) {
+    return null;
+  }
+
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="SignIn"
+        initialRouteName={isAuthenticated ? 'TabNavigation' : 'SignIn'}
         screenOptions={{
           headerShown: false,
           statusBarColor: 'white',

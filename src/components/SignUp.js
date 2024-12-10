@@ -13,6 +13,7 @@ import Icon2 from 'react-native-vector-icons/FontAwesome';
 import {useNavigation} from '@react-navigation/native';
 import ImagePickerComponent from './foodTab/profileImg/ImagePickerComponent';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SignUp = () => {
   const navigation = useNavigation();
@@ -107,7 +108,13 @@ const SignUp = () => {
             },
           },
         );
+
+        const userDetails = response.data;
+
+        await AsyncStorage.setItem('userDetails', JSON.stringify(userDetails));
+
         showToastWithGravityAndOffset('SignUp Successfully');
+
         navigation.navigate('TabNavigation');
       } catch (error) {
         console.warn(error);
