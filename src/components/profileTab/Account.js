@@ -12,6 +12,7 @@ import React from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {useNavigation} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import axiosInstance from '../axios/axiosInstance';
 
 const Account = () => {
   const navigation = useNavigation();
@@ -28,14 +29,30 @@ const Account = () => {
 
   const handleLogout = async () => {
     try {
-      await AsyncStorage.removeItem('userDetails');
-      showToastWithGravityAndOffset('You have been successfully logged out.');
-      navigation.reset({
-        index: 0,
-        routes: [{name: 'SignIn'}],
-      });
+      const response = await axiosInstance.get('/logout');
+      if (response.status === 200) {
+        await AsyncStorage.removeItem('userDetails');
+        showToastWithGravityAndOffset(response.data.message);
+        navigation.reset({
+          index: 0,
+          routes: [{name: 'SignIn'}],
+        });
+      }
     } catch (error) {
-      console.error('Error during logout:', error);
+      if (error.response) {
+        if (
+          error.response.status === 401 ||
+          error.response.data.message === 'Unauthenticated'
+        ) {
+          showToastWithGravityAndOffset(error.response.data.message);
+        } else {
+          showToastWithGravityAndOffset(error.response.data.message);
+        }
+      } else if (error.request) {
+        showToastWithGravityAndOffset(error.response.data.message);
+      } else {
+        showToastWithGravityAndOffset(error.response.data.message);
+      }
     }
   };
 

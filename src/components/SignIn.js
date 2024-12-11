@@ -13,8 +13,8 @@ import {
 } from 'react-native';
 import React, {useState} from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import axiosInstance from './axios/axiosInstance';
 
 const SignIn = ({navigation}) => {
   const [email, setEmail] = useState('');
@@ -70,25 +70,21 @@ const SignIn = ({navigation}) => {
         formData.append('email', email);
         formData.append('password', password);
 
-        const response = await axios.post(
-          'http://192.168.1.3:8000/api/register',
-          formData,
-          {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-            },
+        const response = await axiosInstance.post('/login', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
           },
-        );
+        });
 
         const userDetails = response.data;
 
         await AsyncStorage.setItem('userDetails', JSON.stringify(userDetails));
 
-        showToastWithGravityAndOffset('SignIn Successfully');
+        showToastWithGravityAndOffset(response.data.message);
 
         navigation.navigate('TabNavigation');
       } catch (error) {
-        showToastWithGravityAndOffset('Please enter valid detail');
+        showToastWithGravityAndOffset(error.response.data.message);
       }
     } else {
       showToastWithGravityAndOffset('Please fill all fields correctly');

@@ -12,7 +12,7 @@ import React, {useState} from 'react';
 import Icon2 from 'react-native-vector-icons/FontAwesome';
 import {useNavigation} from '@react-navigation/native';
 import ImagePickerComponent from './foodTab/profileImg/ImagePickerComponent';
-import axios from '../components/axios/axiosInstance';
+import axiosInstance from '../components/axios/axiosInstance';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SignUp = () => {
@@ -99,7 +99,7 @@ const SignUp = () => {
           type: imageDetail.type,
         });
 
-        const response = await axios.post('/api/register', formData, {
+        const response = await axiosInstance.post('/register', formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
@@ -109,14 +109,14 @@ const SignUp = () => {
 
         await AsyncStorage.setItem('userDetails', JSON.stringify(userDetails));
 
-        showToastWithGravityAndOffset('SignUp Successfully');
+        showToastWithGravityAndOffset(response.data.message);
 
         navigation.navigate('TabNavigation');
       } catch (error) {
-        console.warn(error);
+        showToastWithGravityAndOffset(error.response.data.message);
       }
     } else {
-      showToastWithGravityAndOffset('Please fill all fields correctly');
+      showToastWithGravityAndOffset(error.response.data.message);
     }
   };
 
