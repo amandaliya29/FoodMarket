@@ -101,23 +101,10 @@ const Address = () => {
                 }
               }}>
               <Text style={{color: 'white', fontWeight: '500', fontSize: 14}}>
-                {!hideAccountSection ? 'Sign Up Now' : 'Update'}
+                {!hideAccountSection ? 'Continue' : 'Update'}
               </Text>
             </Pressable>
           </View>
-          {!hideAccountSection && (
-            <View style={styles.createAnAccount}>
-              <Text style={[styles.createAnAccount1, styles.signUpTypo]}>
-                I Already Have an Account
-              </Text>
-              <Pressable
-                onPress={() => {
-                  navigation.navigate('SignIn');
-                }}>
-                <Text style={[styles.signUp, styles.signUpTypo]}>Log in</Text>
-              </Pressable>
-            </View>
-          )}
         </View>
       </View>
     </SafeAreaView>

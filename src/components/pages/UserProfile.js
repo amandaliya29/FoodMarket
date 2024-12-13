@@ -10,19 +10,40 @@ import {
   Image,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
 import UserAvatar from '../pages/UserAvatar';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const UserProfile = () => {
   const navigation = useNavigation();
   const {width} = useWindowDimensions();
   const [phone, setPhone] = useState();
-  const [Name, setName] = useState();
   const [Email, setEmail] = useState();
   const [imageUri, setImageUri] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
+  const [userDetails, setUserDetail] = useState(null);
+  const [userName, setUserName] = useState('');
+
+  const fetchUserDetails = async () => {
+    try {
+      const userDetails = await AsyncStorage.getItem('userDetails');
+      if (userDetails) {
+        const parsedDetails = JSON.parse(userDetails);
+        setUserDetail(parsedDetails);
+        setImageUri(parsedDetails.data.user.avatar);
+        setUserName(parsedDetails.data.user.name);
+        setEmail(parsedDetails.data.user.email);
+      }
+    } catch (error) {
+      console.warn('Failed to load user details', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchUserDetails();
+  }, []);
 
   const handleOpenGallery = () => {
     launchImageLibrary(
@@ -93,7 +114,7 @@ const UserProfile = () => {
                     style={styles.defaultAvatar}
                   />
                 ) : (
-                  <UserAvatar size={100} name={Name || 'Food Market'} />
+                  <UserAvatar size={100} name={userName || 'Food Market'} />
                 )}
               </TouchableOpacity>
             </View>
@@ -101,8 +122,8 @@ const UserProfile = () => {
             <View style={{marginTop: 12, marginBottom: 16}}>
               <Text style={styles.title}>Name</Text>
               <TextInput
-                value={Name}
-                onChangeText={setName}
+                value={userName}
+                onChangeText={setUserName}
                 placeholder="Type your Name"
                 placeholderTextColor={'grey'}
                 style={styles.input}

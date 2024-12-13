@@ -3,10 +3,12 @@ import React, {useEffect, useState} from 'react';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import ProfileTabBar from './profileTab/ProfileTabBar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import UserAvatar from './pages/UserAvatar';
 
 const ProfileScreen = () => {
   const [userDetails, setUserDetail] = useState(null);
   const [imageUri, setImageUri] = useState('');
+  const [userName, setUserName] = useState('');
 
   const fetchUserDetails = async () => {
     try {
@@ -15,6 +17,7 @@ const ProfileScreen = () => {
         const parsedDetails = JSON.parse(userDetails);
         setUserDetail(parsedDetails);
         setImageUri(parsedDetails.data.user.avatar);
+        setUserName(parsedDetails.data.user.name);
       }
     } catch (error) {
       console.warn('Failed to load user details', error);
@@ -29,11 +32,17 @@ const ProfileScreen = () => {
       <View style={styles.head}>
         <View style={styles.imageBorder}>
           <View style={styles.imgContainer}>
-            <Image
-              style={styles.picIcon}
-              resizeMode="cover"
-              source={imageUri ? {uri: imageUri} : require('../assets/pic.png')}
-            />
+            {imageUri ? (
+              <Image
+                style={styles.picIcon}
+                resizeMode="cover"
+                source={
+                  imageUri ? {uri: imageUri} : require('../assets/pic.png')
+                }
+              />
+            ) : (
+              <UserAvatar size={100} name={userName || 'Food Market'} />
+            )}
           </View>
         </View>
         <Text style={styles.nameText}>

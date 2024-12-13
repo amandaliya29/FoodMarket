@@ -7,6 +7,8 @@ import {
   TextInput,
   useWindowDimensions,
   ToastAndroid,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import React, {useState} from 'react';
 import Icon2 from 'react-native-vector-icons/FontAwesome';
@@ -87,17 +89,18 @@ const SignUp = () => {
     if (validate()) {
       try {
         const formData = new FormData();
-
         formData.append('email', email);
         formData.append('password', password);
         formData.append('name', name);
         formData.append('password_confirmation', conformPassword);
 
-        formData.append('avatar', {
-          uri: imageUri,
-          name: imageDetail.fileName,
-          type: imageDetail.type,
-        });
+        if (imageUri) {
+          formData.append('avatar', {
+            uri: imageUri,
+            name: imageDetail.fileName,
+            type: imageDetail.type,
+          });
+        }
 
         const response = await axiosInstance.post('/register', formData, {
           headers: {
@@ -116,7 +119,7 @@ const SignUp = () => {
         showToastWithGravityAndOffset(error.response.data.message);
       }
     } else {
-      showToastWithGravityAndOffset(error.response.data.message);
+      showToastWithGravityAndOffset('Please fill all fields correctly');
     }
   };
 
@@ -126,7 +129,10 @@ const SignUp = () => {
         <Text style={styles.text}>Sign Up</Text>
         <Text style={styles.letsGetSome}>Register and eat</Text>
       </View>
-      <View style={{alignItems: 'center', justifyContent: 'center'}}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'position'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 50}
+        style={{alignItems: 'center', justifyContent: 'center'}}>
         <View
           style={[styles.formBox, {width: width >= 400 ? 500 : width - 20}]}>
           <ImagePickerComponent
@@ -222,7 +228,7 @@ const SignUp = () => {
             <Text style={styles.signUp}>Log in</Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };

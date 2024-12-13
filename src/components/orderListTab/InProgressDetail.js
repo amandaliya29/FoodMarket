@@ -167,7 +167,14 @@ const InProgressDetail = ({route}) => {
                 marginTop: 16,
               }}>
               <Text style={[styles.sectionTitle, {fontSize: 16}]}>Status:</Text>
-              <Text style={[styles.value, {fontSize: 16}]}>
+              <Text
+                style={[
+                  styles.value,
+                  {
+                    fontSize: 16,
+                    color: item.status === 'canceled' ? 'red' : '#ccc',
+                  },
+                ]}>
                 {item.status === 'canceled' ? 'Canceled' : 'Delivered'}
               </Text>
             </View>

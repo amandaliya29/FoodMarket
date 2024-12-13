@@ -10,12 +10,14 @@ import {
   FlatList,
   RefreshControl,
   useWindowDimensions,
+  BackHandler,
 } from 'react-native';
 import {foodList} from './foodlist';
 import {StarRatingDisplay} from 'react-native-star-rating-widget';
 import MyTabView from './navigation/MyTabView';
 import {useNavigation} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import UserAvatar from './pages/UserAvatar';
 
 const HomeScreen = () => {
   const {width} = useWindowDimensions();
@@ -26,6 +28,7 @@ const HomeScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [userDetails, setUserDetail] = useState(null);
   const [imageUri, setImageUri] = useState('');
+  const [userName, setUserName] = useState('');
 
   const fetchUserDetails = async () => {
     try {
@@ -34,10 +37,22 @@ const HomeScreen = () => {
         const parsedDetails = JSON.parse(userDetails);
         setUserDetail(parsedDetails);
         setImageUri(parsedDetails.data.user.avatar);
+        setUserName(parsedDetails.data.user.name);
       }
     } catch (error) {
       console.warn('Failed to load user details', error);
     }
+  };
+  const backBtn = () => {
+    const backAction = () => {
+      BackHandler.exitApp();
+      return true;
+    };
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction,
+    );
+    return () => backHandler.remove();
   };
   useEffect(() => {
     fetchUserDetails();
@@ -48,6 +63,8 @@ const HomeScreen = () => {
         return newIndex;
       });
     }, 3000);
+
+    backBtn();
 
     return () => clearInterval(interval);
   }, []);
@@ -125,13 +142,19 @@ const HomeScreen = () => {
           <Text style={styles.text}>FoodMarket</Text>
           <Text style={styles.letsGetSome}>Let's get some foods</Text>
         </View>
-        <Image
-          style={styles.profileImage}
-          height={50}
-          width={50}
-          resizeMode="cover"
-          source={imageUri ? {uri: imageUri} : require('../assets/pic.png')}
-        />
+        <View>
+          {imageUri ? (
+            <Image
+              style={styles.profileImage}
+              height={50}
+              width={50}
+              resizeMode="cover"
+              source={imageUri ? {uri: imageUri} : require('../assets/pic.png')}
+            />
+          ) : (
+            <UserAvatar size={45} name={userName || 'Food Market'} />
+          )}
+        </View>
       </View>
 
       <View>

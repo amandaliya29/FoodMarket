@@ -10,6 +10,8 @@ import {
   useWindowDimensions,
   Modal,
   ToastAndroid,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import React, {useState} from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -111,7 +113,9 @@ const SignIn = ({navigation}) => {
           alignItems: 'center',
           justifyContent: 'center',
         }}>
-        <View
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'position'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
           style={[styles.formBox, {width: width >= 400 ? 500 : width - 20}]}>
           <View>
             <View style={{marginBottom: 8}}>
@@ -244,7 +248,7 @@ const SignIn = ({navigation}) => {
               <Text style={[styles.signUp, styles.signUpTypo]}>Sign Up</Text>
             </Pressable>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </View>
     </SafeAreaView>
   );
