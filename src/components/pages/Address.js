@@ -61,31 +61,33 @@ const Address = () => {
               <TextInput
                 value={phone}
                 onChangeText={setPhone}
+                keyboardType="number-pad"
                 placeholder="Type your phone number"
                 placeholderTextColor={'grey'}
                 style={styles.input}
               />
             </View>
-            <View style={{marginBottom: 16}}>
-              <Text style={styles.title}>Address</Text>
-              <TextInput
-                value={address}
-                onChangeText={setAddress}
-                placeholder="Type your address"
-                placeholderTextColor={'grey'}
-                style={styles.input}
-              />
-            </View>
-            <View>
-              <Text style={styles.title}>House No</Text>
-              <TextInput
-                value={house}
-                onChangeText={setHouse}
-                placeholder="Type your house number"
-                placeholderTextColor={'grey'}
-                style={styles.input}
-              />
-            </View>
+            <Text style={styles.title}>House No</Text>
+            <TextInput
+              value={house}
+              onChangeText={setHouse}
+              placeholder="Type your house number"
+              keyboardType="name-number-pad"
+              placeholderTextColor={'grey'}
+              style={styles.input}
+            />
+          </View>
+          <View style={{marginTop: 16}}>
+            <Text style={styles.title}>Address</Text>
+            <TextInput
+              value={address}
+              onChangeText={setAddress}
+              placeholder="Type your address"
+              placeholderTextColor={'grey'}
+              style={styles.input}
+            />
+          </View>
+          <View>
             <DropDown value={city} setValue={setCity} />
           </View>
           <View>
@@ -99,23 +101,10 @@ const Address = () => {
                 }
               }}>
               <Text style={{color: 'white', fontWeight: '500', fontSize: 14}}>
-                {!hideAccountSection ? 'Sign Up Now' : 'Update'}
+                {!hideAccountSection ? 'Continue' : 'Update'}
               </Text>
             </Pressable>
           </View>
-          {!hideAccountSection && (
-            <View style={styles.createAnAccount}>
-              <Text style={[styles.createAnAccount1, styles.signUpTypo]}>
-                I Already Have an Account
-              </Text>
-              <Pressable
-                onPress={() => {
-                  navigation.navigate('SignIn');
-                }}>
-                <Text style={[styles.signUp, styles.signUpTypo]}>Log in</Text>
-              </Pressable>
-            </View>
-          )}
         </View>
       </View>
     </SafeAreaView>
@@ -162,6 +151,7 @@ const styles = StyleSheet.create({
     padding: 10,
     marginHorizontal: 16,
     borderColor: 'rgba(2, 2, 2, 0.28)',
+    color: 'black',
   },
   title: {
     fontSize: 16,

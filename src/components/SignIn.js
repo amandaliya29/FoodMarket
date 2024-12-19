@@ -10,11 +10,13 @@ import {
   useWindowDimensions,
   Modal,
   ToastAndroid,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import React, {useState} from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import axiosInstance from './axios/axiosInstance';
 
 const SignIn = ({navigation}) => {
   const [email, setEmail] = useState('');
@@ -70,25 +72,21 @@ const SignIn = ({navigation}) => {
         formData.append('email', email);
         formData.append('password', password);
 
-        const response = await axios.post(
-          'http://10.0.2.2:8000/api/login',
-          formData,
-          {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-            },
+        const response = await axiosInstance.post('/login', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
           },
-        );
+        });
 
         const userDetails = response.data;
 
         await AsyncStorage.setItem('userDetails', JSON.stringify(userDetails));
 
-        showToastWithGravityAndOffset('SignIn Successfully');
+        showToastWithGravityAndOffset(response.data.message);
 
         navigation.navigate('TabNavigation');
       } catch (error) {
-        console.warn(error);
+        showToastWithGravityAndOffset(error.response.data.message);
       }
     } else {
       showToastWithGravityAndOffset('Please fill all fields correctly');
@@ -115,7 +113,9 @@ const SignIn = ({navigation}) => {
           alignItems: 'center',
           justifyContent: 'center',
         }}>
-        <View
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'position'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
           style={[styles.formBox, {width: width >= 400 ? 500 : width - 20}]}>
           <View>
             <View style={{marginBottom: 8}}>
@@ -125,6 +125,7 @@ const SignIn = ({navigation}) => {
                 onChangeText={setEmail}
                 placeholder="Type your email address"
                 placeholderTextColor={'grey'}
+                color={'black'}
                 style={styles.input}
               />
               <Text style={styles.errorText}>{emailError}</Text>
@@ -247,7 +248,7 @@ const SignIn = ({navigation}) => {
               <Text style={[styles.signUp, styles.signUpTypo]}>Sign Up</Text>
             </Pressable>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </View>
     </SafeAreaView>
   );
@@ -281,6 +282,7 @@ const styles = StyleSheet.create({
     padding: 10,
     marginHorizontal: 16,
     borderColor: 'rgba(2, 2, 2, 0.28)',
+    color: 'black',
   },
   title: {
     fontSize: 16,
@@ -296,6 +298,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 1,
     borderColor: 'rgba(2, 2, 2, 0.28)',
+    color: 'black',
   },
   iconStyle: {position: 'absolute', right: 20, top: '30%'},
   signInButton: {

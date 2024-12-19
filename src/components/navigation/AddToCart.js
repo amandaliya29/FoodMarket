@@ -1,4 +1,4 @@
-import React, {useState, useRef} from 'react';
+import React, {useState, useRef, useEffect} from 'react';
 import {
   View,
   Text,
@@ -25,6 +25,7 @@ import {foodList} from '../foodlist';
 import {StarRatingDisplay} from 'react-native-star-rating-widget';
 import {useNavigation} from '@react-navigation/native';
 import RazorpayCheckout from 'react-native-razorpay';
+import {RAZORPAY_KEY} from '@env';
 
 const AddToCart = () => {
   const cartItems = useSelector(state => state.cart.items);
@@ -34,6 +35,23 @@ const AddToCart = () => {
   const [isModalVisible, setModalVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const flatListRef = useRef(null);
+  const [userDetails, setUserDetails] = useState(null);
+
+  const fetchUserDetails = async () => {
+    // try {
+    //   const userDetails = await AsyncStorage.getItem('userDetails');
+    //   if (userDetails) {
+    //     const parsedDetails = JSON.parse(userDetails);
+    //     setUserDetails(parsedDetails);
+    //   }
+    // } catch (error) {
+    //   console.warn('Failed to load user details', error);
+    // }
+  };
+
+  useEffect(() => {
+    fetchUserDetails();
+  }, []);
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -81,7 +99,7 @@ const AddToCart = () => {
         description: 'Credits towards consultation',
         image: require('../../assets/vector.png'),
         currency: 'INR',
-        key: 'rzp_test_1NVuRNQwPb6ps5',
+        key: RAZORPAY_KEY,
         amount: (totalCartPrice * 100).toFixed(2),
         name: 'FoodMarket',
         prefill: {

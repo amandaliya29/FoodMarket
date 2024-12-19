@@ -7,12 +7,14 @@ import {
   TextInput,
   useWindowDimensions,
   ToastAndroid,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import React, {useState} from 'react';
 import Icon2 from 'react-native-vector-icons/FontAwesome';
 import {useNavigation} from '@react-navigation/native';
 import ImagePickerComponent from './foodTab/profileImg/ImagePickerComponent';
-import axios from 'axios';
+import axiosInstance from '../components/axios/axiosInstance';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SignUp = () => {
@@ -87,37 +89,34 @@ const SignUp = () => {
     if (validate()) {
       try {
         const formData = new FormData();
-
         formData.append('email', email);
         formData.append('password', password);
         formData.append('name', name);
         formData.append('password_confirmation', conformPassword);
 
-        formData.append('avatar', {
-          uri: imageUri,
-          name: imageDetail.fileName,
-          type: imageDetail.type,
-        });
+        if (imageUri) {
+          formData.append('avatar', {
+            uri: imageUri,
+            name: imageDetail.fileName,
+            type: imageDetail.type,
+          });
+        }
 
-        const response = await axios.post(
-          'http://10.0.2.2:8000/api/register',
-          formData,
-          {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-            },
+        const response = await axiosInstance.post('/register', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
           },
-        );
+        });
 
         const userDetails = response.data;
 
         await AsyncStorage.setItem('userDetails', JSON.stringify(userDetails));
 
-        showToastWithGravityAndOffset('SignUp Successfully');
+        showToastWithGravityAndOffset(response.data.message);
 
         navigation.navigate('TabNavigation');
       } catch (error) {
-        console.warn(error);
+        showToastWithGravityAndOffset(error.response.data.message);
       }
     } else {
       showToastWithGravityAndOffset('Please fill all fields correctly');
@@ -130,7 +129,10 @@ const SignUp = () => {
         <Text style={styles.text}>Sign Up</Text>
         <Text style={styles.letsGetSome}>Register and eat</Text>
       </View>
-      <View style={{alignItems: 'center', justifyContent: 'center'}}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'position'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 50}
+        style={{alignItems: 'center', justifyContent: 'center'}}>
         <View
           style={[styles.formBox, {width: width >= 400 ? 500 : width - 20}]}>
           <ImagePickerComponent
@@ -226,7 +228,7 @@ const SignUp = () => {
             <Text style={styles.signUp}>Log in</Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
@@ -265,6 +267,7 @@ const styles = StyleSheet.create({
     padding: 10,
     marginHorizontal: 16,
     borderColor: 'rgba(2, 2, 2, 0.28)',
+    color: 'black',
   },
   title: {
     fontSize: 16,
@@ -284,6 +287,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 1,
     borderColor: 'rgba(2, 2, 2, 0.28)',
+    color: 'black',
   },
   iconStyle: {
     position: 'absolute',

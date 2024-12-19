@@ -16,6 +16,7 @@ import Help from '../foodMarketScreen/Help';
 import AboutUs from '../foodMarketScreen/AboutUs';
 import UserProfile from '../pages/UserProfile';
 import ForgotPassword from '../ForgotPassword';
+import AdminHomeScreen from '../adminScreen/AdminHomeScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -47,13 +48,15 @@ const StackNavigation = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName={isAuthenticated ? 'TabNavigation' : 'SignIn'}
+        initialRouteName=// {isAuthenticated ? 'TabNavigation' : 'SignIn'}
+        "AdminHomeScreen"
         screenOptions={{
           headerShown: false,
           statusBarColor: 'white',
           statusBarStyle: 'dark',
           contentStyle: {backgroundColor: 'white'},
         }}>
+        <Stack.Screen name="AdminHomeScreen" component={AdminHomeScreen} />
         <Stack.Screen name="SignIn" component={SignIn} />
         <Stack.Screen name="SignUp" component={SignUp} />
         <Stack.Screen name="Address" component={Address} />

@@ -6,17 +6,19 @@ import {
   StyleSheet,
   useWindowDimensions,
   Text,
+  SafeAreaView,
+  Image,
 } from 'react-native';
 import {TabView, SceneMap} from 'react-native-tab-view';
-import Account from './Account';
-import FoodMarket from './FoodMarket';
+import AdminNewOrder from './adminTab/AdminNewOrder';
+import AdminPastOrder from './adminTab/AdminPastOrder';
 
-const ProfileTabBar = () => {
+const AdminTabScreen = () => {
   const layout = useWindowDimensions();
   const [index, setIndex] = useState(0);
   const [routes] = useState([
-    {key: 'account', title: 'Account'},
-    {key: 'foodMarket', title: 'Food Market'},
+    {key: 'NewOrder', title: 'New Order'},
+    {key: 'pastOrder', title: 'Past Order'},
   ]);
   const tabTitleWidths = useRef([]);
   const fixedIndicatorWidth = 40;
@@ -81,28 +83,71 @@ const ProfileTabBar = () => {
   };
 
   const renderScene = SceneMap({
-    account: Account,
-    foodMarket: FoodMarket,
+    NewOrder: AdminNewOrder,
+    pastOrder: AdminPastOrder,
   });
 
   return (
-    <TabView
-      navigationState={{index, routes}}
-      renderScene={renderScene}
-      renderTabBar={renderTabBar}
-      onIndexChange={setIndex}
-      initialLayout={{width: layout.width}}
-    />
+    <SafeAreaView style={styles.container}>
+      <View style={styles.head}>
+        <View>
+          <Text style={styles.text}>FoodMarket</Text>
+          <Text style={styles.letsGetSome}>Let's get some foods</Text>
+        </View>
+        <View>
+          <Image
+            style={styles.profileImage}
+            height={50}
+            width={50}
+            resizeMode="cover"
+            source={require('../../assets/photo2.png')}
+          />
+        </View>
+      </View>
+      <TabView
+        navigationState={{index, routes}}
+        renderScene={renderScene}
+        renderTabBar={renderTabBar}
+        onIndexChange={setIndex}
+        initialLayout={{width: layout.width}}
+      />
+    </SafeAreaView>
   );
 };
 
-export default ProfileTabBar;
-
+export default AdminTabScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingTop: 8,
+    backgroundColor: '#fff',
+  },
+  text: {
+    fontSize: 20,
+    fontWeight: '500',
+    color: 'black',
+  },
+  letsGetSome: {
+    fontSize: 13,
+    fontWeight: '300',
+    color: '#8d92a3',
+  },
+  head: {
+    padding: 16,
+    paddingVertical: 2,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  profileImage: {
+    height: 44,
+    width: 44,
+    borderRadius: 8,
+    borderWidth: 1,
   },
   tabBar: {
+    backgroundColor: '#fff',
     flexDirection: 'row',
     paddingTop: 0,
     position: 'relative',

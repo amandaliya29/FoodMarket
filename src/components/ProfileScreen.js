@@ -1,25 +1,59 @@
 import {Image, StyleSheet, Text, View} from 'react-native';
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import ProfileTabBar from './profileTab/ProfileTabBar';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import UserAvatar from './pages/UserAvatar';
+import {IMAGE_API} from '@env';
 
 const ProfileScreen = () => {
+  const [userDetails, setUserDetail] = useState(null);
+  const [imageUri, setImageUri] = useState('');
+  const [userName, setUserName] = useState('');
+
+  const fetchUserDetails = async () => {
+    try {
+      const userDetails = await AsyncStorage.getItem('userDetails');
+      if (userDetails) {
+        const parsedDetails = JSON.parse(userDetails);
+        setUserDetail(parsedDetails);
+        setImageUri(`${IMAGE_API}/` + parsedDetails.data.user.avatar);
+        setUserName(parsedDetails.data.user.name);
+      }
+    } catch (error) {
+      console.warn('Failed to load user details', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchUserDetails();
+  }, []);
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.head}>
         <View style={styles.imageBorder}>
           <View style={styles.imgContainer}>
-            <Image
-              style={styles.picIcon}
-              resizeMode="cover"
-              source={require('../assets/photo2.png')}
-            />
+            {imageUri ? (
+              <Image
+                style={styles.picIcon}
+                resizeMode="cover"
+                source={
+                  imageUri ? {uri: imageUri} : require('../assets/pic.png')
+                }
+              />
+            ) : (
+              <UserAvatar size={100} name={userName || 'Food Market'} />
+            )}
           </View>
         </View>
-        <Text style={styles.nameText}>FoodMarket</Text>
-        <Text style={styles.emailText}>foodmarket123@gmail.com</Text>
+        <Text style={styles.nameText}>
+          {userDetails ? userDetails.data.user.name : 'User'}
+        </Text>
+        <Text style={styles.emailText}>
+          {userDetails ? userDetails.data.user.email : 'user123@gmail.com'}
+        </Text>
       </View>
-      <View style={{flex: 1, marginTop: 66}}>
+      <View style={{flex: 1, marginTop: 60}}>
         <ProfileTabBar />
       </View>
     </SafeAreaView>
@@ -37,8 +71,8 @@ const styles = StyleSheet.create({
   picIcon: {
     flex: 1,
     width: '100%',
-    height: 90,
-    borderRadius: 45,
+    height: '100%',
+    borderRadius: 100,
     borderWidth: 0.5,
   },
   imageBorder: {
@@ -52,9 +86,9 @@ const styles = StyleSheet.create({
     borderColor: '#8D92A3',
   },
   imgContainer: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
   },
   nameText: {
     paddingTop: 12,

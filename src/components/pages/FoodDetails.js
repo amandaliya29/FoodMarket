@@ -102,7 +102,7 @@ const FoodDetails = () => {
                   starStyle={{marginRight: -2, marginLeft: 0}}
                 />
                 <Text style={{marginLeft: 8, color: 'grey'}}>
-                  {item.rating.toFixed(1)}
+                  {item.rating}
                 </Text>
               </View>
             </View>
@@ -110,7 +110,9 @@ const FoodDetails = () => {
           </View>
         </View>
         <View style={{marginHorizontal: 16, marginBottom: 16}}>
-          <Text style={styles.detail}>{item.detail}</Text>
+          <Text style={styles.detail}>
+            {item.description ? item.description : item.detail}
+          </Text>
         </View>
         <View style={{marginHorizontal: 16}}>
           <Text style={{fontSize: 16, color: '#020202'}}>Ingredients:</Text>
@@ -131,9 +133,7 @@ const FoodDetails = () => {
             <Text style={{fontSize: 16, fontWeight: 'bold', color: 'black'}}>
               Price:
             </Text>
-            <Text style={{fontSize: 18, color: 'black'}}>
-              ₹{item.price.toFixed(2)}
-            </Text>
+            <Text style={{fontSize: 18, color: 'black'}}>₹{item.price}</Text>
           </View>
           <TouchableOpacity style={styles.addToCart} onPress={handleAddToCart}>
             <Text style={{color: 'white', fontWeight: '500', fontSize: 14}}>
