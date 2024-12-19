@@ -15,7 +15,7 @@ import {useNavigation} from '@react-navigation/native';
 import UserAvatar from '../pages/UserAvatar';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import {IMAGE_API} from '@env';
 const UserProfile = () => {
   const navigation = useNavigation();
   const {width} = useWindowDimensions();
@@ -32,7 +32,7 @@ const UserProfile = () => {
       if (userDetails) {
         const parsedDetails = JSON.parse(userDetails);
         setUserDetail(parsedDetails);
-        setImageUri(parsedDetails.data.user.avatar);
+        setImageUri(`${IMAGE_API}/` + parsedDetails.data.user.avatar);
         setUserName(parsedDetails.data.user.name);
         setEmail(parsedDetails.data.user.email);
       }

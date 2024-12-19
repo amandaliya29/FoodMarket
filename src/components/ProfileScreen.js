@@ -4,6 +4,7 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import ProfileTabBar from './profileTab/ProfileTabBar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import UserAvatar from './pages/UserAvatar';
+import {IMAGE_API} from '@env';
 
 const ProfileScreen = () => {
   const [userDetails, setUserDetail] = useState(null);
@@ -16,7 +17,7 @@ const ProfileScreen = () => {
       if (userDetails) {
         const parsedDetails = JSON.parse(userDetails);
         setUserDetail(parsedDetails);
-        setImageUri(parsedDetails.data.user.avatar);
+        setImageUri(`${IMAGE_API}/` + parsedDetails.data.user.avatar);
         setUserName(parsedDetails.data.user.name);
       }
     } catch (error) {

@@ -1,37 +1,40 @@
-import React, {useState, useEffect} from 'react';
-import TabNavigation from './src/components/navigation/TabNavigation';
+import React, {useState, useEffect, useRef} from 'react';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
-import StackNavigation from './src/components/navigation/StackNavigation';
 import {Provider} from 'react-redux';
-import {store} from './src/components/redux/store';
-import NetInfo, {addEventListener} from '@react-native-community/netinfo';
+import NetInfo from '@react-native-community/netinfo';
 import {Text, View, StyleSheet} from 'react-native';
+import StackNavigation from './src/components/navigation/StackNavigation';
+import {store} from './src/components/redux/store';
 
 const App = () => {
   const [isConnected, setIsConnected] = useState(true);
   const [showMessage, setShowMessage] = useState('');
+  const hasBeenOffline = useRef(false);
 
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener(state => {
-      console.log('Connection type', state.type);
-      console.log('Is connected?', state.isConnected);
-      setIsConnected(state.isConnected !== null ? state.isConnected : false);
+      const connected = state.isConnected !== null ? state.isConnected : false;
 
-      if (state.isConnected) {
-        if (showMessage !== 'Back to online') {
-          setShowMessage('Back to online');
-          setTimeout(() => setShowMessage(''), 3000);
-        }
-      } else {
-        if (showMessage !== 'Device is offline') {
-          setShowMessage('Device is offline');
-          setTimeout(() => setShowMessage(''), 3000);
-        }
+      if (!connected && !hasBeenOffline.current) {
+        setIsConnected(false);
+        setShowMessage('Device is offline');
+        hasBeenOffline.current = true;
+      } else if (connected && hasBeenOffline.current) {
+        setIsConnected(true);
+        setShowMessage('Back to online');
+        hasBeenOffline.current = true;
       }
     });
 
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (showMessage) {
+      const timeout = setTimeout(() => setShowMessage(''), 3000);
+      return () => clearTimeout(timeout);
+    }
+  }, [showMessage]);
 
   return (
     <Provider store={store}>
@@ -42,7 +45,7 @@ const App = () => {
               style={{
                 color: 'white',
                 backgroundColor: isConnected ? 'green' : 'red',
-                textAlign: 'center', // Center the text horizontally
+                textAlign: 'center',
                 padding: 10,
               }}>
               {showMessage}
@@ -58,11 +61,10 @@ const App = () => {
 const styles = StyleSheet.create({
   messageContainer: {
     position: 'absolute',
-    bottom: 0, // Position the message at the bottom of the screen
+    bottom: 0,
     left: 0,
     right: 0,
-    paddingBottom: 0,
-    zIndex: 1, // Make sure the message appears on top of other components
+    zIndex: 1,
   },
 });
 

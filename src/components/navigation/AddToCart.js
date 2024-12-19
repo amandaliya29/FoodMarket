@@ -25,8 +25,7 @@ import {foodList} from '../foodlist';
 import {StarRatingDisplay} from 'react-native-star-rating-widget';
 import {useNavigation} from '@react-navigation/native';
 import RazorpayCheckout from 'react-native-razorpay';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import axiosInstance from '../axios/axiosInstance';
+import {RAZORPAY_KEY} from '@env';
 
 const AddToCart = () => {
   const cartItems = useSelector(state => state.cart.items);
@@ -100,7 +99,7 @@ const AddToCart = () => {
         description: 'Credits towards consultation',
         image: require('../../assets/vector.png'),
         currency: 'INR',
-        key: 'rzp_test_1NVuRNQwPb6ps5',
+        key: RAZORPAY_KEY,
         amount: (totalCartPrice * 100).toFixed(2),
         name: 'FoodMarket',
         prefill: {

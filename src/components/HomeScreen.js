@@ -18,6 +18,7 @@ import MyTabView from './navigation/MyTabView';
 import {useNavigation} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import UserAvatar from './pages/UserAvatar';
+import {IMAGE_API} from '@env';
 
 const HomeScreen = () => {
   const {width} = useWindowDimensions();
@@ -36,7 +37,7 @@ const HomeScreen = () => {
       if (userDetails) {
         const parsedDetails = JSON.parse(userDetails);
         setUserDetail(parsedDetails);
-        setImageUri(parsedDetails.data.user.avatar);
+        setImageUri(`${IMAGE_API}/` + parsedDetails.data.user.avatar);
         setUserName(parsedDetails.data.user.name);
       }
     } catch (error) {
