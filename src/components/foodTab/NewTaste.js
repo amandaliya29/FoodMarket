@@ -11,6 +11,7 @@ import React, {useEffect, useState} from 'react';
 import StarRatingDisplay from 'react-native-star-rating-widget';
 import {useNavigation} from '@react-navigation/native';
 import axiosInstance from '../axios/axiosInstance';
+import Icon2 from 'react-native-vector-icons/Ionicons';
 
 const NewTaste = () => {
   const navigation = useNavigation();
@@ -71,14 +72,20 @@ const NewTaste = () => {
           <Text style={styles.foodPrice}>₹{item.price}</Text>
         </View>
         <View
-          style={{flexDirection: 'row', marginTop: 6, pointerEvents: 'none'}}>
-          <StarRatingDisplay
-            rating={item.rating}
-            starSize={20}
-            color={'#EB0029'}
-            starStyle={{marginRight: -2, marginLeft: 0}}
-          />
-          <Text style={{marginLeft: 8, color: 'grey'}}>{item.rating}</Text>
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            alignContent: 'center',
+            justifyContent: 'center',
+            borderRadius: 8,
+            padding: 2,
+            paddingHorizontal: 6,
+            backgroundColor: 'green',
+          }}>
+          <Text style={{color: '#fff', fontSize: 14, paddingRight: 2}}>
+            {item.rating}
+          </Text>
+          <Icon2 name="star" color={'#fff'} size={12} />
         </View>
       </View>
     </TouchableOpacity>

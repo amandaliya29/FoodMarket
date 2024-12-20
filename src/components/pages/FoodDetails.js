@@ -95,15 +95,22 @@ const FoodDetails = () => {
             <View>
               <Text style={styles.title}>{item.name}</Text>
               <View style={{flexDirection: 'row', marginTop: 6}}>
-                <StarRatingDisplay
-                  rating={item.rating}
-                  starSize={20}
-                  color={'#EB0029'}
-                  starStyle={{marginRight: -2, marginLeft: 0}}
-                />
-                <Text style={{marginLeft: 8, color: 'grey'}}>
-                  {item.rating}
-                </Text>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    alignContent: 'center',
+                    justifyContent: 'center',
+                    borderRadius: 8,
+                    padding: 2,
+                    paddingHorizontal: 6,
+                    backgroundColor: 'green',
+                  }}>
+                  <Text style={{color: '#fff', fontSize: 14, paddingRight: 2}}>
+                    {item.rating.toFixed(1)}
+                  </Text>
+                  <Icon2 name="star" color={'#fff'} size={12} />
+                </View>
               </View>
             </View>
             <Quentity onChangeQuantity={setQuantity} />

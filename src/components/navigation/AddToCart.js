@@ -26,6 +26,7 @@ import {StarRatingDisplay} from 'react-native-star-rating-widget';
 import {useNavigation} from '@react-navigation/native';
 import RazorpayCheckout from 'react-native-razorpay';
 import {RAZORPAY_KEY} from '@env';
+import Icon2 from 'react-native-vector-icons/Ionicons';
 
 const AddToCart = () => {
   const cartItems = useSelector(state => state.cart.items);
@@ -152,15 +153,22 @@ const AddToCart = () => {
           <View style={{paddingLeft: 12}}>
             <Text style={styles.foodName}>{item.name}</Text>
             <View style={{flexDirection: 'row', marginTop: 6}}>
-              <StarRatingDisplay
-                rating={item.rating}
-                starSize={20}
-                color={'#EB0029'}
-                starStyle={{marginRight: -2, marginLeft: 0}}
-              />
-              <Text style={{marginLeft: 8, color: 'grey'}}>
-                {item.rating.toFixed(1)}
-              </Text>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  alignContent: 'center',
+                  justifyContent: 'center',
+                  borderRadius: 8,
+                  padding: 2,
+                  paddingHorizontal: 6,
+                  backgroundColor: 'green',
+                }}>
+                <Text style={{color: '#fff', fontSize: 14, paddingRight: 2}}>
+                  {item.rating.toFixed(1)}
+                </Text>
+                <Icon2 name="star" color={'#fff'} size={12} />
+              </View>
             </View>
           </View>
         </TouchableOpacity>
@@ -249,15 +257,22 @@ const AddToCart = () => {
         <View style={{paddingLeft: 12}}>
           <Text style={styles.foodName}>{item.name}</Text>
           <View style={{flexDirection: 'row', marginTop: 6}}>
-            <StarRatingDisplay
-              rating={item.rating}
-              starSize={20}
-              color={'#EB0029'}
-              starStyle={{marginRight: -2, marginLeft: 0}}
-            />
-            <Text style={{marginLeft: 8, color: 'grey'}}>
-              {item.rating.toFixed(1)}
-            </Text>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                alignContent: 'center',
+                justifyContent: 'center',
+                borderRadius: 8,
+                padding: 2,
+                paddingHorizontal: 6,
+                backgroundColor: 'green',
+              }}>
+              <Text style={{color: '#fff', fontSize: 14, paddingRight: 2}}>
+                {item.rating.toFixed(1)}
+              </Text>
+              <Icon2 name="star" color={'#fff'} size={12} />
+            </View>
           </View>
         </View>
       </TouchableOpacity>

@@ -48,8 +48,8 @@ const StackNavigation = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName=// {isAuthenticated ? 'TabNavigation' : 'SignIn'}
-        "AdminHomeScreen"
+        initialRouteName={isAuthenticated ? 'TabNavigation' : 'SignIn'}
+        // "AdminHomeScreen"
         screenOptions={{
           headerShown: false,
           statusBarColor: 'white',

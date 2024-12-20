@@ -10,6 +10,7 @@ import React from 'react';
 import StarRatingDisplay from 'react-native-star-rating-widget';
 import {foodList} from '../foodlist';
 import {useNavigation} from '@react-navigation/native';
+import Icon2 from 'react-native-vector-icons/Ionicons';
 
 const Popular = () => {
   const navigation = useNavigation();
@@ -35,16 +36,20 @@ const Popular = () => {
           <Text style={styles.foodPrice}>₹{item.price.toFixed(2)}</Text>
         </View>
         <View
-          style={{flexDirection: 'row', marginTop: 6, pointerEvents: 'none'}}>
-          <StarRatingDisplay
-            rating={item.rating}
-            starSize={20}
-            color={'#EB0029'}
-            starStyle={{marginRight: -2, marginLeft: 0}}
-          />
-          <Text style={{marginLeft: 8, color: 'grey'}}>
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            alignContent: 'center',
+            justifyContent: 'center',
+            borderRadius: 8,
+            padding: 2,
+            paddingHorizontal: 6,
+            backgroundColor: 'green',
+          }}>
+          <Text style={{color: '#fff', fontSize: 14, paddingRight: 2}}>
             {item.rating.toFixed(1)}
           </Text>
+          <Icon2 name="star" color={'#fff'} size={12} />
         </View>
       </View>
     </TouchableOpacity>
