@@ -52,6 +52,34 @@ const TabNavigation = () => {
             }}
           />
           <Tab.Screen
+            name="WishList"
+            component={WishList}
+            options={{
+              tabBarIcon: ({focused}) => (
+                <View>
+                  <Icon2
+                    name={focused ? 'favorite' : 'favorite-outline'}
+                    size={18}
+                    color={focused ? '#EB0029' : '#8d92a3'}
+                  />
+                </View>
+              ),
+            }}
+          />
+          <Tab.Screen
+            name="Search"
+            component={Search}
+            options={{
+              tabBarIcon: ({focused}) => (
+                <Icon2
+                  name={focused ? 'search' : 'search'}
+                  size={18}
+                  color={focused ? '#EB0029' : '#8d92a3'}
+                />
+              ),
+            }}
+          />
+          <Tab.Screen
             name="Cart"
             component={AddToCart}
             options={{
@@ -71,35 +99,7 @@ const TabNavigation = () => {
               ),
             }}
           />
-          <Tab.Screen
-            name="Search"
-            component={Search}
-            options={{
-              tabBarIcon: ({focused}) => (
-                <Icon2
-                  name={focused ? 'search' : 'search'}
-                  size={18}
-                  color={focused ? '#EB0029' : '#8d92a3'}
-                />
-              ),
-            }}
-          />
 
-          <Tab.Screen
-            name="WishList"
-            component={WishList}
-            options={{
-              tabBarIcon: ({focused}) => (
-                <View>
-                  <Icon2
-                    name={focused ? 'favorite' : 'favorite-outline'}
-                    size={18}
-                    color={focused ? '#EB0029' : '#8d92a3'}
-                  />
-                </View>
-              ),
-            }}
-          />
           <Tab.Screen
             name="Profile"
             component={ProfileScreen}
@@ -122,18 +122,22 @@ const TabNavigation = () => {
 const styles = StyleSheet.create({
   badgeContainer: {
     position: 'absolute',
-    right: -6,
-    top: -3,
+    right: -10,
+    top: -4,
     backgroundColor: '#EB0029',
     borderRadius: 10,
-    width: 20,
-    height: 20,
+    width: 15,
+    height: 15,
     justifyContent: 'center',
     alignItems: 'center',
+    alignContent: 'center',
+    justifyContent: 'center',
+    textAlign: 'center',
   },
   badgeText: {
+    textAlign: 'center',
     color: 'white',
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: 'bold',
   },
 });

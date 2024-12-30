@@ -3,13 +3,11 @@ import {
   Text,
   View,
   FlatList,
-  Pressable,
   TouchableOpacity,
-  Alert,
   ToastAndroid,
 } from 'react-native';
 import React from 'react';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import {useNavigation} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axiosInstance from '../axios/axiosInstance';
@@ -40,18 +38,11 @@ const Account = () => {
       }
     } catch (error) {
       if (error.response) {
-        if (
-          error.response.status === 401 ||
-          error.response.data.message === 'Unauthenticated'
-        ) {
-          showToastWithGravityAndOffset(error.response.data.message);
-        } else {
-          showToastWithGravityAndOffset(error.response.data.message);
-        }
+        showToastWithGravityAndOffset(error.response.data.message);
       } else if (error.request) {
-        showToastWithGravityAndOffset(error.response.data.message);
+        showToastWithGravityAndOffset('Network Error');
       } else {
-        showToastWithGravityAndOffset(error.response.data.message);
+        showToastWithGravityAndOffset(error.message);
       }
     }
   };
@@ -59,24 +50,34 @@ const Account = () => {
   const DATA = [
     {
       id: 1,
-      name: 'Order',
-      screen: 'Order',
+      name: 'Edit Profile',
+      screen: 'UserProfile',
+      icon: 'person',
     },
     {
       id: 2,
-      name: 'Edit Profile',
-      screen: 'UserProfile',
-    },
-    {
-      id: 3,
       name: 'Home Address',
       screen: 'Address',
+      icon: 'location-pin',
       params: {hideAccountSection: true},
     },
     {
+      id: 3,
+      name: 'Order',
+      screen: 'Order',
+      icon: 'shopping-bag',
+    },
+    {
       id: 4,
+      name: 'Wish List',
+      screen: 'WishList',
+      icon: 'favorite',
+    },
+    {
+      id: 5,
       name: 'LogOut',
       action: handleLogout,
+      icon: 'logout',
     },
   ];
 
@@ -96,8 +97,16 @@ const Account = () => {
             }}
             style={styles.itemContainer}>
             <View style={styles.row}>
-              <Text style={styles.itemText}>{item.name}</Text>
-              <Icon name="angle-right" size={20} color="#000" />
+              <View style={styles.iconTextRow}>
+                <Icon
+                  name={item.icon}
+                  size={20}
+                  color="#EB0029"
+                  style={styles.icon}
+                />
+                <Text style={styles.itemText}>{item.name}</Text>
+              </View>
+              <Icon name="chevron-right" size={24} color="#000" />
             </View>
           </TouchableOpacity>
         )}
@@ -111,17 +120,24 @@ export default Account;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginHorizontal: 24,
+    marginHorizontal: 16,
     backgroundColor: '#fff',
     marginVertical: 10,
   },
   itemContainer: {
-    paddingVertical: 8,
+    paddingVertical: 10,
   },
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+  },
+  iconTextRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  icon: {
+    marginRight: 10,
   },
   itemText: {
     fontSize: 14,
