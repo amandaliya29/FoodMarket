@@ -86,6 +86,8 @@ const SignIn = ({navigation}) => {
 
         navigation.navigate('TabNavigation');
       } catch (error) {
+        console.warn(error);
+
         showToastWithGravityAndOffset(error.response.data.message);
       }
     } else {
