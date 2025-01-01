@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-  baseURL: 'http://10.0.2.2:8000/api',
+  baseURL: 'https://impala-clear-beetle.ngrok-free.app/api',
   headers: {
     'Content-Type': 'multipart/form-data',
   },

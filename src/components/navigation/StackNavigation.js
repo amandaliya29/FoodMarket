@@ -17,6 +17,7 @@ import AboutUs from '../foodMarketScreen/AboutUs';
 import UserProfile from '../pages/UserProfile';
 import ForgotPassword from '../ForgotPassword';
 import AdminHomeScreen from '../adminScreen/AdminHomeScreen';
+import CategoriesDetail from '../pages/CategoriesDetail';
 
 const Stack = createNativeStackNavigator();
 
@@ -68,6 +69,7 @@ const StackNavigation = () => {
         <Stack.Screen name="AboutUs" component={AboutUs} />
         <Stack.Screen name="UserProfile" component={UserProfile} />
         <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
+        <Stack.Screen name="CategoriesDetail" component={CategoriesDetail} />
         <Stack.Screen
           name="PrivacyPolicyScreen"
           component={PrivacyPolicyScreen}
