@@ -10,9 +10,12 @@ import {
 } from 'react-native';
 import axiosInstance from '../axios/axiosInstance';
 import {IMAGE_API} from '@env';
+import {useNavigation} from '@react-navigation/native';
 
 const Categories = () => {
   const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const navigation = useNavigation();
 
   const showToastWithGravityAndOffset = message => {
     ToastAndroid.showWithGravityAndOffset(
@@ -32,12 +35,15 @@ const Categories = () => {
         name: item.name,
         image: item.image,
         description: item.description,
+        products: item.products,
       }));
       setData(categories);
     } catch (error) {
       showToastWithGravityAndOffset(
         error.response?.data?.message || 'Something went wrong.',
       );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -45,22 +51,42 @@ const Categories = () => {
     GetList();
   }, []);
 
-  const groupedCategories = [];
-  for (let i = 0; i < data.length; i += 2) {
-    groupedCategories.push(data.slice(i, i + 2));
-  }
-
-  const renderRow = ({item}) => (
-    <View style={styles.column}>
-      {item.map(category => (
-        <TouchableOpacity key={category.id} style={styles.categoryItem}>
+  const renderCategory = (category, index) => (
+    <TouchableOpacity
+      onPress={() => {
+        if (category) {
+          navigation.navigate('CategoriesDetail', {category});
+        }
+      }}
+      key={category?.id || `placeholder-${index}`}
+      style={styles.categoryItem}
+      activeOpacity={0.7}>
+      {loading || !category ? (
+        <View style={styles.placeholder}>
+          <View style={styles.placeholderImage} />
+          <View style={styles.placeholderText} />
+        </View>
+      ) : (
+        <View style={styles.categoryContent}>
           <Image
             source={{uri: `${IMAGE_API}/${category.image}`}}
             style={styles.categoryImage}
           />
           <Text style={styles.categoryText}>{category.name}</Text>
-        </TouchableOpacity>
-      ))}
+        </View>
+      )}
+    </TouchableOpacity>
+  );
+
+  const groupedCategories = [];
+  const itemsToShow = loading ? 16 : data.length;
+  for (let i = 0; i < itemsToShow; i += 2) {
+    groupedCategories.push(loading ? [null, null] : data.slice(i, i + 2));
+  }
+
+  const renderRow = ({item}) => (
+    <View style={styles.column}>
+      {item.map((category, index) => renderCategory(category, index))}
     </View>
   );
 
@@ -101,6 +127,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginVertical: 5,
   },
+  categoryContent: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   categoryImage: {
     width: 80,
     height: 50,
@@ -111,6 +141,21 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     color: 'grey',
+  },
+  placeholder: {
+    alignItems: 'center',
+    marginVertical: 5,
+  },
+  placeholderImage: {
+    width: 80,
+    height: 50,
+    backgroundColor: 'lightgrey',
+    marginBottom: 5,
+  },
+  placeholderText: {
+    width: 60,
+    height: 10,
+    backgroundColor: 'lightgrey',
   },
 });
 

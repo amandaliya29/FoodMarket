@@ -2,7 +2,6 @@ import React from 'react';
 import {View, Text, Image, StyleSheet} from 'react-native';
 
 const UserAvatar = ({name = '?', size = 50, url = null}) => {
-  // Function to generate initials
   const getInitials = () => {
     const nameSplit = name.trim().toUpperCase().split(' ');
     if (nameSplit.length === 1) {
@@ -11,8 +10,6 @@ const UserAvatar = ({name = '?', size = 50, url = null}) => {
       return nameSplit[0].charAt(0) + nameSplit[1].charAt(0);
     }
   };
-
-  // Function to generate color based on initials
   const getColor = () => {
     const colours = [
       '#1abc9c',

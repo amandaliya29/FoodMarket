@@ -17,7 +17,13 @@ const ProfileScreen = () => {
       if (userDetails) {
         const parsedDetails = JSON.parse(userDetails);
         setUserDetail(parsedDetails);
-        setImageUri(`${IMAGE_API}/` + parsedDetails.data.user.avatar);
+        setImageUri(
+          parsedDetails.data &&
+            parsedDetails.data.user &&
+            parsedDetails.data.user.avatar
+            ? `${IMAGE_API}/${parsedDetails.data.user.avatar}`
+            : null,
+        );
         setUserName(parsedDetails.data.user.name);
       }
     } catch (error) {
