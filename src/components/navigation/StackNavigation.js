@@ -18,6 +18,7 @@ import UserProfile from '../pages/UserProfile';
 import ForgotPassword from '../ForgotPassword';
 import AdminHomeScreen from '../adminScreen/AdminHomeScreen';
 import CategoriesDetail from '../pages/CategoriesDetail';
+import WishList from '../WishList';
 
 const Stack = createNativeStackNavigator();
 
@@ -49,8 +50,8 @@ const StackNavigation = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName={isAuthenticated ? 'TabNavigation' : 'SignIn'}
-        // "AdminHomeScreen"
+        initialRouteName=// {isAuthenticated ? 'TabNavigation' : 'SignIn'}
+        "AdminHomeScreen"
         screenOptions={{
           headerShown: false,
           statusBarColor: 'white',
@@ -70,6 +71,7 @@ const StackNavigation = () => {
         <Stack.Screen name="UserProfile" component={UserProfile} />
         <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
         <Stack.Screen name="CategoriesDetail" component={CategoriesDetail} />
+        <Stack.Screen name="WishList" component={WishList} />
         <Stack.Screen
           name="PrivacyPolicyScreen"
           component={PrivacyPolicyScreen}

@@ -107,7 +107,7 @@ const FoodDetails = () => {
                     backgroundColor: 'green',
                   }}>
                   <Text style={{color: '#fff', fontSize: 14, paddingRight: 2}}>
-                    {item.rate ? item.rate : item.rating.toFixed(1)}
+                    {item.rate ? item.rate : item.rating}
                   </Text>
                   <Icon2 name="star" color={'#fff'} size={12} />
                 </View>

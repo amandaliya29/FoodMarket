@@ -101,7 +101,7 @@ const AddToCart = () => {
         image: require('../../assets/vector.png'),
         currency: 'INR',
         key: RAZORPAY_KEY,
-        amount: (totalCartPrice * 100).toFixed(2),
+        amount: totalCartPrice * 100,
         name: 'FoodMarket',
         prefill: {
           email: 'void@razorpay.com',
@@ -294,7 +294,7 @@ const AddToCart = () => {
           }}>
           <View style={styles.verticalDetails}>
             <Text style={styles.foodName}>{item.name}</Text>
-            <Text style={styles.foodPrice}>₹{item.price.toFixed(2)}</Text>
+            <Text style={styles.foodPrice}>₹{item.price}</Text>
           </View>
         </View>
       </View>

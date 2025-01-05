@@ -17,6 +17,7 @@ import {useNavigation} from '@react-navigation/native';
 import {foodList} from './foodlist';
 import {StarRatingDisplay} from 'react-native-star-rating-widget';
 import Icon2 from 'react-native-vector-icons/Ionicons';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 const WishList = () => {
   const dispatch = useDispatch();
@@ -144,6 +145,17 @@ const WishList = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.head}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}>
+          <Icon
+            name="chevron-back"
+            size={24}
+            color="white"
+            backgroundColor="red"
+            style={{borderRadius: 5}}
+          />
+        </TouchableOpacity>
         <View>
           <Text style={styles.text}>WishList</Text>
           <Text style={styles.you}>Your favourited products</Text>
@@ -222,12 +234,13 @@ const styles = StyleSheet.create({
     color: '#8d92a3',
   },
   head: {
-    padding: 16,
-    paddingVertical: 2,
+    paddingLeft: 16,
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 6,
+  },
+  backButton: {
+    marginRight: 16,
   },
   verticalBox: {
     marginTop: -2,
