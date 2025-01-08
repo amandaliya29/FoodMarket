@@ -39,9 +39,7 @@ const Categories = () => {
       }));
       setData(categories);
     } catch (error) {
-      showToastWithGravityAndOffset(
-        error.response?.data?.message || 'Error fetching categories',
-      );
+      showToastWithGravityAndOffset(error.response.data.message);
     } finally {
       setLoading(false);
     }

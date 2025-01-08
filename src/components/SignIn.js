@@ -81,10 +81,11 @@ const SignIn = ({navigation}) => {
         const userDetails = response.data;
 
         await AsyncStorage.setItem('userDetails', JSON.stringify(userDetails));
+        const isAdmin = userDetails.data.user.is_admin === 1;
 
         showToastWithGravityAndOffset(response.data.message);
 
-        navigation.navigate('TabNavigation');
+        navigation.navigate(isAdmin ? 'AdminHomeScreen' : 'TabNavigation');
       } catch (error) {
         console.warn(error);
 

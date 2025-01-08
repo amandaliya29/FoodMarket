@@ -54,7 +54,9 @@ const HomeScreen = () => {
 
   useEffect(() => {
     fetchUserDetails();
+    imageUri;
     backBtn();
+    <Categories />;
   }, []);
 
   const renderHeader = () => (

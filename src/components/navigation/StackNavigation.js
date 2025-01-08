@@ -1,13 +1,13 @@
 import React, {useEffect, useState} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import SignIn from '../SignIn';
 import TabNavigation from './TabNavigation';
 import SignUp from '../SignUp';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import Address from '../pages/Address';
 import FoodDetails from '../pages/FoodDetails';
-
 import CartScreen from '../CartScreen';
 import PrivacyPolicyScreen from '../foodMarketScreen/PrivacyPolicyScreen';
 import TermsConditionsScreen from '../foodMarketScreen/TermsConditionsScreen';
@@ -19,39 +19,46 @@ import ForgotPassword from '../ForgotPassword';
 import AdminHomeScreen from '../adminScreen/AdminHomeScreen';
 import CategoriesDetail from '../pages/CategoriesDetail';
 import WishList from '../WishList';
+import AdminOrderDetail from '../adminScreen/AdminOrderDetail';
+import AdminSetProfile from '../adminScreen/AdminSetProfile';
+import Search from '../Search';
+import AdminSearch from '../adminScreen/AdminSearch';
 
 const Stack = createNativeStackNavigator();
 
 const StackNavigation = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(null);
+  const [initialRoute, setInitialRoute] = useState(null);
 
   useEffect(() => {
-    const checkAuthentication = async () => {
+    const determineInitialRoute = async () => {
       try {
         const userData = await AsyncStorage.getItem('userDetails');
-        if (userData) {
-          setIsAuthenticated(true);
+        const parsedUserData = userData ? JSON.parse(userData) : null;
+        console.warn('hello');
+
+        if (parsedUserData) {
+          const isAdmin = parsedUserData.data.user.is_admin === 1;
+          setInitialRoute(isAdmin ? 'AdminHomeScreen' : 'TabNavigation');
         } else {
-          setIsAuthenticated(false);
+          setInitialRoute('SignIn');
         }
       } catch (error) {
         console.error('Error reading AsyncStorage data', error);
-        setIsAuthenticated(false);
+        setInitialRoute('SignIn');
       }
     };
 
-    checkAuthentication();
+    determineInitialRoute();
   }, []);
 
-  if (isAuthenticated === null) {
+  if (!initialRoute) {
     return null;
   }
 
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName=// {isAuthenticated ? 'TabNavigation' : 'SignIn'}
-        "AdminHomeScreen"
+        initialRouteName={initialRoute}
         screenOptions={{
           headerShown: false,
           statusBarColor: 'white',
@@ -72,6 +79,9 @@ const StackNavigation = () => {
         <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
         <Stack.Screen name="CategoriesDetail" component={CategoriesDetail} />
         <Stack.Screen name="WishList" component={WishList} />
+        <Stack.Screen name="AdminOrderDetail" component={AdminOrderDetail} />
+        <Stack.Screen name="AdminSetProfile" component={AdminSetProfile} />
+        <Stack.Screen name="AdminSearch" component={AdminSearch} />
         <Stack.Screen
           name="PrivacyPolicyScreen"
           component={PrivacyPolicyScreen}
