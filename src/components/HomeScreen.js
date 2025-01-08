@@ -54,7 +54,9 @@ const HomeScreen = () => {
 
   useEffect(() => {
     fetchUserDetails();
+    imageUri;
     backBtn();
+    <Categories />;
   }, []);
 
   const renderHeader = () => (
@@ -64,7 +66,6 @@ const HomeScreen = () => {
         <Text style={styles.letsGetSome}>Let's get some foods</Text>
       </View>
       <View>
-        {/* {console.warn(imageUri)} */}
         {imageUri ? (
           <Image
             style={styles.profileImage}

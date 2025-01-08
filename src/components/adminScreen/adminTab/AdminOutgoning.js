@@ -15,7 +15,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Icon2 from 'react-native-vector-icons/Ionicons';
 import {foodList} from '../../foodlist';
 
-const AdminNewOrder = () => {
+const AdminOutgoning = () => {
   const navigation = useNavigation();
   const [data, setData] = useState([]);
 
@@ -60,17 +60,17 @@ const AdminNewOrder = () => {
         </TouchableOpacity> */}
         <TouchableOpacity
           onPress={() => {
-            navigation.navigate('AdminOrderDetail', {inGoing: 'newOrder'});
+            navigation.navigate('AdminOrderDetail', {inGoing: 'inGoing'});
           }}
           style={[styles.button, styles.detailsButton]}>
           <Text style={styles.buttonText}>View Details</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.button, styles.cancelButton]}>
+        {/* <TouchableOpacity style={[styles.button, styles.cancelButton]}>
           <Text style={styles.buttonText}>Cancel Order</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.button, styles.acceptButton]}>
           <Text style={styles.buttonText}>Accept Order</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
     </View>
   );
@@ -86,7 +86,7 @@ const AdminNewOrder = () => {
   );
 };
 
-export default AdminNewOrder;
+export default AdminOutgoning;
 
 const styles = StyleSheet.create({
   allContainer: {
@@ -138,6 +138,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#2ecc71',
     fontWeight: '600',
+    color: '#2ecc71',
   },
   itemRow: {
     flexDirection: 'row',

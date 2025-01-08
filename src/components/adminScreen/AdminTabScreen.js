@@ -12,12 +12,14 @@ import {
 import {TabView, SceneMap} from 'react-native-tab-view';
 import AdminNewOrder from './adminTab/AdminNewOrder';
 import AdminPastOrder from './adminTab/AdminPastOrder';
+import AdminOutgoning from './adminTab/AdminOutgoning';
 
 const AdminTabScreen = () => {
   const layout = useWindowDimensions();
   const [index, setIndex] = useState(0);
   const [routes] = useState([
     {key: 'NewOrder', title: 'New Order'},
+    {key: 'AdminOutgoning', title: 'Ongoing'},
     {key: 'pastOrder', title: 'Past Order'},
   ]);
   const tabTitleWidths = useRef([]);
@@ -85,6 +87,7 @@ const AdminTabScreen = () => {
   const renderScene = SceneMap({
     NewOrder: AdminNewOrder,
     pastOrder: AdminPastOrder,
+    AdminOutgoning: AdminOutgoning,
   });
 
   return (

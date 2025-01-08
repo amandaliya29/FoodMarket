@@ -14,16 +14,15 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import {useNavigation} from '@react-navigation/native';
 
 const ForgotPassword = () => {
-  const [userPassword, setUserPassword] = useState('');
-  const [hidePass, setHidePass] = useState(true);
-  const [newPassword, setNewPassword] = useState('');
+  const [email, setEmail] = useState('');
+
   const {width, height} = useWindowDimensions();
   const navigation = useNavigation();
 
   const handleResetPassword = () => {
     Alert.alert(
       'Password change',
-      'Your password change successfully',
+      'Please check your email to reset your password.',
       [
         {
           text: 'OK',
@@ -32,7 +31,6 @@ const ForgotPassword = () => {
           },
         },
       ],
-      {cancelable: false},
     );
   };
 
@@ -53,43 +51,19 @@ const ForgotPassword = () => {
         <View
           style={[styles.formBox, {width: width >= 400 ? 500 : width - 20}]}>
           <View>
-            <Text style={styles.label}>Generated Password</Text>
+            <Text style={styles.label}>Email</Text>
             <TextInput
-              value={userPassword}
-              onChangeText={setUserPassword}
-              placeholder="Enter generated password"
-              secureTextEntry={true}
+              value={email}
+              onChangeText={setEmail}
+              placeholder="Enter your email"
               placeholderTextColor="grey"
               style={styles.input}
             />
 
-            <View style={{marginBottom: 16}}>
-              <Text style={styles.label}>New Password</Text>
-              <View style={styles.passwordContainer}>
-                <TextInput
-                  secureTextEntry={hidePass}
-                  value={newPassword}
-                  onChangeText={setNewPassword}
-                  placeholder="Enter your new password"
-                  placeholderTextColor={'grey'}
-                  style={styles.inputWithIcon}
-                />
-                <TouchableOpacity
-                  onPress={() => setHidePass(!hidePass)}
-                  style={styles.iconStyle}>
-                  <Icon
-                    name={hidePass ? 'eye-slash' : 'eye'}
-                    size={20}
-                    color="grey"
-                  />
-                </TouchableOpacity>
-              </View>
-            </View>
-
             <TouchableOpacity
               style={styles.resetButton}
               onPress={handleResetPassword}>
-              <Text style={styles.resetButtonText}>Reset Password</Text>
+              <Text style={styles.resetButtonText}>Send Email</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -108,7 +82,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: '30%',
+    marginBottom: '50%',
   },
   formBox: {
     marginHorizontal: 10,

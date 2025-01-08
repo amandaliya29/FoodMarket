@@ -64,7 +64,6 @@ const AboutUs = () => {
           </Text>
         </View>
 
-        {/* Introduction Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Who We Are</Text>
           <Text style={styles.sectionContent}>
@@ -76,7 +75,6 @@ const AboutUs = () => {
           </Text>
         </View>
 
-        {/* Mission Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Our Mission</Text>
           <Text style={styles.sectionContent}>
@@ -88,7 +86,6 @@ const AboutUs = () => {
           </Text>
         </View>
 
-        {/* Vision Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Our Vision</Text>
           <Text style={styles.sectionContent}>
@@ -99,7 +96,6 @@ const AboutUs = () => {
           </Text>
         </View>
 
-        {/* Services Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>What We Offer</Text>
           <Text style={styles.sectionContent}>
@@ -110,7 +106,6 @@ const AboutUs = () => {
           </Text>
         </View>
 
-        {/* Our Team Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Meet the Team</Text>
           <Text style={styles.sectionContent}>
@@ -122,7 +117,6 @@ const AboutUs = () => {
           </Text>
         </View>
 
-        {/* Sustainability Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>
             Our Commitment to Sustainability
@@ -135,7 +129,6 @@ const AboutUs = () => {
           </Text>
         </View>
 
-        {/* Contact Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Contact Us</Text>
           <Text style={styles.sectionContent}>
@@ -151,7 +144,6 @@ const AboutUs = () => {
           </Text>
         </View>
 
-        {/* Footer Section */}
         <View style={styles.footer}>
           <Text style={styles.footerText}>
             © 2024 FoodMarket. Crafted with care and passion. All rights

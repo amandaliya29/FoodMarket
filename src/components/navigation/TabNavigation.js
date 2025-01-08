@@ -11,6 +11,9 @@ import {useSelector} from 'react-redux';
 import WishList from '../WishList';
 import Search from '../Search';
 import {KeyboardAvoidingView} from 'react-native';
+import OfferPage from '../pages/OfferPage';
+import Icon3 from 'react-native-vector-icons/MaterialCommunityIcons';
+
 const Tab = createBottomTabNavigator();
 
 const TabNavigation = () => {
@@ -52,14 +55,14 @@ const TabNavigation = () => {
             }}
           />
           <Tab.Screen
-            name="WishList"
-            component={WishList}
+            name="Offer"
+            component={OfferPage}
             options={{
               tabBarIcon: ({focused}) => (
                 <View>
-                  <Icon2
-                    name={focused ? 'favorite' : 'favorite-outline'}
-                    size={18}
+                  <Icon3
+                    name={focused ? 'offer' : 'offer'}
+                    size={20}
                     color={focused ? '#EB0029' : '#8d92a3'}
                   />
                 </View>

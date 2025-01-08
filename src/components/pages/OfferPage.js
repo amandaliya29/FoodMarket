@@ -9,26 +9,22 @@ import {
   Image,
   ToastAndroid,
   ActivityIndicator,
+  SafeAreaView,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import Icon2 from 'react-native-vector-icons/Ionicons';
 import axiosInstance from '../axios/axiosInstance';
 
-const filters = [
-  {id: '1', label: 'Sort By', type: 'sort'},
-  {id: '2', label: 'New on Food Market', type: 'filter', value: 'new'},
-  {id: '3', label: 'Rating 4.0+', type: 'filter', value: 'rating4Plus'},
-  {id: '4', label: 'Offers', type: 'filter', value: 'offers'},
-  {id: '5', label: '₹300 - ₹600', type: 'filter', value: 'price300to600'},
-  {id: '6', label: 'Less than ₹300', type: 'filter', value: 'priceLess300'},
+const sortOptions = [
+  {id: '1', label: 'Filter', value: 'filter'},
+  {id: '2', label: 'Sort By', value: 'sort'},
 ];
 
-const FoodTab = () => {
+const OfferPage = () => {
   const navigation = useNavigation();
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
-  const [selectedFilter, setSelectedFilter] = useState(null);
+  const [selectedOption, setSelectedOption] = useState(null);
   const [isDropdownVisible, setDropdownVisible] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -69,57 +65,39 @@ const FoodTab = () => {
   }, []);
 
   useEffect(() => {
-    if (!selectedFilter) {
+    if (!selectedOption) {
       setFilteredData(data);
     }
   }, [data]);
 
-  const applyFilter = filter => {
+  const applySortOrFilter = option => {
     let newData = [...data];
+    setSelectedOption(option.value);
+    setDropdownVisible(false);
 
-    if (filter.type === 'sort') {
-      switch (filter.value) {
-        case 'costLowToHigh':
+    if (option.value === 'filter') {
+      switch (option.label) {
+        case 'Cost Low to High':
           newData.sort((a, b) => a.price - b.price);
           break;
-        case 'costHighToLow':
+        case 'Cost High to Low':
           newData.sort((a, b) => b.price - a.price);
           break;
-        case 'ratingHighToLow':
+        case 'Rating High to Low':
           newData.sort((a, b) => b.rating - a.rating);
           break;
-        case 'aToZ':
+        case 'A to Z':
           newData.sort((a, b) => a.name.localeCompare(b.name));
           break;
-        case 'zToA':
+        case 'Z to A':
           newData.sort((a, b) => b.name.localeCompare(a.name));
           break;
       }
-    } else if (filter.type === 'filter') {
-      switch (filter.value) {
-        case 'new':
-          newData = newData.filter(item => item.isNew);
-          break;
-        case 'rating4Plus':
-          newData = newData.filter(item => item.rating >= 4);
-          break;
-        case 'price300to600':
-          newData = newData.filter(
-            item => item.price >= 300 && item.price <= 600,
-          );
-          break;
-        case 'priceLess300':
-          newData = newData.filter(item => item.price < 300);
-          break;
-        case 'offers':
-          newData = newData.filter(item => item.hasOffers);
-          break;
-      }
+    } else if (option.value === 'sort') {
+      applySortOrFilter({label: option.label, value: 'filter'});
     }
 
     setFilteredData(newData);
-    setSelectedFilter(filter.value);
-    setDropdownVisible(false);
   };
 
   const renderPlaceholder = () => (
@@ -141,9 +119,7 @@ const FoodTab = () => {
     <TouchableOpacity
       key={item.id.toString()}
       style={styles.verticalBox}
-      onPress={() => {
-        navigation.navigate('FoodDetail', {item});
-      }}>
+      onPress={() => navigation.navigate('FoodDetail', {item})}>
       <View style={styles.verticalImageContainer}>
         <Image style={styles.verticalImage} source={{uri: item.image}} />
       </View>
@@ -153,13 +129,12 @@ const FoodTab = () => {
           style={{
             flexDirection: 'row',
             justifyContent: 'space-between',
-            alignContent: 'center',
             alignItems: 'center',
           }}>
           <Text style={styles.foodPrice}>₹ {item.price}</Text>
           <View style={styles.ratingContainer}>
             <Text style={styles.ratingText}>{item.rating}</Text>
-            <Icon2 name="star" color={'#fff'} size={12} />
+            <Icon name="star" color={'#fff'} size={12} />
           </View>
         </View>
         <View>
@@ -181,41 +156,66 @@ const FoodTab = () => {
   );
 
   return (
-    <View style={styles.container}>
-      <ScrollView
-        horizontal
-        style={styles.filterBar}
-        showsHorizontalScrollIndicator={false}>
-        {filters.map(filter => (
-          <TouchableOpacity
-            key={filter.id}
-            style={styles.filterButton}
-            onPress={() =>
-              filter.label === 'Sort By'
-                ? setDropdownVisible(!isDropdownVisible)
-                : applyFilter(filter)
-            }>
-            <Text style={styles.filterText}>{filter.label}</Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
-
+    <SafeAreaView style={styles.container}>
+      <View>
+        <View style={styles.head}>
+          <View>
+            <Text style={styles.text}>Offer</Text>
+            <Text style={styles.you}>Elevate your dining experience today</Text>
+          </View>
+        </View>
+        <ScrollView
+          horizontal
+          style={styles.filterBar}
+          showsHorizontalScrollIndicator={false}>
+          {sortOptions.map(option => (
+            <TouchableOpacity
+              key={option.id}
+              style={[
+                styles.filterButton,
+                selectedOption === option.value ? styles.selectedButton : null,
+              ]}
+              onPress={() =>
+                option.value === 'sort' || option.value === 'filter'
+                  ? setDropdownVisible(!isDropdownVisible)
+                  : applySortOrFilter(option)
+              }>
+              <View style={styles.filterWithIcon}>
+                <Text
+                  style={[
+                    styles.filterText,
+                    selectedOption === option.value
+                      ? styles.selectedText
+                      : null,
+                  ]}>
+                  {option.label}
+                </Text>
+                <Icon
+                  name={option.value === 'filter' ? 'filter-outline' : 'sort'}
+                  size={16}
+                  color={selectedOption === option.value ? '#fff' : '#000'}
+                />
+              </View>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
       {isDropdownVisible && (
         <View style={styles.dropdownMenu}>
           {[
-            'costLowToHigh',
-            'costHighToLow',
-            'ratingHighToLow',
-            'aToZ',
-            'zToA',
+            'Cost Low to High',
+            'Cost High to Low',
+            'Rating High to Low',
+            'A to Z',
+            'Z to A',
           ].map(sortType => (
             <TouchableOpacity
               key={sortType}
               style={styles.dropdownItem}
-              onPress={() => applyFilter({type: 'sort', value: sortType})}>
-              <Text style={styles.dropdownText}>
-                {sortType.replace(/([A-Z])/g, ' $1').trim()}
-              </Text>
+              onPress={() =>
+                applySortOrFilter({label: sortType, value: 'sort'})
+              }>
+              <Text style={styles.dropdownText}>{sortType}</Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -236,20 +236,41 @@ const FoodTab = () => {
           contentContainerStyle={styles.listContainer}
         />
       )}
-    </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingTop: 8,
+    backgroundColor: '#fff',
   },
+  text: {
+    fontSize: 20,
+    fontWeight: '500',
+    color: 'black',
+  },
+  you: {
+    fontSize: 13,
+    fontWeight: '300',
+    color: '#8d92a3',
+  },
+  head: {
+    padding: 16,
+    paddingVertical: 2,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+
   filterBar: {
     flexDirection: 'row',
     paddingRight: 16,
     marginBottom: 10,
     paddingLeft: 16,
-    marginTop: 16,
+    marginTop: 8,
   },
   filterButton: {
     paddingVertical: 8,
@@ -266,6 +287,7 @@ const styles = StyleSheet.create({
   filterText: {
     fontSize: 13,
     color: '#000',
+    marginRight: 3,
   },
   selectedText: {
     color: '#fff',
@@ -293,7 +315,6 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     paddingBottom: 20,
-    paddingRight: 16,
   },
   verticalBox: {
     borderRadius: 10,
@@ -349,7 +370,7 @@ const styles = StyleSheet.create({
   },
   filterWithIcon: {
     flexDirection: 'row',
-    justifyContent: 'center',
+    justifyContent: 'space-evenly',
     alignItems: 'center',
   },
   icon: {
@@ -368,7 +389,8 @@ const styles = StyleSheet.create({
     height: 10,
     backgroundColor: '#e0e0e0',
     borderRadius: 4,
+    marginVertical: 2,
   },
 });
 
-export default FoodTab;
+export default OfferPage;

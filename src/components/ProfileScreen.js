@@ -33,6 +33,7 @@ const ProfileScreen = () => {
 
   useEffect(() => {
     fetchUserDetails();
+    imageUri;
   }, []);
   return (
     <SafeAreaView style={styles.container}>

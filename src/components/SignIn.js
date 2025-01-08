@@ -81,10 +81,11 @@ const SignIn = ({navigation}) => {
         const userDetails = response.data;
 
         await AsyncStorage.setItem('userDetails', JSON.stringify(userDetails));
+        const isAdmin = userDetails.data.user.is_admin === 1;
 
         showToastWithGravityAndOffset(response.data.message);
 
-        navigation.navigate('TabNavigation');
+        navigation.navigate(isAdmin ? 'AdminHomeScreen' : 'TabNavigation');
       } catch (error) {
         console.warn(error);
 
@@ -97,7 +98,6 @@ const SignIn = ({navigation}) => {
 
   const handleForgotPassword = () => {
     navigation.navigate('ForgotPassword');
-    setModalVisible(false);
   };
 
   return (
@@ -167,12 +167,12 @@ const SignIn = ({navigation}) => {
           </View>
 
           <View style={{alignItems: 'center'}}>
-            <Pressable onPress={() => setModalVisible(true)}>
+            <TouchableOpacity onPress={handleForgotPassword}>
               <Text style={styles.forgotPassword}>Forgot Password</Text>
-            </Pressable>
+            </TouchableOpacity>
           </View>
 
-          <Modal
+          {/* <Modal
             transparent={true}
             visible={modalVisible}
             animationType="slide"
@@ -203,16 +203,27 @@ const SignIn = ({navigation}) => {
                 <View style={{height: 50}} />
               </View>
             </View>
-          </Modal>
+          </Modal> */}
 
-          <View>
+          {/* <View>
             <Text style={styles.orContinueWith}>- OR Continue with -</Text>
           </View>
-          <View
+          <View style={styles.socialContainer}>
+            <Pressable style={styles.googleButton}>
+              <Image
+                source={require('../assets/google1.png')}
+                style={styles.googleIcon}
+              />
+              <Text style={styles.googleButtonText}>Google</Text>
+            </Pressable>
+          </View> */}
+
+          {/* <View
             style={{
               flexDirection: 'row',
               gap: 10,
               marginHorizontal: 60,
+              width: 200,
               marginVertical: 20,
               marginBottom: 24,
             }}>
@@ -228,7 +239,7 @@ const SignIn = ({navigation}) => {
                 <Text style={styles.google1}>Google</Text>
               </View>
             </Pressable>
-            <Pressable
+             <Pressable
               onPress={() => console.warn('facebook')}
               style={styles.google}>
               <View style={styles.google1Parent}>
@@ -239,8 +250,8 @@ const SignIn = ({navigation}) => {
                 />
                 <Text style={styles.google1}>Facebook</Text>
               </View>
-            </Pressable>
-          </View>
+            </Pressable> 
+          </View> */}
 
           <View style={styles.createAnAccount}>
             <Text style={[styles.createAnAccount1, styles.signUpTypo]}>
@@ -323,6 +334,28 @@ const styles = StyleSheet.create({
     fontWeight: '300',
     color: '#575757',
     textAlign: 'center',
+  },
+  socialContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: 20,
+  },
+  googleButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    overflow: 'hidden',
+    borderRadius: 50,
+    backgroundColor: 'rgba(235, 0, 41, 0.1)',
+    justifyContent: 'center',
+    paddingHorizontal: 25,
+    paddingVertical: 10,
+  },
+  googleIcon: {width: 24, height: 24, marginRight: 10},
+  googleButtonText: {
+    fontSize: 12,
+    color: '#575757',
+    textAlign: 'center',
+    fontWeight: '500',
   },
   google1Icon: {width: 24, height: 24},
   google1: {

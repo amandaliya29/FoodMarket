@@ -39,9 +39,7 @@ const Categories = () => {
       }));
       setData(categories);
     } catch (error) {
-      showToastWithGravityAndOffset(
-        error.response?.data?.message || 'Something went wrong.',
-      );
+      showToastWithGravityAndOffset(error.response.data.message);
     } finally {
       setLoading(false);
     }
@@ -150,12 +148,14 @@ const styles = StyleSheet.create({
     width: 80,
     height: 50,
     backgroundColor: 'lightgrey',
+    borderRadius: 8,
     marginBottom: 5,
   },
   placeholderText: {
     width: 60,
     height: 10,
     backgroundColor: 'lightgrey',
+    borderRadius: 6,
   },
 });
 
