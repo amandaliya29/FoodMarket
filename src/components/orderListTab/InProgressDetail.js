@@ -33,7 +33,7 @@ const InProgressDetail = ({route}) => {
       <View style={styles.verticalDetailsContainer}>
         <View style={styles.verticalDetails}>
           <Text style={styles.foodName}>{item.name}</Text>
-          <Text style={styles.foodPrice}>₹{item.price.toFixed(2)}</Text>
+          <Text style={styles.foodPrice}>₹{item.price}</Text>
         </View>
         <View style={styles.quantityContainer}>
           <Text style={styles.quantityText}>{item.quantity}</Text>
@@ -99,7 +99,7 @@ const InProgressDetail = ({route}) => {
             <View key={detail.id} style={styles.paymentDetailRow}>
               <Text style={styles.paymentDetailText}>{detail.name}</Text>
               <Text style={styles.paymentDetailText}>
-                ₹{(detail.price * detail.quantity).toFixed(2)}
+                ₹{detail.price * detail.quantity}
               </Text>
             </View>
           ))}

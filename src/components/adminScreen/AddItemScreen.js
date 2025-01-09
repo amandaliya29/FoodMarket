@@ -7,17 +7,21 @@ import {
   useWindowDimensions,
   Text,
   SafeAreaView,
-  Image,
+  Modal,
+  Pressable,
 } from 'react-native';
 import {TabView, SceneMap} from 'react-native-tab-view';
 import AdminCategories from './addItemAdminTab/AdminCategories';
 import AdminAddItem from './addItemAdminTab/AdminAddItem';
 import AdminOffers from './addItemAdminTab/AdminOffers';
 import Icon from 'react-native-vector-icons/Ionicons';
+import {useNavigation} from '@react-navigation/native';
 
 const AddItemScreen = () => {
+  const navigation = useNavigation();
   const layout = useWindowDimensions();
   const [index, setIndex] = useState(0);
+  const [isModalVisible, setModalVisible] = useState(false);
   const [routes] = useState([
     {key: 'Categories', title: 'Categories'},
     {key: 'Item', title: 'Products'},
@@ -91,6 +95,10 @@ const AddItemScreen = () => {
     Offers: AdminOffers,
   });
 
+  const toggleModal = () => {
+    setModalVisible(!isModalVisible);
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.head}>
@@ -106,7 +114,9 @@ const AddItemScreen = () => {
         onIndexChange={setIndex}
         initialLayout={{width: layout.width}}
       />
-      <View style={{position: 'absolute', bottom: 16, right: 16}}>
+      <TouchableOpacity
+        style={{position: 'absolute', bottom: 16, right: 16}}
+        onPress={toggleModal}>
         <View
           style={{
             width: 55,
@@ -118,12 +128,56 @@ const AddItemScreen = () => {
           }}>
           <Icon name="add-outline" size={30} color={'#fff'} />
         </View>
-      </View>
+      </TouchableOpacity>
+
+      <Modal
+        transparent={true}
+        visible={isModalVisible}
+        animationType="slide"
+        onRequestClose={toggleModal}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <TouchableOpacity
+              style={styles.modalButton}
+              onPress={() => {
+                toggleModal();
+                navigation.navigate('AdminAddCategory');
+              }}>
+              <Text style={styles.modalButtonText}>Add Category</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.modalButton}
+              onPress={() => {
+                toggleModal();
+                // Handle Add Product Action
+              }}>
+              <Text style={styles.modalButtonText}>Add Product</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.modalButton}
+              onPress={() => {
+                toggleModal();
+                // Handle Add Offers Action
+              }}>
+              <Text style={styles.modalButtonText}>Add Offers</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.modalButton}
+              onPress={() => {
+                toggleModal();
+                // Handle Add Offers Action
+              }}>
+              <Text style={styles.modalButtonText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
 
 export default AddItemScreen;
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -148,19 +202,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 6,
   },
-  profileImage: {
-    height: 44,
-    width: 44,
-    borderRadius: 8,
-    borderWidth: 1,
-  },
   tabBar: {
     backgroundColor: '#fff',
     flexDirection: 'row',
     paddingTop: 0,
     position: 'relative',
     borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
     borderBottomColor: '#F2F2F2',
   },
   tabItem: {
@@ -176,5 +223,30 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 10,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+  },
+  modalContainer: {
+    width: '100%',
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 16,
+  },
+  modalButton: {
+    backgroundColor: '#fff',
+    padding: 10,
+    marginVertical: 8,
+    borderWidth: 0.2,
+    borderRadius: 10,
+    borderColor: '#eb0029',
+  },
+  modalButtonText: {
+    color: '#eb0029',
+    fontSize: 16,
+    textAlign: 'center',
   },
 });
