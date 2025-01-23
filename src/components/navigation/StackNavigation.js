@@ -23,6 +23,9 @@ import AdminOrderDetail from '../adminScreen/AdminOrderDetail';
 import AdminSetProfile from '../adminScreen/AdminSetProfile';
 import Search from '../Search';
 import AdminSearch from '../adminScreen/AdminSearch';
+import AdminAddCategory from '../adminScreen/addItemAdminTab/AdminAddCategory';
+import AdminAddProduct from '../adminScreen/addItemAdminTab/AdminAddProduct';
+import AdminDetail from '../adminScreen/AdminDetail';
 
 const Stack = createNativeStackNavigator();
 
@@ -34,8 +37,6 @@ const StackNavigation = () => {
       try {
         const userData = await AsyncStorage.getItem('userDetails');
         const parsedUserData = userData ? JSON.parse(userData) : null;
-        console.warn('hello');
-
         if (parsedUserData) {
           const isAdmin = parsedUserData.data.user.is_admin === 1;
           setInitialRoute(isAdmin ? 'AdminHomeScreen' : 'TabNavigation');
@@ -82,6 +83,9 @@ const StackNavigation = () => {
         <Stack.Screen name="AdminOrderDetail" component={AdminOrderDetail} />
         <Stack.Screen name="AdminSetProfile" component={AdminSetProfile} />
         <Stack.Screen name="AdminSearch" component={AdminSearch} />
+        <Stack.Screen name="AdminAddCategory" component={AdminAddCategory} />
+        <Stack.Screen name="AdminAddProduct" component={AdminAddProduct} />
+        <Stack.Screen name="AdminDetail" component={AdminDetail} />
         <Stack.Screen
           name="PrivacyPolicyScreen"
           component={PrivacyPolicyScreen}

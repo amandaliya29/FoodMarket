@@ -2,22 +2,20 @@ import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   FlatList,
   TouchableOpacity,
+  StyleSheet,
   Image,
   ToastAndroid,
 } from 'react-native';
+import {useNavigation} from '@react-navigation/native';
 import axiosInstance from '../../axios/axiosInstance';
 import {IMAGE_API} from '@env';
-import {useNavigation} from '@react-navigation/native';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import Icon2 from 'react-native-vector-icons/MaterialIcons';
 
 const AdminCategories = () => {
+  const navigation = useNavigation();
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const navigation = useNavigation();
 
   const showToastWithGravityAndOffset = message => {
     ToastAndroid.showWithGravityAndOffset(
@@ -55,108 +53,108 @@ const AdminCategories = () => {
     <View style={styles.verticalBox}>
       <View style={[styles.verticalImageContainer, styles.placeholderBox]} />
       <View style={styles.verticalDetails}>
-        <View style={[styles.placeholderText, {width: '60%'}]} />
         <View
-          style={[styles.placeholderText, {width: '40%', marginVertical: 4}]}
+          style={[styles.placeholderText, {width: '60%', marginLeft: '4%'}]}
         />
         <View
-          style={[styles.placeholderText, {width: '90%', marginVertical: 4}]}
+          style={[
+            styles.placeholderText,
+            {width: '90%', marginVertical: 4, marginLeft: '4%'},
+          ]}
         />
         <View
-          style={[styles.placeholderText, {width: '90%', marginVertical: 4}]}
+          style={[
+            styles.placeholderText,
+            {width: '40%', marginVertical: 4, marginLeft: '4%'},
+          ]}
+        />
+        <View
+          style={[
+            styles.placeholderText,
+            {width: '90%', marginVertical: 4, marginLeft: '4%'},
+          ]}
         />
       </View>
     </View>
   );
 
-  const renderVerticalItem = ({item: category}) => (
-    <TouchableOpacity
-      key={category.id.toString()}
-      style={styles.verticalBox}
-      onPress={() => {
-        navigation.navigate('CategoriesDetail', {category});
-      }}>
+  const renderCategoryItem = ({item}) => (
+    <View style={styles.container}>
       <View style={styles.verticalImageContainer}>
         <Image
           style={styles.verticalImage}
-          source={{uri: `${IMAGE_API}/${category.image}`}}
+          source={{uri: `${IMAGE_API}/${item.image}`}}
         />
       </View>
-      <View style={styles.verticalDetails}>
-        <Text style={styles.foodName}>{category.name}</Text>
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}>
-          <Text style={styles.foodPrice}>
-            Products in {category.products.length}
-          </Text>
-          {/* <View style={styles.ratingContainer}>
-            <Text style={styles.ratingText}>4.5</Text>
-            <Icon2 name="star" color={'#fff'} size={12} />
-          </View> */}
+      <View style={styles.detailsContainer}>
+        <Text style={styles.categoryName}>{item.name}</Text>
+        <Text numberOfLines={2} style={styles.description}>
+          {item.description}
+        </Text>
+        <Text style={styles.productsCount}>
+          Products: {item.products.length}
+        </Text>
+        <View style={styles.actions}>
+          <TouchableOpacity
+            style={[styles.button, styles.detailsButton]}
+            onPress={() =>
+              navigation.navigate('CategoriesDetail', {category: item})
+            }>
+            <Text style={styles.buttonText}>View</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.button, styles.updateButton]}>
+            <Text style={styles.buttonText}>Update</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.button, styles.deleteButton]}>
+            <Text style={styles.buttonText}>Delete</Text>
+          </TouchableOpacity>
         </View>
-        <View>
-          <Text
-            numberOfLines={3}
-            ellipsizeMode="tail"
-            style={styles.detailText}>
-            {category.description}
-          </Text>
-        </View>
-        {/* <View style={{flexDirection: 'row', alignItems: 'center'}}>
-          <Icon name="brightness-percent" size={20} color={'red'} />
-          <Text style={{color: 'grey', fontSize: 14, paddingLeft: 4}}>
-            40% OFF
-          </Text>
-        </View> */}
       </View>
-    </TouchableOpacity>
+    </View>
   );
 
   return (
-    <View style={styles.container}>
-      <FlatList
-        data={loading ? Array.from({length: 10}) : data}
-        renderItem={loading ? renderPlaceholder : renderVerticalItem}
-        keyExtractor={(item, index) =>
-          item?.id?.toString() || `placeholder-${index}`
-        }
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.listContainer}
-      />
+    <View style={styles.mainContainer}>
+      {loading ? (
+        <FlatList
+          data={Array(data.length || 16).fill({})}
+          keyExtractor={(_, index) => index.toString()}
+          renderItem={renderPlaceholder}
+        />
+      ) : (
+        <FlatList
+          data={data}
+          keyExtractor={item => item.id.toString()}
+          renderItem={renderCategoryItem}
+        />
+      )}
     </View>
   );
 };
 
+export default AdminCategories;
+
 const styles = StyleSheet.create({
-  container: {
+  mainContainer: {
     flex: 1,
+    backgroundColor: '#fcfcfc',
   },
-  heading: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginHorizontal: 16,
-    marginBottom: 10,
-    color: 'grey',
-  },
-  listContainer: {
-    paddingBottom: 20,
-    paddingRight: 16,
-  },
-  verticalBox: {
-    borderRadius: 10,
-    margin: 5,
-    backgroundColor: 'white',
-    padding: 10,
+  container: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    backgroundColor: '#fff',
+    marginVertical: 8,
+    marginHorizontal: 10,
+    borderRadius: 8,
+    padding: 10,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   verticalImageContainer: {
-    width: 120,
-    height: 120,
+    width: 130,
+    height: 135,
     borderRadius: 10,
     overflow: 'hidden',
     borderWidth: 0.5,
@@ -165,52 +163,76 @@ const styles = StyleSheet.create({
   verticalImage: {
     width: '100%',
     height: '100%',
+    objectFit: 'contain',
   },
-  verticalDetails: {
-    marginLeft: 12,
+  detailsContainer: {
     flex: 1,
     justifyContent: 'space-between',
+    marginLeft: '4%',
   },
-  foodName: {
+  categoryName: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#020202',
+    color: '#333',
   },
-  foodPrice: {
-    fontSize: 14,
-    color: '#888',
-    marginTop: 4,
-  },
-  ratingContainer: {
-    alignSelf: 'flex-start',
-    marginTop: 5,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 8,
-    padding: 2,
-    paddingHorizontal: 8,
-    backgroundColor: 'green',
-  },
-  ratingText: {
-    color: '#fff',
-    fontSize: 14,
-    paddingRight: 2,
-  },
-  detailText: {
+  description: {
     fontSize: 14,
     color: '#666',
-    marginTop: 4,
-    marginBottom: 8,
+    marginVertical: 5,
+  },
+  productsCount: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#777',
+  },
+  actions: {
+    flexDirection: 'row',
+    marginTop: 10,
+  },
+  button: {
+    flex: 1,
+    marginHorizontal: 5,
+    paddingVertical: 8,
+    borderRadius: 5,
+    alignItems: 'center',
+  },
+  detailsButton: {
+    backgroundColor: '#3498db',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  deleteButton: {
+    backgroundColor: '#e74c3c',
+  },
+  updateButton: {
+    backgroundColor: '#f1c40f',
+  },
+  verticalBox: {
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    marginVertical: 8,
+    marginHorizontal: 10,
+    borderRadius: 8,
+    padding: 10,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   placeholderBox: {
     backgroundColor: '#e0e0e0',
   },
+  verticalDetails: {
+    flex: 1,
+    justifyContent: 'space-evenly',
+  },
   placeholderText: {
-    height: 10,
+    height: 15,
     backgroundColor: '#e0e0e0',
-    borderRadius: 4,
+    borderRadius: 5,
   },
 });
-
-export default AdminCategories;

@@ -27,6 +27,7 @@ import {useNavigation} from '@react-navigation/native';
 import RazorpayCheckout from 'react-native-razorpay';
 import {RAZORPAY_KEY} from '@env';
 import Icon2 from 'react-native-vector-icons/Ionicons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const AddToCart = () => {
   const cartItems = useSelector(state => state.cart.items);
@@ -39,15 +40,15 @@ const AddToCart = () => {
   const [userDetails, setUserDetails] = useState(null);
 
   const fetchUserDetails = async () => {
-    // try {
-    //   const userDetails = await AsyncStorage.getItem('userDetails');
-    //   if (userDetails) {
-    //     const parsedDetails = JSON.parse(userDetails);
-    //     setUserDetails(parsedDetails);
-    //   }
-    // } catch (error) {
-    //   console.warn('Failed to load user details', error);
-    // }
+    try {
+      const userDetails = await AsyncStorage.getItem('userDetails');
+      if (userDetails) {
+        const parsedDetails = JSON.parse(userDetails);
+        setUserDetails(parsedDetails);
+      }
+    } catch (error) {
+      console.warn('Failed to load user details', error);
+    }
   };
 
   useEffect(() => {
@@ -104,9 +105,9 @@ const AddToCart = () => {
         amount: totalCartPrice * 100,
         name: 'FoodMarket',
         prefill: {
-          email: 'void@razorpay.com',
+          email: userDetails.data.user.email,
           contact: '9191919191',
-          name: 'Razorpay Software',
+          name: userDetails.data.user.name,
         },
         theme: {color: '#eb0029'},
       };

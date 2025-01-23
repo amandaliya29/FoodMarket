@@ -104,7 +104,7 @@ const PastOrders = () => {
                 <View style={styles.textContainer}>
                   <Text style={styles.text}>Order Date: {item.orderDate}</Text>
                   <Text style={styles.text}>
-                    Total Price: ₹{item.totalPrice.toFixed(2)}
+                    Total Price: ₹{item.totalPrice}
                   </Text>
                   <Text style={styles.text}>
                     Payment Method: {item.paymentMethod}

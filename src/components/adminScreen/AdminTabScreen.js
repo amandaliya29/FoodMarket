@@ -1,4 +1,4 @@
-import React, {useState, useRef} from 'react';
+import React, {useState, useRef, useEffect} from 'react';
 import {
   Animated,
   View,
@@ -8,15 +8,21 @@ import {
   Text,
   SafeAreaView,
   Image,
+  BackHandler,
 } from 'react-native';
 import {TabView, SceneMap} from 'react-native-tab-view';
 import AdminNewOrder from './adminTab/AdminNewOrder';
 import AdminPastOrder from './adminTab/AdminPastOrder';
 import AdminOutgoning from './adminTab/AdminOutgoning';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import UserAvatar from '../pages/UserAvatar';
 
 const AdminTabScreen = () => {
   const layout = useWindowDimensions();
   const [index, setIndex] = useState(0);
+  const [userDetails, setUserDetail] = useState(null);
+  const [imageUri, setImageUri] = useState('');
+  const [userName, setUserName] = useState('');
   const [routes] = useState([
     {key: 'NewOrder', title: 'New Order'},
     {key: 'AdminOutgoning', title: 'Ongoing'},
@@ -90,6 +96,43 @@ const AdminTabScreen = () => {
     AdminOutgoning: AdminOutgoning,
   });
 
+  const fetchUserDetails = async () => {
+    try {
+      const userDetails = await AsyncStorage.getItem('userDetails');
+      if (userDetails) {
+        const parsedDetails = JSON.parse(userDetails);
+        setUserDetail(parsedDetails);
+        setImageUri(
+          parsedDetails.data &&
+            parsedDetails.data.user &&
+            parsedDetails.data.user.avatar
+            ? `${IMAGE_API}/${parsedDetails.data.user.avatar}`
+            : null,
+        );
+        setUserName(parsedDetails.data.user.name);
+      }
+    } catch (error) {
+      console.warn('Failed to load user details', error);
+    }
+  };
+
+  const backBtn = () => {
+    const backAction = () => {
+      BackHandler.exitApp();
+      return true;
+    };
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction,
+    );
+    return () => backHandler.remove();
+  };
+
+  useEffect(() => {
+    fetchUserDetails();
+    imageUri;
+    backBtn();
+  }, []);
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.head}>
@@ -98,13 +141,18 @@ const AdminTabScreen = () => {
           <Text style={styles.letsGetSome}>Let's get some foods</Text>
         </View>
         <View>
-          <Image
-            style={styles.profileImage}
-            height={50}
-            width={50}
-            resizeMode="cover"
-            source={require('../../assets/photo2.png')}
-          />
+          {imageUri ? (
+            <Image
+              alt="image"
+              style={styles.profileImage}
+              height={50}
+              width={50}
+              resizeMode="cover"
+              source={{uri: imageUri}}
+            />
+          ) : (
+            <UserAvatar size={45} name={userName || 'Food Market'} />
+          )}
         </View>
       </View>
       <TabView
