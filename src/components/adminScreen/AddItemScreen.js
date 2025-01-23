@@ -149,7 +149,7 @@ const AddItemScreen = () => {
               style={styles.modalButton}
               onPress={() => {
                 toggleModal();
-                // Handle Add Product Action
+                navigation.navigate('AdminAddProduct', {update: false});
               }}>
               <Text style={styles.modalButtonText}>Add Product</Text>
             </TouchableOpacity>

@@ -13,19 +13,31 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 import Icon2 from 'react-native-vector-icons/EvilIcons';
 import React, {useEffect, useState} from 'react';
-import {useNavigation} from '@react-navigation/native';
-import UserAvatar from '../../pages/UserAvatar';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {IMAGE_API} from '@env';
-const AdminAddCategory = () => {
+import RNPickerSelect from 'react-native-picker-select';
+import TagInput from './TagInput';
+import axiosInstance from '../../axios/axiosInstance';
+import ToggleSwitch from 'toggle-switch-react-native';
+
+const AdminAddProduct = () => {
+  const route = useRoute();
+  const {item} = route.params || {};
+  const update = route.params?.update;
   const navigation = useNavigation();
   const {width} = useWindowDimensions();
   const [description, setDescription] = useState();
+  const [ingredients, setIngredients] = useState([]);
+  const [price, setPrice] = useState();
+  const [rate, setRate] = useState();
+  const [stock, setStock] = useState();
+  const [is_hot, setIs_hot] = useState(!!item?.is_hot);
+  const [category, setCategory] = useState([]);
   const [imageUri, setImageUri] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
-  const [userDetails, setUserDetail] = useState(null);
+  // const [userDetails, setUserDetail] = useState(null);
   const [name, setName] = useState('');
+  const [categoryList, setCategoryList] = useState();
 
   //   const fetchUserDetails = async () => {
   //     try {
@@ -47,11 +59,67 @@ const AdminAddCategory = () => {
   //       console.warn('Failed to load user details', error);
   //     }
   //   };
+  const handleToggle = async isOn => {
+    setIs_hot(!!isOn);
+
+    // try {
+    //   await axiosInstance.patch(`category/update/${item.id}`, {
+    //     is_hot: isOn ? 1 : 0,
+    //   });
+    //   showToastWithGravityAndOffset('Hot status updated successfully.');
+    // } catch (error) {
+    //   showToastWithGravityAndOffset(
+    //     error.response?.data?.message || 'Failed to update hot status.',
+    //   );
+    // }
+  };
+  const CategoryListDisplay = async () => {
+    try {
+      const response = await axiosInstance.get('category/list');
+      const categories = response.data.data.map(item => ({
+        id: item.id,
+        name: item.name,
+        image: item.image,
+        description: item.description,
+        products: item.products,
+        ingredients: item.ingredients,
+        is_hot: !!item.is_hot,
+      }));
+      setCategoryList(categories);
+    } catch (error) {
+      showToastWithGravityAndOffset(error.response.data.message);
+    }
+  };
 
   useEffect(() => {
     // fetchUserDetails();
+    CategoryListDisplay();
     imageUri;
   }, []);
+
+  useEffect(() => {
+    if (route.params.update === true) {
+      if (item) {
+        setName(item.name || '');
+        setImageUri(item.image || '');
+        setPrice(item.price?.toString() || '');
+        setStock(item.stock?.toString() || '');
+        setIngredients(item.ingredients || []);
+        setDescription(item.description || '');
+        setCategory(item.category_id || '');
+        setIs_hot(!!item.is_hot || false);
+      }
+    } else {
+      setName('');
+      setImageUri('');
+      setPrice('');
+      setStock('');
+      setIngredients([]);
+      setDescription('');
+      setCategory('');
+      setIs_hot(false);
+    }
+  }, [item, update]);
 
   const handleOpenGallery = () => {
     launchImageLibrary(
@@ -101,7 +169,9 @@ const AdminAddCategory = () => {
         </TouchableOpacity>
 
         <View>
-          <Text style={styles.text}>Add Categories</Text>
+          <Text style={styles.text}>
+            {item ? 'Update Products' : 'Add Products'}
+          </Text>
           <Text style={styles.letsGetSome}>Make sure it's valid</Text>
         </View>
       </View>
@@ -113,7 +183,7 @@ const AdminAddCategory = () => {
             style={[
               styles.formBox,
               {
-                width: width >= 400 ? 500 : width - 20,
+                width: width >= 400 ? 500 : width - -12,
               },
             ]}>
             <View>
@@ -134,7 +204,7 @@ const AdminAddCategory = () => {
                       style={{alignSelf: 'center'}}
                     />
                     <Text style={[{marginTop: 10}, styles.title]}>
-                      Upload category image
+                      Upload food products image
                     </Text>
                   </View>
                 )}
@@ -150,16 +220,104 @@ const AdminAddCategory = () => {
                   style={styles.input}
                 />
               </View>
+              <View style={{marginTop: 12, marginBottom: 16}}>
+                <Text style={styles.title}>Category</Text>
+                <View style={[styles.input, {padding: 0}]}>
+                  <RNPickerSelect
+                    value={category}
+                    onValueChange={value => setCategory(value)}
+                    items={
+                      categoryList
+                        ? categoryList.map(item => ({
+                            label: item.name,
+                            value: item.id,
+                          }))
+                        : []
+                    }
+                    placeholder={{
+                      label: 'Select a category...',
+                      value: null,
+                      color: 'black',
+                    }}
+                    style={{
+                      inputAndroid: {
+                        fontSize: 14,
+                        color: 'black',
+                      },
+                      inputIOS: {
+                        fontSize: 14,
+                        color: 'black',
+                      },
+                      placeholder: {
+                        fontSize: 14,
+                        color: 'grey',
+                      },
+                    }}
+                  />
+                </View>
+              </View>
+
               <View style={{marginBottom: 16}}>
                 <Text style={styles.title}>Description</Text>
                 <TextInput
+                  style={styles.input}
                   value={description}
                   onChangeText={setDescription}
-                  placeholder="Type your description"
+                  placeholder="Enter description here"
+                  multiline={true}
+                  numberOfLines={5}
+                  textAlignVertical="top"
+                />
+              </View>
+              <View style={{marginBottom: 16}}>
+                <Text style={styles.title}>Ingredients</Text>
+                <TagInput
+                  maxTags={10}
+                  duplicate={false}
+                  initialTags={ingredients}
+                  onChange={setIngredients}
+                />
+              </View>
+              <View style={{marginBottom: 16}}>
+                <Text style={styles.title}>Price</Text>
+                <View style={styles.inputPriceContainer}>
+                  <Text style={styles.prefix}>₹</Text>
+                  <TextInput
+                    value={price}
+                    onChangeText={setPrice}
+                    keyboardType="number-pad"
+                    placeholder="Type your price"
+                    placeholderTextColor={'grey'}
+                    // style={styles.input}
+                  />
+                </View>
+              </View>
+
+              <View style={{marginBottom: 16}}>
+                <Text style={styles.title}>Stock</Text>
+                <TextInput
+                  value={stock}
+                  onChangeText={setStock}
+                  placeholder="Type your stock"
                   placeholderTextColor={'grey'}
                   style={styles.input}
                 />
               </View>
+            </View>
+            <View style={{marginTop: 12, marginBottom: 16}}>
+              <ToggleSwitch
+                isOn={!!is_hot}
+                onColor="#eb0029"
+                offColor="#ccc"
+                label="Hot"
+                labelStyle={{
+                  color: '#333',
+                  fontWeight: '500',
+                  marginLeft: 24,
+                }}
+                size="small"
+                onToggle={isOn => handleToggle(isOn)}
+              />
             </View>
             <View>
               <TouchableOpacity
@@ -202,7 +360,7 @@ const AdminAddCategory = () => {
   );
 };
 
-export default AdminAddCategory;
+export default AdminAddProduct;
 
 const styles = StyleSheet.create({
   container: {
@@ -226,7 +384,7 @@ const styles = StyleSheet.create({
     alignContent: 'center',
     justifyContent: 'center',
     marginBottom: 16,
-    width: 325,
+    width: 345,
     height: 200,
     borderWidth: 0.5,
     borderRadius: 12,
@@ -244,7 +402,7 @@ const styles = StyleSheet.create({
     paddingLeft: 16,
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 16,
   },
   backButton: {
     marginRight: 16,
@@ -315,5 +473,27 @@ const styles = StyleSheet.create({
     alignContent: 'center',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  inputPriceContainer: {
+    marginTop: 6,
+    marginHorizontal: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(2, 2, 2, 0.28)',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    backgroundColor: '#fff',
+  },
+  prefix: {
+    fontSize: 18,
+    color: '#333',
+    marginRight: 5,
+  },
+  inputPrice: {
+    flex: 1,
+    fontSize: 16,
+    color: '#333',
+    height: 40,
   },
 });

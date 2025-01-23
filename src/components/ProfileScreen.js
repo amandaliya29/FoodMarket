@@ -44,9 +44,7 @@ const ProfileScreen = () => {
               <Image
                 style={styles.picIcon}
                 resizeMode="cover"
-                source={
-                  imageUri ? {uri: imageUri} : require('../assets/pic.png')
-                }
+                source={{uri: imageUri}}
               />
             ) : (
               <UserAvatar size={100} name={userName || 'Food Market'} />

@@ -68,11 +68,12 @@ const HomeScreen = () => {
       <View>
         {imageUri ? (
           <Image
+            alt="image"
             style={styles.profileImage}
             height={50}
             width={50}
             resizeMode="cover"
-            source={imageUri ? {uri: imageUri} : require('../assets/pic.png')}
+            source={{uri: imageUri}}
           />
         ) : (
           <UserAvatar size={45} name={userName || 'Food Market'} />
@@ -91,6 +92,7 @@ const HomeScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* {console.log(IMAGE_API)} */}
       <FlatList
         data={[]}
         showsHorizontalScrollIndicator={false}

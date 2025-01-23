@@ -24,6 +24,7 @@ import AdminSetProfile from '../adminScreen/AdminSetProfile';
 import Search from '../Search';
 import AdminSearch from '../adminScreen/AdminSearch';
 import AdminAddCategory from '../adminScreen/addItemAdminTab/AdminAddCategory';
+import AdminAddProduct from '../adminScreen/addItemAdminTab/AdminAddProduct';
 
 const Stack = createNativeStackNavigator();
 
@@ -82,6 +83,7 @@ const StackNavigation = () => {
         <Stack.Screen name="AdminSetProfile" component={AdminSetProfile} />
         <Stack.Screen name="AdminSearch" component={AdminSearch} />
         <Stack.Screen name="AdminAddCategory" component={AdminAddCategory} />
+        <Stack.Screen name="AdminAddProduct" component={AdminAddProduct} />
         <Stack.Screen
           name="PrivacyPolicyScreen"
           component={PrivacyPolicyScreen}

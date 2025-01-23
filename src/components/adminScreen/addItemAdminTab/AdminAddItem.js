@@ -7,20 +7,22 @@ import {
   StyleSheet,
   Image,
   ToastAndroid,
-  ActivityIndicator,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
+import axiosInstance from '../../axios/axiosInstance';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Icon2 from 'react-native-vector-icons/Ionicons';
-import axiosInstance from '../../axios/axiosInstance';
+import {IMAGE_API} from '@env';
+import ToggleSwitch from 'toggle-switch-react-native';
 
 const AdminAddItem = () => {
   const navigation = useNavigation();
   const [data, setData] = useState([]);
-  const [filteredData, setFilteredData] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [is_active, setIs_active] = useState(false);
+  // const [filteredData, setFilteredData] = useState([]);
 
-  const showToast = message => {
+  const showToastWithGravityAndOffset = message => {
     ToastAndroid.showWithGravityAndOffset(
       message,
       ToastAndroid.CENTER,
@@ -28,6 +30,25 @@ const AdminAddItem = () => {
       25,
       50,
     );
+  };
+
+  const handleToggle = async (isOn, itemId) => {
+    // Update the is_active state for the specific item
+    const updatedData = data.map(item =>
+      item.id === itemId ? {...item, is_active: isOn} : item,
+    );
+    setData(updatedData);
+
+    // try {
+    //   await axiosInstance.patch(`category/update/${item.id}`, {
+    //     is_hot: isOn ? 1 : 0,
+    //   });
+    //   showToastWithGravityAndOffset('Hot status updated successfully.');
+    // } catch (error) {
+    //   showToastWithGravityAndOffset(
+    //     error.response?.data?.message || 'Failed to update hot status.',
+    //   );
+    // }
   };
 
   const fetchProductList = async () => {
@@ -43,11 +64,14 @@ const AdminAddItem = () => {
         stock: item.stock,
         description: item.description,
         rating: item.rate,
+        category_id: item.category_id,
+        is_hot: item.is_hot,
+        is_active: item.is_active === '1',
       }));
       setData(products);
-      setFilteredData(products);
+      // setFilteredData(products);
     } catch (error) {
-      showToast(error.response?.data?.message || 'Failed to fetch products');
+      showToast(error.response.data.message);
     } finally {
       setLoading(false);
     }
@@ -55,33 +79,73 @@ const AdminAddItem = () => {
 
   useEffect(() => {
     fetchProductList();
+    setIs_active(data.is_hot || false);
   }, []);
 
   const renderPlaceholder = () => (
     <View style={styles.verticalBox}>
       <View style={[styles.verticalImageContainer, styles.placeholderBox]} />
       <View style={styles.verticalDetails}>
-        <View style={[styles.placeholderText, {width: '60%'}]} />
         <View
-          style={[styles.placeholderText, {width: '40%', marginVertical: 4}]}
+          style={[styles.placeholderText, {width: '60%', marginLeft: '4%'}]}
         />
         <View
-          style={[styles.placeholderText, {width: '90%', marginVertical: 4}]}
+          style={[
+            styles.placeholderText,
+            {width: '90%', marginVertical: 4, marginLeft: '4%'},
+          ]}
+        />
+        <View
+          style={[
+            styles.placeholderText,
+            {width: '40%', marginVertical: 4, marginLeft: '4%'},
+          ]}
+        />
+        <View
+          style={[
+            styles.placeholderText,
+            {width: '90%', marginVertical: 4, marginLeft: '4%'},
+          ]}
         />
       </View>
     </View>
   );
 
-  const renderVerticalItem = ({item}) => (
-    <TouchableOpacity
-      key={item.id.toString()}
-      style={styles.verticalBox}
-      onPress={() => navigation.navigate('FoodDetail', {item})}>
+  const renderCategoryItem = ({item}) => (
+    <View style={styles.container}>
       <View style={styles.verticalImageContainer}>
-        <Image style={styles.verticalImage} source={{uri: item.image}} />
+        <Image style={styles.verticalImage} source={{uri: `${item.image}`}} />
       </View>
-      <View style={styles.verticalDetails}>
-        <Text style={styles.foodName}>{item.name}</Text>
+      <View style={styles.detailsContainer}>
+        <View
+          style={[
+            styles.priceAndRatingContainer,
+            {
+              marginBottom: 10,
+            },
+          ]}>
+          <View style={styles.foodNameContainer}>
+            <Text
+              numberOfLines={1}
+              ellipsizeMode="tail"
+              style={styles.foodName}>
+              {item.name}
+            </Text>
+          </View>
+          <ToggleSwitch
+            isOn={item.is_active}
+            onColor="#eb0029"
+            offColor="#ccc"
+            label=""
+            labelStyle={{
+              color: '#333',
+              fontWeight: '500',
+              marginLeft: 24,
+            }}
+            size="small"
+            onToggle={isOn => handleToggle(isOn, item.id)}
+          />
+        </View>
         <View style={styles.priceAndRatingContainer}>
           <Text style={styles.foodPrice}>₹ {item.price}</Text>
           <View style={styles.ratingContainer}>
@@ -89,59 +153,162 @@ const AdminAddItem = () => {
             <Icon2 name="star" color="#fff" size={12} />
           </View>
         </View>
-        <Text numberOfLines={2} ellipsizeMode="tail" style={styles.detailText}>
+        <Text numberOfLines={1} ellipsizeMode="tail" style={styles.detailText}>
           {item.description}
         </Text>
         <View style={styles.discountContainer}>
           <Icon name="brightness-percent" size={20} color="red" />
           <Text style={styles.discountText}>40% OFF</Text>
         </View>
+
+        <View style={styles.actions}>
+          <TouchableOpacity
+            style={[styles.button, styles.detailsButton]}
+            onPress={() => navigation.navigate('FoodDetail', {item})}>
+            <Text style={styles.buttonText}>View</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.button, styles.updateButton]}
+            onPress={() =>
+              navigation.navigate('AdminAddProduct', {item, update: true})
+            }>
+            <Text style={styles.buttonText}>Update</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.button, styles.deleteButton]}>
+            <Text style={styles.buttonText}>Delete</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-    </TouchableOpacity>
+    </View>
   );
 
   return (
-    <View style={styles.container}>
+    <View style={styles.mainContainer}>
+      {/* {console.warn(is_active)} */}
       {loading ? (
         <FlatList
-          data={Array.from({length: data.length || 6})}
+          data={Array(data.length || 16).fill({})}
           keyExtractor={(_, index) => index.toString()}
           renderItem={renderPlaceholder}
-          contentContainerStyle={styles.listContainer}
         />
       ) : (
         <FlatList
-          data={filteredData}
+          data={data}
           keyExtractor={item => item.id.toString()}
-          renderItem={renderVerticalItem}
-          showsHorizontalScrollIndicator={false}
-          showsVerticalScrollIndicator={false}
+          renderItem={renderCategoryItem}
         />
       )}
     </View>
   );
 };
 
+export default AdminAddItem;
+
 const styles = StyleSheet.create({
-  container: {flex: 1},
-  listContainer: {paddingBottom: 20, paddingRight: 16},
-  verticalBox: {
-    borderRadius: 10,
-    margin: 5,
-    backgroundColor: 'white',
-    padding: 10,
+  mainContainer: {
+    flex: 1,
+    backgroundColor: '#fcfcfc',
+  },
+  container: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    backgroundColor: '#fff',
+    marginVertical: 8,
+    marginHorizontal: 10,
+    borderRadius: 8,
+    padding: 10,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   verticalImageContainer: {
-    width: 120,
-    height: 120,
+    width: 135,
+    height: 155,
     borderRadius: 10,
     overflow: 'hidden',
     borderWidth: 0.5,
     borderColor: '#ccc',
   },
-  verticalImage: {width: '100%', height: '100%'},
+  verticalImage: {
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover',
+  },
+  detailsContainer: {
+    flex: 1,
+    justifyContent: 'space-between',
+    marginLeft: '4%',
+  },
+  categoryName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  description: {
+    fontSize: 14,
+    color: '#666',
+    marginVertical: 5,
+  },
+  foodNameContainer: {
+    flex: 1,
+    marginRight: 5,
+  },
+  productsCount: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#777',
+  },
+  actions: {
+    flexDirection: 'row',
+    marginTop: 10,
+  },
+  button: {
+    flex: 1,
+    marginHorizontal: 5,
+    paddingVertical: 8,
+    borderRadius: 5,
+    alignItems: 'center',
+  },
+  detailsButton: {
+    backgroundColor: '#3498db',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  deleteButton: {
+    backgroundColor: '#e74c3c',
+  },
+  updateButton: {
+    backgroundColor: '#f1c40f',
+  },
+  verticalBox: {
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    marginVertical: 8,
+    marginHorizontal: 10,
+    borderRadius: 8,
+    padding: 10,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  placeholderBox: {
+    backgroundColor: '#e0e0e0',
+  },
+  verticalDetails: {
+    flex: 1,
+    justifyContent: 'space-evenly',
+  },
+  placeholderText: {
+    height: 15,
+    backgroundColor: '#e0e0e0',
+    borderRadius: 5,
+  },
   verticalDetails: {
     marginLeft: 12,
     flex: 1,
@@ -175,12 +342,4 @@ const styles = StyleSheet.create({
   },
   discountContainer: {flexDirection: 'row', alignItems: 'center'},
   discountText: {color: 'grey', fontSize: 14, paddingLeft: 4},
-  placeholderBox: {backgroundColor: '#e0e0e0'},
-  placeholderText: {
-    height: 10,
-    backgroundColor: '#e0e0e0',
-    borderRadius: 4,
-  },
 });
-
-export default AdminAddItem;

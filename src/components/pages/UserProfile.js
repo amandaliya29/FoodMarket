@@ -117,6 +117,7 @@ const UserProfile = () => {
               <TouchableOpacity onPress={handleImagePress}>
                 {imageUri ? (
                   <Image
+                    alt="image"
                     source={{uri: imageUri}}
                     style={styles.defaultAvatar}
                   />
