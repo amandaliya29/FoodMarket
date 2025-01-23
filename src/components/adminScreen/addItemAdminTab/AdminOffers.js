@@ -111,7 +111,7 @@ const AdminOffers = () => {
         <View style={styles.actions}>
           <TouchableOpacity
             style={[styles.button, styles.detailsButton]}
-            onPress={() => navigation.navigate('FoodDetail', {item})}>
+            onPress={() => navigation.navigate('AdminDetail', {item})}>
             <Text style={styles.buttonText}>View</Text>
           </TouchableOpacity>
           <TouchableOpacity style={[styles.button, styles.updateButton]}>

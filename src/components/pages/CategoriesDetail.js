@@ -30,7 +30,7 @@ const CategoriesDetail = () => {
       key={item.id.toString()}
       style={styles.verticalBox}
       onPress={() => {
-        navigation.navigate('FoodDetail', {item});
+        navigation.navigate('AdminDetail', {item});
       }}>
       <View style={styles.verticalImageContainer}>
         <Image style={styles.verticalImage} source={{uri: item.image}} />

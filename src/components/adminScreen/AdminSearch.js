@@ -23,7 +23,7 @@ import {
 } from '../redux/cartSlice';
 import {foodList} from '../foodlist';
 
-const Search = () => {
+const AdminSearch = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const width = useWindowDimensions().width;
@@ -173,7 +173,7 @@ const Search = () => {
   );
 };
 
-export default Search;
+export default AdminSearch;
 
 const styles = StyleSheet.create({
   container: {
