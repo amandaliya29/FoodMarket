@@ -30,16 +30,24 @@ const Categories = () => {
   const GetList = async () => {
     try {
       const response = await axiosInstance.get('category/list');
-      const categories = response.data.data.map(item => ({
-        id: item.id,
-        name: item.name,
-        image: item.image,
-        description: item.description,
-        products: item.products,
-      }));
-      setData(categories);
+
+      if (Array.isArray(response.data?.data)) {
+        const categories = response.data.data.map(item => ({
+          id: item.id,
+          name: item.name,
+          image: item.image,
+          description: item.description,
+          products: item.products,
+        }));
+        setData(categories);
+      } else {
+        setData([]); // Ensure setData doesn't get undefined
+      }
     } catch (error) {
-      showToastWithGravityAndOffset(error.response.data.message);
+      console.warn(error);
+      showToastWithGravityAndOffset(
+        error.response?.data?.message || 'An error occurred',
+      );
     } finally {
       setLoading(false);
     }
@@ -47,6 +55,8 @@ const Categories = () => {
 
   useEffect(() => {
     GetList();
+    IMAGE_API;
+    data;
   }, []);
 
   const renderCategory = (category, index) => (
@@ -69,6 +79,7 @@ const Categories = () => {
           <Image
             source={{uri: `${IMAGE_API}/${category.image}`}}
             style={styles.categoryImage}
+            accessibilityLabel="A beautiful landscape"
           />
           <Text style={styles.categoryText}>{category.name}</Text>
         </View>

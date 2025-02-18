@@ -9,16 +9,21 @@ import {
   Modal,
   Image,
   ScrollView,
+  ToastAndroid,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Icon2 from 'react-native-vector-icons/EvilIcons';
 import React, {useEffect, useState} from 'react';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import UserAvatar from '../../pages/UserAvatar';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {IMAGE_API} from '@env';
+import axiosInstance from '../../axios/axiosInstance';
 const AdminAddCategory = () => {
+  const route = useRoute();
+  const {item} = route.params || {};
+  const update = route.params?.update;
   const navigation = useNavigation();
   const {width} = useWindowDimensions();
   const [description, setDescription] = useState();
@@ -26,59 +31,128 @@ const AdminAddCategory = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [userDetails, setUserDetail] = useState(null);
   const [name, setName] = useState('');
-
-  //   const fetchUserDetails = async () => {
-  //     try {
-  //       const userDetails = await AsyncStorage.getItem('userDetails');
-  //       if (userDetails) {
-  //         const parsedDetails = JSON.parse(userDetails);
-  //         setUserDetail(parsedDetails);
-  //         setImageUri(
-  //           parsedDetails.data &&
-  //             parsedDetails.data.user &&
-  //             parsedDetails.data.user.avatar
-  //             ? `${IMAGE_API}/${parsedDetails.data.user.avatar}`
-  //             : null,
-  //         );
-  //         setUserName(parsedDetails.data.user.name);
-  //         setEmail(parsedDetails.data.user.email);
-  //       }
-  //     } catch (error) {
-  //       console.warn('Failed to load user details', error);
-  //     }
-  //   };
+  const [id, setId] = useState('');
 
   useEffect(() => {
-    // fetchUserDetails();
-    imageUri;
-  }, []);
-
-  const handleOpenGallery = () => {
-    launchImageLibrary(
-      {
-        mediaType: 'photo',
-      },
-      response => {
-        if (response.assets && response.assets.length > 0) {
-          setImageUri(response.assets[0].uri);
-        }
-        setModalVisible(false);
-      },
+    if (route.params?.update === true) {
+      if (item) {
+        setId(item.id || '');
+        setName(item.name || '');
+        setImageUri(item.image ? `${IMAGE_API}/${item.image}` : '');
+        setDescription(item.description || '');
+      }
+    } else {
+      setId('');
+      setName('');
+      setImageUri();
+      setDescription('');
+    }
+  }, [item, update]);
+  const showToastWithGravityAndOffset = message => {
+    ToastAndroid.showWithGravityAndOffset(
+      message,
+      ToastAndroid.CENTER,
+      ToastAndroid.BOTTOM,
+      25,
+      50,
     );
   };
 
-  const handleOpenCamera = () => {
-    launchCamera(
-      {
-        mediaType: 'photo',
-      },
-      response => {
-        if (response.assets && response.assets.length > 0) {
-          setImageUri(response.assets[0].uri);
+  const uploadImage = async () => {
+    if (!imageUri || imageUri.startsWith('http')) return imageUri; // Skip if it's already a URL
+
+    const formData = new FormData();
+    formData.append('image', {
+      uri: imageUri,
+      type: 'image/jpeg',
+      name: 'category_image.jpg',
+    });
+
+    try {
+      const response = await axiosInstance.post('category/upload', formData, {
+        headers: {'Content-Type': 'multipart/form-data'},
+      });
+
+      if (response.data.status && response.data.data.url) {
+        return response.data.data.url.replace(`${IMAGE_API}/`, ''); // Convert full URL to "categories/..."
+      } else {
+        throw new Error('Image upload failed');
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      return null;
+    }
+  };
+
+  const handleSave = async () => {
+    try {
+      let finalImageUri = imageUri;
+
+      if (imageUri && imageUri.startsWith('file://')) {
+        const uploadedImageUrl = await uploadImage();
+        if (uploadedImageUrl) {
+          finalImageUri = uploadedImageUrl; // Use uploaded path
+        } else {
+          showToastWithGravityAndOffset('Image upload failed');
+          return;
         }
-        setModalVisible(false);
-      },
-    );
+      }
+
+      const formData = new FormData();
+      formData.append('name', name);
+      formData.append('description', description);
+      formData.append('image', finalImageUri); // Use the final formatted image path
+
+      if (update) {
+        formData.append('id', id);
+        await axiosInstance.post('category/save', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        showToastWithGravityAndOffset('Category updated successfully');
+      } else {
+        await axiosInstance.post('category/save', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        showToastWithGravityAndOffset('Category added successfully');
+      }
+
+      navigation.goBack();
+    } catch (error) {
+      console.log('Error:', error.response?.data);
+      showToastWithGravityAndOffset(
+        error.response?.data?.message || 'Failed to save category.',
+      );
+    }
+  };
+
+  useEffect(() => {
+    IMAGE_API;
+    imageUri;
+    item;
+  }, []);
+
+  const handleOpenGallery = () => {
+    launchImageLibrary({mediaType: 'photo'}, response => {
+      if (response.assets && response.assets.length > 0) {
+        const newImageUri = response.assets[0].uri;
+        setImageUri(newImageUri);
+      }
+      setModalVisible(false);
+    });
+  };
+
+  const handleOpenCamera = () => {
+    launchCamera({mediaType: 'photo'}, response => {
+      if (response.assets && response.assets.length > 0) {
+        const newImageUri = response.assets[0].uri;
+        setImageUri(newImageUri);
+      }
+      setModalVisible(false);
+    });
   };
 
   const handleImagePress = () => {
@@ -122,7 +196,7 @@ const AdminAddCategory = () => {
                 style={styles.avatarContainer}>
                 {imageUri ? (
                   <Image
-                    source={{uri: imageUri}}
+                    source={{uri: `${imageUri}`}}
                     style={styles.defaultAvatar}
                   />
                 ) : (
@@ -153,20 +227,20 @@ const AdminAddCategory = () => {
               <View style={{marginBottom: 16}}>
                 <Text style={styles.title}>Description</Text>
                 <TextInput
+                  style={styles.input}
                   value={description}
                   onChangeText={setDescription}
-                  placeholder="Type your description"
-                  placeholderTextColor={'grey'}
-                  style={styles.input}
+                  placeholder="Enter description here"
+                  multiline={true}
+                  numberOfLines={5}
+                  textAlignVertical="top"
                 />
               </View>
             </View>
             <View>
               <TouchableOpacity
                 style={styles.signInButton}
-                onPress={() => {
-                  navigation.goBack();
-                }}>
+                onPress={handleSave}>
                 <Text style={styles.buttonText}>Save</Text>
               </TouchableOpacity>
             </View>

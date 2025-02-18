@@ -14,6 +14,7 @@ import {
 import {useNavigation} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import axiosInstance from '../axios/axiosInstance';
+import {IMAGE_API} from '@env';
 
 const sortOptions = [
   {id: '1', label: 'Filter', value: 'filter'},
@@ -62,6 +63,7 @@ const OfferPage = () => {
 
   useEffect(() => {
     GetList();
+    IMAGE_API;
   }, []);
 
   useEffect(() => {
@@ -121,29 +123,37 @@ const OfferPage = () => {
       style={styles.verticalBox}
       onPress={() => navigation.navigate('FoodDetail', {item})}>
       <View style={styles.verticalImageContainer}>
-        <Image style={styles.verticalImage} source={{uri: item.image}} />
+        <Image
+          style={styles.verticalImage}
+          source={{uri: `${IMAGE_API}/${item.image}`}}
+          accessibilityLabel="A beautiful landscape"
+        />
+        <View style={styles.textOverlay}>
+          <Text style={styles.tag} numberOfLines={1} ellipsizeMode="tail">
+            {item.price}
+          </Text>
+        </View>
       </View>
       <View style={styles.verticalDetails}>
-        <Text style={styles.foodName}>{item.name}</Text>
         <View
           style={{
             flexDirection: 'row',
             justifyContent: 'space-between',
             alignItems: 'center',
+            marginTop: 8,
           }}>
-          <Text style={styles.foodPrice}>₹ {item.price}</Text>
+          <View style={{maxWidth: 270}} numberOfLines={1} ellipsizeMode="tail">
+            <Text
+              style={styles.foodName}
+              numberOfLines={1}
+              ellipsizeMode="tail">
+              {item.name}
+            </Text>
+          </View>
           <View style={styles.ratingContainer}>
             <Text style={styles.ratingText}>{item.rating}</Text>
             <Icon name="star" color={'#fff'} size={12} />
           </View>
-        </View>
-        <View>
-          <Text
-            numberOfLines={2}
-            ellipsizeMode="tail"
-            style={styles.detailText}>
-            {item.description}
-          </Text>
         </View>
         <View style={{flexDirection: 'row', alignItems: 'center'}}>
           <Icon name="brightness-percent" size={20} color={'red'} />
@@ -167,7 +177,8 @@ const OfferPage = () => {
         <ScrollView
           horizontal
           style={styles.filterBar}
-          showsHorizontalScrollIndicator={false}>
+          showsHorizontalScrollIndicator={false}
+          showsVerticalScrollIndicator={false}>
           {sortOptions.map(option => (
             <TouchableOpacity
               key={option.id}
@@ -227,6 +238,8 @@ const OfferPage = () => {
           keyExtractor={(_, index) => index.toString()}
           renderItem={renderPlaceholder}
           contentContainerStyle={styles.listContainer}
+          showsHorizontalScrollIndicator={false}
+          showsVerticalScrollIndicator={false}
         />
       ) : (
         <FlatList
@@ -234,6 +247,8 @@ const OfferPage = () => {
           keyExtractor={item => item.id.toString()}
           renderItem={renderVerticalItem}
           contentContainerStyle={styles.listContainer}
+          showsHorizontalScrollIndicator={false}
+          showsVerticalScrollIndicator={false}
         />
       )}
     </SafeAreaView>
@@ -318,26 +333,45 @@ const styles = StyleSheet.create({
   },
   verticalBox: {
     borderRadius: 10,
-    margin: 5,
+    margin: 14,
     backgroundColor: 'white',
-    padding: 10,
-    flexDirection: 'row',
-    alignItems: 'flex-start',
+    paddingBottom: 10,
+    borderColor: '#ccc',
+    borderWidth: 0.5,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 2,
   },
+
   verticalImageContainer: {
-    width: 120,
-    height: 120,
+    width: '100%',
+    height: 200,
     borderRadius: 10,
     overflow: 'hidden',
-    borderWidth: 0.5,
-    borderColor: '#ccc',
   },
   verticalImage: {
     width: '100%',
     height: '100%',
+    resizeMode: 'cover',
+  },
+  textOverlay: {
+    position: 'absolute',
+    left: 7,
+    bottom: '4%',
+    backgroundColor: '#000',
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+  },
+  tag: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#FFF',
   },
   verticalDetails: {
-    marginLeft: 12,
+    marginHorizontal: 8,
     flex: 1,
     justifyContent: 'space-between',
   },

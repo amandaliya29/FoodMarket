@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -8,7 +8,7 @@ import {
   Image,
   ToastAndroid,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import axiosInstance from '../../axios/axiosInstance';
 import {IMAGE_API} from '@env';
 
@@ -16,6 +16,7 @@ const AdminCategories = () => {
   const navigation = useNavigation();
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   const showToastWithGravityAndOffset = message => {
     ToastAndroid.showWithGravityAndOffset(
@@ -28,6 +29,8 @@ const AdminCategories = () => {
   };
 
   const GetList = async () => {
+    setLoading(true);
+    setRefreshing(true);
     try {
       const response = await axiosInstance.get('category/list');
       const categories = response.data.data.map(item => ({
@@ -42,12 +45,36 @@ const AdminCategories = () => {
       showToastWithGravityAndOffset(error.response.data.message);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
+  const onRefresh = () => {
+    setRefreshing(true);
+    GetList();
+  };
 
+  useFocusEffect(
+    useCallback(() => {
+      GetList();
+    }, []),
+  );
   useEffect(() => {
+    onRefresh();
+    data;
+    // IMAGE_API;
     GetList();
   }, []);
+
+  const DeleteButton = async id => {
+    try {
+      await axiosInstance.delete(`category/delete/${id}`);
+      setData(prevData => prevData.filter(item => item.id !== id));
+
+      showToastWithGravityAndOffset('Item deleted successfully.');
+    } catch (error) {
+      showToastWithGravityAndOffset(error.response?.data?.message);
+    }
+  };
 
   const renderPlaceholder = () => (
     <View style={styles.verticalBox}>
@@ -84,6 +111,7 @@ const AdminCategories = () => {
         <Image
           style={styles.verticalImage}
           source={{uri: `${IMAGE_API}/${item.image}`}}
+          accessibilityLabel="A beautiful landscape"
         />
       </View>
       <View style={styles.detailsContainer}>
@@ -98,14 +126,25 @@ const AdminCategories = () => {
           <TouchableOpacity
             style={[styles.button, styles.detailsButton]}
             onPress={() =>
-              navigation.navigate('CategoriesDetail', {category: item})
+              navigation.navigate('CategoriesDetail', {
+                category: item,
+                isAdmin: true,
+              })
             }>
             <Text style={styles.buttonText}>View</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.button, styles.updateButton]}>
+          <TouchableOpacity
+            onPress={() =>
+              navigation.navigate('AdminAddCategory', {item, update: true})
+            }
+            style={[styles.button, styles.updateButton]}>
             <Text style={styles.buttonText}>Update</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.button, styles.deleteButton]}>
+          <TouchableOpacity
+            style={[styles.button, styles.deleteButton]}
+            onPress={() => {
+              DeleteButton(item.id);
+            }}>
             <Text style={styles.buttonText}>Delete</Text>
           </TouchableOpacity>
         </View>
@@ -126,6 +165,8 @@ const AdminCategories = () => {
           data={data}
           keyExtractor={item => item.id.toString()}
           renderItem={renderCategoryItem}
+          refreshing={refreshing}
+          onRefresh={onRefresh}
         />
       )}
     </View>

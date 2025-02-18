@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef} from 'react';
+import React, {useState, useEffect, useRef, useCallback} from 'react';
 import {
   View,
   Text,
@@ -14,11 +14,23 @@ import {IMAGE_API} from '@env';
 import Categories from './pages/Categories';
 import AnimatedFlatList from './pages/AnimatedFlatList';
 import FoodTab from './pages/FoodTab';
+import {useFocusEffect} from '@react-navigation/native';
 
 const HomeScreen = () => {
   const [userDetails, setUserDetail] = useState(null);
   const [imageUri, setImageUri] = useState('');
   const [userName, setUserName] = useState('');
+
+  useEffect(() => {
+    imageUri;
+    IMAGE_API;
+  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      imageUri;
+      IMAGE_API;
+    }, []),
+  );
 
   const fetchUserDetails = async () => {
     try {
@@ -62,7 +74,7 @@ const HomeScreen = () => {
   const renderHeader = () => (
     <View style={styles.head}>
       <View>
-        <Text style={styles.text}>FoodMarket</Text>
+        <Text style={styles.text}>Food Market</Text>
         <Text style={styles.letsGetSome}>Let's get some foods</Text>
       </View>
       <View>
@@ -74,6 +86,7 @@ const HomeScreen = () => {
             width={50}
             resizeMode="cover"
             source={{uri: imageUri}}
+            accessibilityLabel="user profile photo"
           />
         ) : (
           <UserAvatar size={45} name={userName || 'Food Market'} />
@@ -92,7 +105,6 @@ const HomeScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* {console.log(IMAGE_API)} */}
       <FlatList
         data={[]}
         showsHorizontalScrollIndicator={false}

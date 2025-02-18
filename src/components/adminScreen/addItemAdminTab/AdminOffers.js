@@ -89,7 +89,11 @@ const AdminOffers = () => {
   const renderCategoryItem = ({item}) => (
     <View style={styles.container}>
       <View style={styles.verticalImageContainer}>
-        <Image style={styles.verticalImage} source={{uri: `${item.image}`}} />
+        <Image
+          style={styles.verticalImage}
+          source={{uri: `${IMAGE_API}/${item.image}`}}
+          accessibilityLabel="A beautiful landscape"
+        />
       </View>
       <View style={styles.detailsContainer}>
         <Text style={styles.foodName}>{item.name}</Text>

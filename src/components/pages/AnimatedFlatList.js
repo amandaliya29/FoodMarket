@@ -7,50 +7,60 @@ import {
   Animated,
   TouchableOpacity,
   useWindowDimensions,
+  FlatList,
+  ToastAndroid,
 } from 'react-native';
 import {foodList} from '../foodlist';
 import {useNavigation} from '@react-navigation/native';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import Icon2 from 'react-native-vector-icons/Ionicons';
-
+import axiosInstance from '../axios/axiosInstance';
+import {IMAGE_API} from '@env';
 const AnimatedFlatList = () => {
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentIndex(prevIndex => {
-        const newIndex = prevIndex === foodList.length - 1 ? 0 : prevIndex + 1;
-        flatListRef.current.scrollToIndex({index: newIndex, animated: true});
-        return newIndex;
-      });
-    }, 3000);
-
-    return () => clearInterval(interval);
-  }, []);
-
   const {width} = useWindowDimensions();
   const navigation = useNavigation();
   const flatListRef = useRef(null);
   const scrollX = useRef(new Animated.Value(0)).current;
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [data, setData] = useState([]);
 
-  const handleScrollEnd = event => {
-    const offsetX = event.nativeEvent.contentOffset.x;
-    const newIndex = Math.round(offsetX / width);
-    setCurrentIndex(newIndex);
+  const showToastWithGravityAndOffset = message => {
+    ToastAndroid.showWithGravityAndOffset(
+      message,
+      ToastAndroid.CENTER,
+      ToastAndroid.BOTTOM,
+      25,
+      50,
+    );
   };
 
-  const renderHorizontalItem = ({item, index}) => {
-    const inputRange = [
-      (index - 1) * width,
-      index * width,
-      (index + 1) * width,
-    ];
+  const GetList = async () => {
+    try {
+      const response = await axiosInstance.get('/offer/list');
+      const products = response.data.data.map(item => ({
+        id: item.id,
+        banner: item.banner,
+      }));
+      setData(products);
+    } catch (error) {
+      showToastWithGravityAndOffset(error.response?.data?.message);
+    }
+  };
 
-    const scale = scrollX.interpolate({
-      inputRange,
-      outputRange: [0.5, 1, 0.5],
-      extrapolate: 'clamp',
-    });
+  useEffect(() => {
+    GetList(), data;
+  }, []);
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentIndex(prevIndex => {
+        const newIndex = prevIndex === foodList.length - 1 ? 0 : prevIndex + 1;
+        flatListRef.current?.scrollToIndex({index: newIndex, animated: true});
+        return newIndex;
+      });
+    }, 30000000000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const renderHorizontalItem = ({item}) => {
     return (
       <TouchableOpacity
         key={item.id.toString()}
@@ -58,145 +68,121 @@ const AnimatedFlatList = () => {
           width,
           justifyContent: 'center',
           alignItems: 'center',
+          marginTop: 10,
         }}
-        onPress={() => navigation.navigate('FoodDetail', {item})}>
-        <Animated.View
-          style={[
-            styles.box,
-            {
-              transform: [{scale}],
-              width: width - 30,
-            },
-          ]}>
+        onPress={() => navigation.navigate('Offer', {item})}>
+        <View style={[styles.box, {width: width - 30}]}>
           <View style={styles.imageContainer}>
-            <Image style={styles.image} source={{uri: item.image}} />
-          </View>
+            <Image
+              style={styles.image}
+              source={{uri: `${IMAGE_API}/${item.banner}`}}
+            />
 
-          <View style={{paddingHorizontal: 12}}>
-            <Text style={styles.foodName}>{item.name}</Text>
-            <View
-              style={{
-                flexDirection: 'row',
-                marginTop: 6,
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                alignContent: 'center',
-              }}>
-              <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                <Icon name="brightness-percent" size={20} color={'red'} />
-                <Text style={{color: 'grey', fontSize: 14, paddingLeft: 4}}>
-                  40% OFF
-                </Text>
-              </View>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  alignContent: 'center',
-                  justifyContent: 'center',
-                  borderRadius: 8,
-                  padding: 2,
-                  paddingHorizontal: 6,
-                  backgroundColor: 'green',
-                }}>
-                <Text style={{color: '#fff', fontSize: 14, paddingRight: 2}}>
-                  {item.rating.toFixed(1)}
-                </Text>
-                <Icon2 name="star" color={'#fff'} size={12} />
-              </View>
-            </View>
+            {/* <View style={styles.textOverlay}>
+              <Text style={styles.foodName}>{item.name}</Text>
+            </View> */}
           </View>
-        </Animated.View>
+        </View>
       </TouchableOpacity>
     );
   };
+
+  const renderDots = () => {
+    return (
+      <View style={styles.dotContainer}>
+        {foodList.map((_, i) => {
+          const opacity = scrollX.interpolate({
+            inputRange: [(i - 1) * width, i * width, (i + 1) * width],
+            outputRange: [0.3, 1, 0.3],
+            extrapolate: 'clamp',
+          });
+          return <Animated.View key={i} style={[styles.dot, {opacity}]} />;
+        })}
+      </View>
+    );
+  };
+
   return (
-    <Animated.FlatList
-      ref={flatListRef}
-      data={foodList}
-      horizontal={true}
-      showsHorizontalScrollIndicator={false}
-      keyExtractor={item => item.id.toString()}
-      renderItem={renderHorizontalItem}
-      pagingEnabled={true}
-      snapToAlignment="center"
-      snapToInterval={width}
-      decelerationRate="normal"
-      onScroll={Animated.event([{nativeEvent: {contentOffset: {x: scrollX}}}], {
-        useNativeDriver: true,
-      })}
-      onMomentumScrollEnd={handleScrollEnd}
-      style={styles.horizontalList}
-    />
+    <View>
+      <FlatList
+        ref={flatListRef}
+        data={data}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        keyExtractor={item => item.id.toString()}
+        renderItem={renderHorizontalItem}
+        pagingEnabled
+        snapToAlignment="center"
+        snapToInterval={width}
+        decelerationRate="normal"
+        onScroll={Animated.event(
+          [{nativeEvent: {contentOffset: {x: scrollX}}}],
+          {useNativeDriver: false},
+        )}
+        style={styles.horizontalList}
+      />
+      {renderDots()}
+    </View>
   );
 };
 
 export default AnimatedFlatList;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingTop: 8,
-    backgroundColor: '#fff',
-  },
-  text: {
-    fontSize: 20,
-    fontWeight: '500',
-    color: 'black',
-  },
-  letsGetSome: {
-    fontSize: 13,
-    fontWeight: '300',
-    color: '#8d92a3',
-  },
-  head: {
-    padding: 16,
-    paddingVertical: 2,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 6,
-  },
-  profileImage: {
-    height: 44,
-    width: 44,
-    borderRadius: 8,
-    borderWidth: 1,
-  },
   box: {
-    borderRadius: 10,
+    borderRadius: 20,
     backgroundColor: 'white',
-    marginTop: 10,
     overflow: 'hidden',
-    paddingBottom: 12,
     shadowColor: '#8D92A3',
-    shadowOffset: {
-      width: 0,
-      height: 3,
-    },
-    shadowRadius: 15,
-    elevation: 10,
+    shadowOffset: {width: 1, height: 3},
+    shadowRadius: 20,
+    elevation: 8,
     shadowOpacity: 1,
   },
   imageContainer: {
     width: '100%',
     height: 200,
     borderWidth: 0.5,
-    borderColor: '#ccc',
-    marginBottom: 12,
+    borderColor: 'transparent',
   },
   image: {
     width: '100%',
     height: '100%',
     resizeMode: 'cover',
   },
+  textOverlay: {
+    position: 'absolute',
+    left: 15,
+    top: '15%',
+    transform: [{translateY: -20}],
+    backgroundColor: '#000',
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+  },
   foodName: {
-    fontSize: 16,
+    fontSize: 12,
     fontWeight: 'bold',
-    color: '#020202',
+    color: '#FFF',
+  },
+  foodOffer: {
+    fontSize: 14,
+    color: '#FFD700',
+  },
+  dotContainer: {
+    flexDirection: 'row',
+    alignSelf: 'center',
+    marginTop: 0,
+    marginBottom: 10,
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#FF4D61',
+    marginHorizontal: 5,
   },
   horizontalList: {
     paddingBottom: 16,
-    alignContent: 'center',
   },
 });

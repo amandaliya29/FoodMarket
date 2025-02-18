@@ -11,15 +11,20 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {useNavigation} from '@react-navigation/native';
-import React from 'react';
+import React, {useEffect} from 'react';
 import {useDispatch} from 'react-redux';
 import {cancelOrder} from '../redux/cartSlice';
+import {IMAGE_API} from '@env';
 
 const InProgressDetail = ({route}) => {
   const {item, isPastOrder} = route.params;
   const navigation = useNavigation();
   const dispatch = useDispatch();
 
+  useEffect(() => {
+    IMAGE_API;
+    item;
+  }, []);
   const renderVerticalItem = ({item}) => (
     <TouchableOpacity
       onPress={() => {
@@ -28,7 +33,10 @@ const InProgressDetail = ({route}) => {
       key={item.id.toString()}
       style={styles.verticalBox}>
       <View style={styles.verticalImageContainer}>
-        <Image style={styles.verticalImage} source={{uri: item.image}} />
+        <Image
+          style={styles.verticalImage}
+          source={{uri: `${IMAGE_API}/${item.image}`}}
+        />
       </View>
       <View style={styles.verticalDetailsContainer}>
         <View style={styles.verticalDetails}>

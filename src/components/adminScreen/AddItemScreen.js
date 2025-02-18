@@ -9,6 +9,7 @@ import {
   SafeAreaView,
   Modal,
   Pressable,
+  Image,
   FlatList,
 } from 'react-native';
 import {TabView, SceneMap} from 'react-native-tab-view';
@@ -16,6 +17,7 @@ import AdminCategories from './addItemAdminTab/AdminCategories';
 import AdminAddItem from './addItemAdminTab/AdminAddItem';
 import AdminOffers from './addItemAdminTab/AdminOffers';
 import Icon from 'react-native-vector-icons/Ionicons';
+import Icon3 from 'react-native-vector-icons/FontAwesome6';
 import Icon2 from 'react-native-vector-icons/MaterialIcons';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {useDispatch, useSelector} from 'react-redux';
@@ -32,6 +34,8 @@ const AddItemScreen = () => {
   const layout = useWindowDimensions();
   const [index, setIndex] = useState(0);
   const [isModalVisible, setModalVisible] = useState(false);
+  const [isSearchModalVisible, setSearchModalVisible] = useState(false);
+
   const [routes] = useState([
     {key: 'Categories', title: 'Categories'},
     {key: 'Item', title: 'Products'},
@@ -39,74 +43,6 @@ const AddItemScreen = () => {
   ]);
   const tabTitleWidths = useRef([]);
   const fixedIndicatorWidth = 40;
-
-  const dispatch = useDispatch();
-  const width = useWindowDimensions().width;
-  const [query, setQuery] = useState('');
-  const searchHistory = useSelector(state => state.cart.searchHistory);
-
-  useFocusEffect(
-    useCallback(() => {
-      setQuery('');
-    }, []),
-  );
-
-  const filteredFoodList = foodList.filter(item =>
-    item.name.toLowerCase().includes(query.toLowerCase()),
-  );
-
-  const handleItemPress = item => {
-    Keyboard.dismiss();
-    dispatch(addSearchHistory(item.name));
-    navigation.navigate('FoodDetail', {item});
-  };
-
-  const handleClearHistory = () => {
-    dispatch(clearHistory());
-  };
-
-  const handleRemoveHistoryItem = historyItem => {
-    dispatch(removeSearchHistoryItem(historyItem));
-  };
-
-  const renderHistoryItem = ({item}) => (
-    <View
-      style={[
-        styles.historyBox,
-        {flexDirection: 'row', justifyContent: 'space-between'},
-      ]}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignContent: 'center',
-          alignItems: 'center',
-        }}>
-        <Icon3 name="clock-rotate-left" size={16} color="#8d92a3" />
-        <Text
-          style={styles.historyItem}
-          ellipsizeMode="tail"
-          numberOfLines={1}
-          onPress={() => setQuery(item)}>
-          {item}
-        </Text>
-      </View>
-      <TouchableOpacity onPress={() => handleRemoveHistoryItem(item)}>
-        <Icon name="close" size={22} color="#8d92a3" />
-      </TouchableOpacity>
-    </View>
-  );
-
-  const renderFoodItem = ({item}) => (
-    <TouchableOpacity onPress={() => handleItemPress(item)}>
-      <View style={styles.foodItem}>
-        <Image source={{uri: item.image}} style={styles.foodImage} />
-        <View style={styles.foodInfo}>
-          <Text style={styles.foodName}>{item.name}</Text>
-          <Text style={styles.foodPrice}>₹{item.price.toFixed(2)}</Text>
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
 
   const handleTextLayout = (event, i) => {
     const {width} = event.nativeEvent.layout;
@@ -180,28 +116,24 @@ const AddItemScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.head}>
-        <View>
-          <Text style={styles.text}>Add Products</Text>
-          <Text style={styles.letsGetSome}>Let's get some foods</Text>
-        </View>
-      </View>
-      <View>
         <View style={styles.head}>
-          <View style={[styles.searchContainer, {width: width - 30}]}>
+          <View>
+            <Text style={styles.text}>Add Products</Text>
+            <Text style={styles.letsGetSome}>Let's get some foods</Text>
+          </View>
+        </View>
+        <View>
+          <TouchableOpacity
+            onPress={() => {
+              navigation.navigate('AdminSearch');
+            }}>
             <Icon2
               name="search"
-              size={24}
-              color="#8d92a3"
+              size={28}
+              color="#000"
               style={styles.searchIcon}
             />
-            <TextInput
-              style={styles.textInput}
-              placeholder="Search FoodMarket"
-              placeholderTextColor="#8d92a3"
-              value={query}
-              onChangeText={setQuery}
-            />
-          </View>
+          </TouchableOpacity>
         </View>
       </View>
       <TabView
@@ -269,54 +201,6 @@ const AddItemScreen = () => {
           </View>
         </View>
       </Modal>
-      <Modal
-        transparent={true}
-        visible={isModalVisible}
-        animationType="slide"
-        onRequestClose={toggleModal}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            {query === '' && (
-              <View style={styles.historyContainer}>
-                {searchHistory.length > 0 ? (
-                  <>
-                    <View style={styles.historyHeader}>
-                      <Text style={styles.historyTitle}>Search History</Text>
-                      <TouchableOpacity onPress={handleClearHistory}>
-                        <Text style={styles.clearHistoryButton}>Clear All</Text>
-                      </TouchableOpacity>
-                    </View>
-                    <FlatList
-                      data={searchHistory}
-                      keyExtractor={(item, index) => index.toString()}
-                      renderItem={renderHistoryItem}
-                    />
-                  </>
-                ) : (
-                  <View style={styles.centeredContainer}>
-                    <Text style={styles.placeholderText}>Search your item</Text>
-                  </View>
-                )}
-              </View>
-            )}
-
-            {query !== '' && (
-              <>
-                {filteredFoodList.length > 0 ? (
-                  <FlatList
-                    data={filteredFoodList}
-                    keyExtractor={item => item.id.toString()}
-                    keyboardShouldPersistTaps="handled"
-                    renderItem={renderFoodItem}
-                  />
-                ) : (
-                  <Text style={styles.noResultsText}>No results found</Text>
-                )}
-              </>
-            )}
-          </View>
-        </View>
-      </Modal>
     </SafeAreaView>
   );
 };
@@ -339,14 +223,14 @@ const styles = StyleSheet.create({
     fontWeight: '300',
     color: '#8d92a3',
   },
-  head: {
-    padding: 16,
-    paddingVertical: 2,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 6,
-  },
+  // head: {
+  //   padding: 16,
+  //   paddingVertical: 2,
+  //   flexDirection: 'row',
+  //   justifyContent: 'space-between',
+  //   alignItems: 'center',
+  //   marginBottom: 6,
+  // },
   tabBar: {
     backgroundColor: '#fff',
     flexDirection: 'row',
@@ -381,6 +265,12 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 16,
   },
+  searchModalContainer: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'white',
+    padding: 16,
+  },
   modalButton: {
     backgroundColor: '#fff',
     padding: 10,
@@ -388,6 +278,8 @@ const styles = StyleSheet.create({
     borderWidth: 0.2,
     borderRadius: 10,
     borderColor: '#eb0029',
+    alignContent: 'center',
+    alignItems: 'center',
   },
   modalButtonText: {
     color: '#eb0029',
@@ -395,10 +287,11 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   head: {
-    paddingLeft: 16,
+    paddingLeft: 8,
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
+    justifyContent: 'space-between',
+    paddingRight: 8,
   },
   backButton: {
     marginRight: 14,
@@ -412,7 +305,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   searchIcon: {
-    marginRight: 4,
+    marginRight: 0,
   },
   textInput: {
     flex: 1,

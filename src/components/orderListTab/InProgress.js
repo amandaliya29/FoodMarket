@@ -11,6 +11,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
+import {IMAGE_API} from '@env';
 
 const InProgress = () => {
   const items = useSelector(state => state.cart.orders);
@@ -30,6 +31,10 @@ const InProgress = () => {
     setCurrentItems(items);
   }, [items]);
 
+  useEffect(() => {
+    IMAGE_API;
+    items;
+  }, []);
   return (
     <View style={styles.container}>
       {items.length === 0 ? (
@@ -79,7 +84,7 @@ const InProgress = () => {
                       {item.items.slice(0, 3).map((orderItem, index) => (
                         <Image
                           key={index}
-                          source={{uri: orderItem.image}}
+                          source={{uri: `${IMAGE_API}/${orderItem.image}`}}
                           style={styles.image}
                         />
                       ))}
@@ -93,7 +98,7 @@ const InProgress = () => {
                     item.items.map((orderItem, index) => (
                       <Image
                         key={index}
-                        source={{uri: orderItem.image}}
+                        source={{uri: `${IMAGE_API}/${orderItem.image}`}}
                         style={
                           item.items.length === 1
                             ? styles.singleImage

@@ -76,7 +76,6 @@ const AdminProfile = ({navigation}) => {
 
   const menuOptions = [
     {id: 1, name: 'Edit Profile', screen: 'AdminSetProfile', icon: 'person'},
-    {id: 3, name: 'Search', screen: 'AdminSearch', icon: 'search'},
     {
       id: 2,
       name: 'Reset Password',

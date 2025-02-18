@@ -28,6 +28,7 @@ import RazorpayCheckout from 'react-native-razorpay';
 import {RAZORPAY_KEY} from '@env';
 import Icon2 from 'react-native-vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {IMAGE_API} from '@env';
 
 const AddToCart = () => {
   const cartItems = useSelector(state => state.cart.items);
@@ -53,6 +54,8 @@ const AddToCart = () => {
 
   useEffect(() => {
     fetchUserDetails();
+    IMAGE_API;
+    cartItems;
   }, []);
 
   const onRefresh = () => {
@@ -68,66 +71,12 @@ const AddToCart = () => {
   );
 
   const handleCheckout = () => {
-    setModalVisible(true);
+    // setModalVisible(true);
+    navigation.navigate('EditAddress', {cartItems});
   };
 
   const closeModal = () => {
     setModalVisible(false);
-  };
-
-  const handlePaymentOption = option => {
-    const orderDetails = {
-      items: cartItems,
-      totalPrice: totalCartPrice,
-      paymentMethod: option,
-      orderDate: (() => {
-        const now = new Date();
-        const date = now.toLocaleDateString();
-        const time = now.toLocaleTimeString();
-        return `${date} ${time}`;
-      })(),
-      status: 'inProgress',
-    };
-
-    closeModal();
-
-    if (option === 'cash') {
-      dispatch(addOrder(orderDetails));
-      dispatch(clearCart());
-      console.log('Cash on Delivery selected');
-      moveToPastOrdersAfterDelay(orderDetails);
-    } else if (option === 'online') {
-      var options = {
-        description: 'Credits towards consultation',
-        image: require('../../assets/vector.png'),
-        currency: 'INR',
-        key: RAZORPAY_KEY,
-        amount: totalCartPrice * 100,
-        name: 'FoodMarket',
-        prefill: {
-          email: userDetails.data.user.email,
-          contact: '9191919191',
-          name: userDetails.data.user.name,
-        },
-        theme: {color: '#eb0029'},
-      };
-      RazorpayCheckout.open(options)
-        .then(data => {
-          dispatch(addOrder(orderDetails));
-          dispatch(clearCart());
-          alert(`Success: ${data.razorpay_payment_id}`);
-          moveToPastOrdersAfterDelay(orderDetails);
-        })
-        .catch(error => {
-          alert(`Error: ${error.code} | ${error.description}`);
-        });
-    }
-  };
-
-  const moveToPastOrdersAfterDelay = orderDetails => {
-    setTimeout(() => {
-      dispatch(moveOrderToPast(orderDetails));
-    }, 30000);
   };
 
   const Wishlist = () => {
@@ -148,7 +97,10 @@ const AddToCart = () => {
             navigation.navigate('FoodDetail', {item});
           }}>
           <View style={styles.imageContainer(width, height)}>
-            <Image style={styles.image} source={{uri: item.image}} />
+            <Image
+              style={styles.image}
+              source={{uri: `${IMAGE_API}/${item.image}`}}
+            />
           </View>
 
           <View style={{paddingLeft: 12}}>
@@ -166,7 +118,7 @@ const AddToCart = () => {
                   backgroundColor: 'green',
                 }}>
                 <Text style={{color: '#fff', fontSize: 14, paddingRight: 2}}>
-                  {item.rating.toFixed(1)}
+                  {item.rating}
                 </Text>
                 <Icon2 name="star" color={'#fff'} size={12} />
               </View>
@@ -284,7 +236,10 @@ const AddToCart = () => {
     <View style={{marginHorizontal: 16, marginVertical: 5}}>
       <View key={item.id.toString()} style={[styles.verticalBox]}>
         <View style={styles.verticalImageContainer}>
-          <Image style={styles.verticalImage} source={{uri: item.image}} />
+          <Image
+            style={styles.verticalImage}
+            source={{uri: `${IMAGE_API}/${item.image}`}}
+          />
         </View>
         <View
           style={{
@@ -384,7 +339,7 @@ const AddToCart = () => {
         </View>
         <TouchableOpacity style={styles.addToCart} onPress={handleCheckout}>
           <Text style={{color: 'white', fontWeight: '500', fontSize: 14}}>
-            Checkout Now
+            Payment
           </Text>
         </TouchableOpacity>
       </View>
@@ -447,30 +402,6 @@ const AddToCart = () => {
           <BottomFun />
         </>
       )}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={isModalVisible}
-        onRequestClose={closeModal}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>Select Payment Method</Text>
-            <TouchableOpacity
-              style={styles.paymentButton}
-              onPress={() => handlePaymentOption('cash')}>
-              <Text style={styles.paymentText}>Cash on Delivery</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.paymentButton}
-              onPress={() => handlePaymentOption('online')}>
-              <Text style={styles.paymentText}>Online Payment</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.closeButton} onPress={closeModal}>
-              <Text style={styles.closeText}>Cancel</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
     </SafeAreaView>
   );
 };
@@ -597,41 +528,45 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, .5)',
     justifyContent: 'flex-end',
     alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContainer: {
-    width: '100%',
     backgroundColor: 'white',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 20,
+    paddingVertical: 16,
+    paddingHorizontal: 10,
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
+    height: '30%',
     alignItems: 'center',
   },
   modalTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 20,
+    marginBottom: 30,
+    color: '#000',
+  },
+  paymentRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
   },
   paymentButton: {
-    width: '100%',
-    padding: 15,
-    backgroundColor: '#eb0029',
-    borderRadius: 8,
+    flex: 1,
+    flexDirection: 'column',
     alignItems: 'center',
-    marginVertical: 10,
+    padding: 10,
+    marginHorizontal: 10,
+    borderRadius: 10,
+    backgroundColor: '#f5f5f5',
   },
   paymentText: {
-    color: 'white',
-    fontSize: 14,
+    marginTop: 5,
+    fontSize: 16,
     fontWeight: '500',
   },
   closeButton: {
-    marginTop: 16,
-  },
-  closeText: {
-    color: '#eb0029',
-    fontSize: 14,
+    marginTop: 15,
   },
 });

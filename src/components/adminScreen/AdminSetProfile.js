@@ -8,6 +8,7 @@ import {
   View,
   Modal,
   Image,
+  PermissionsAndroid,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import React, {useEffect, useState} from 'react';
@@ -49,7 +50,9 @@ const UserProfile = () => {
 
   useEffect(() => {
     fetchUserDetails();
+    requestCameraPermission();
     imageUri;
+    IMAGE_API;
   }, []);
 
   const handleOpenGallery = () => {
@@ -65,14 +68,43 @@ const UserProfile = () => {
       },
     );
   };
+  const requestCameraPermission = async () => {
+    if (Platform.OS === 'android') {
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.CAMERA,
+          {
+            title: 'Camera Permission',
+            message: 'App needs access to your camera',
+            buttonPositive: 'OK',
+            buttonNegative: 'Cancel',
+          },
+        );
+        return granted === PermissionsAndroid.RESULTS.GRANTED;
+      } catch (err) {
+        console.warn('Camera permission error:', err);
+        return false;
+      }
+    }
+    return true;
+  };
 
-  const handleOpenCamera = () => {
+  const handleOpenCamera = async () => {
+    const hasPermission = await requestCameraPermission();
+    if (!hasPermission) {
+      return;
+    }
+
     launchCamera(
       {
         mediaType: 'photo',
+        cameraType: 'back',
+        saveToPhotos: true,
       },
       response => {
-        if (response.assets && response.assets.length > 0) {
+        if (response.didCancel) {
+        } else if (response.errorMessage) {
+        } else if (response.assets && response.assets.length > 0) {
           setImageUri(response.assets[0].uri);
         }
         setModalVisible(false);
@@ -143,6 +175,7 @@ const UserProfile = () => {
                 onChangeText={setEmail}
                 placeholder="Type your Email"
                 placeholderTextColor={'grey'}
+                editable={false}
                 style={styles.input}
               />
             </View>

@@ -9,6 +9,7 @@ import {
   Modal,
   Image,
   ScrollView,
+  ToastAndroid,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Icon2 from 'react-native-vector-icons/EvilIcons';
@@ -19,6 +20,7 @@ import RNPickerSelect from 'react-native-picker-select';
 import TagInput from './TagInput';
 import axiosInstance from '../../axios/axiosInstance';
 import ToggleSwitch from 'toggle-switch-react-native';
+import {IMAGE_API} from '@env';
 
 const AdminAddProduct = () => {
   const route = useRoute();
@@ -26,12 +28,17 @@ const AdminAddProduct = () => {
   const update = route.params?.update;
   const navigation = useNavigation();
   const {width} = useWindowDimensions();
+  const [id, setId] = useState();
   const [description, setDescription] = useState();
   const [ingredients, setIngredients] = useState([]);
   const [price, setPrice] = useState();
   const [rate, setRate] = useState();
   const [stock, setStock] = useState();
   const [is_hot, setIs_hot] = useState(!!item?.is_hot);
+  const [is_active, setIs_active] = useState(!!item?.is_active);
+  const [is_offer, setIs_offer] = useState(!!item?.is_offer);
+  const [offer_percentage, setOffer_percentage] = useState('');
+  const [offer_text, setOffer_text] = useState('');
   const [category, setCategory] = useState([]);
   const [imageUri, setImageUri] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
@@ -39,39 +46,21 @@ const AdminAddProduct = () => {
   const [name, setName] = useState('');
   const [categoryList, setCategoryList] = useState();
 
-  //   const fetchUserDetails = async () => {
-  //     try {
-  //       const userDetails = await AsyncStorage.getItem('userDetails');
-  //       if (userDetails) {
-  //         const parsedDetails = JSON.parse(userDetails);
-  //         setUserDetail(parsedDetails);
-  //         setImageUri(
-  //           parsedDetails.data &&
-  //             parsedDetails.data.user &&
-  //             parsedDetails.data.user.avatar
-  //             ? `${IMAGE_API}/${parsedDetails.data.user.avatar}`
-  //             : null,
-  //         );
-  //         setUserName(parsedDetails.data.user.name);
-  //         setEmail(parsedDetails.data.user.email);
-  //       }
-  //     } catch (error) {
-  //       console.warn('Failed to load user details', error);
-  //     }
-  //   };
-  const handleToggle = async isOn => {
-    setIs_hot(!!isOn);
+  const showToastWithGravityAndOffset = message => {
+    ToastAndroid.showWithGravityAndOffset(
+      message,
+      ToastAndroid.CENTER,
+      ToastAndroid.BOTTOM,
+      25,
+      50,
+    );
+  };
 
-    // try {
-    //   await axiosInstance.patch(`category/update/${item.id}`, {
-    //     is_hot: isOn ? 1 : 0,
-    //   });
-    //   showToastWithGravityAndOffset('Hot status updated successfully.');
-    // } catch (error) {
-    //   showToastWithGravityAndOffset(
-    //     error.response?.data?.message || 'Failed to update hot status.',
-    //   );
-    // }
+  const handleToggle = async isOn => {
+    setIs_hot(isOn ? 1 : 0);
+  };
+  const handleIs_OfferToggle = async isOn => {
+    setIs_offer(isOn ? 1 : 0);
   };
   const CategoryListDisplay = async () => {
     try {
@@ -84,6 +73,7 @@ const AdminAddProduct = () => {
         products: item.products,
         ingredients: item.ingredients,
         is_hot: !!item.is_hot,
+        is_active: !!item.is_active,
       }));
       setCategoryList(categories);
     } catch (error) {
@@ -92,24 +82,27 @@ const AdminAddProduct = () => {
   };
 
   useEffect(() => {
-    // fetchUserDetails();
     CategoryListDisplay();
+    IMAGE_API;
     imageUri;
   }, []);
 
   useEffect(() => {
     if (route.params.update === true) {
       if (item) {
+        setId(item.id || '');
         setName(item.name || '');
-        setImageUri(item.image || '');
+        setImageUri(item.image ? `${IMAGE_API}/${item.image}` : '');
         setPrice(item.price?.toString() || '');
         setStock(item.stock?.toString() || '');
         setIngredients(item.ingredients || []);
         setDescription(item.description || '');
         setCategory(item.category_id || '');
         setIs_hot(!!item.is_hot || false);
+        setIs_active(!!item.is_active || true);
       }
     } else {
+      setId('');
       setName('');
       setImageUri('');
       setPrice('');
@@ -118,35 +111,130 @@ const AdminAddProduct = () => {
       setDescription('');
       setCategory('');
       setIs_hot(false);
+      setIs_active(true);
     }
   }, [item, update]);
 
-  const handleOpenGallery = () => {
-    launchImageLibrary(
-      {
-        mediaType: 'photo',
-      },
-      response => {
-        if (response.assets && response.assets.length > 0) {
-          setImageUri(response.assets[0].uri);
+  const uploadImage = async () => {
+    if (!imageUri || imageUri.startsWith('http')) return imageUri; // Skip if already uploaded
+
+    const formData = new FormData();
+    formData.append('image', {
+      uri: imageUri,
+      type: 'image/jpeg',
+      name: 'product_image.jpg',
+    });
+
+    try {
+      const response = await axiosInstance.post('product/upload', formData, {
+        headers: {'Content-Type': 'multipart/form-data'},
+      });
+
+      if (response.data.status && response.data.data.url) {
+        return response.data.data.url; // Return uploaded image URL
+      } else {
+        throw new Error('Image upload failed');
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      return null;
+    }
+  };
+
+  const handleSave = async () => {
+    try {
+      let finalImageUri = imageUri;
+
+      if (imageUri && imageUri.startsWith('file://')) {
+        const uploadedImageUrl = await uploadImage();
+        if (uploadedImageUrl) {
+          finalImageUri = uploadedImageUrl;
+        } else {
+          showToastWithGravityAndOffset('Image upload failed');
+          return;
         }
-        setModalVisible(false);
-      },
-    );
+      }
+      const formData = new FormData();
+      formData.append('name', name);
+      formData.append('description', description);
+      formData.append('ingredients', ingredients);
+      formData.append('price', price);
+      formData.append('stock', stock);
+      formData.append('is_hot', is_hot ? 1 : 0);
+      formData.append('is_active', is_active ? 1 : 0);
+      formData.append('is_offer', is_offer ? 1 : 0);
+      formData.append('offer_percentage', offer_percentage);
+      formData.append('offer_text', offer_text);
+      // console.warn(is_hot);
+
+      formData.append('category_id', category);
+      // console.log(imageUri);
+
+      formData.append('image', finalImageUri);
+
+      if (update) {
+        formData.append('id', id);
+        await axiosInstance.post('product/save', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        showToastWithGravityAndOffset('Product updated successfully');
+      } else {
+        await uploadImage();
+        await axiosInstance.post('product/save', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        showToastWithGravityAndOffset('Product added successfully');
+      }
+
+      navigation.goBack();
+    } catch (error) {
+      console.log('Error:', error.response?.data);
+      showToastWithGravityAndOffset(error.response?.data?.message);
+    }
+    // console.warn(
+    //   'id',
+    //   id,
+    //   'name',
+    //   name,
+    //   'imageUri',
+    //   imageUri,
+    //   'price',
+    //   price,
+    //   'ingredients',
+    //   ingredients,
+    //   'stock',
+    //   stock,
+    //   'is_hot',
+    //   is_hot,
+    //   'description',
+    //   description,
+    //   'category',
+    //   category,
+    // );
+  };
+
+  const handleOpenGallery = () => {
+    launchImageLibrary({mediaType: 'photo'}, response => {
+      if (response.assets && response.assets.length > 0) {
+        const newImageUri = response.assets[0].uri;
+        setImageUri(newImageUri);
+      }
+      setModalVisible(false);
+    });
   };
 
   const handleOpenCamera = () => {
-    launchCamera(
-      {
-        mediaType: 'photo',
-      },
-      response => {
-        if (response.assets && response.assets.length > 0) {
-          setImageUri(response.assets[0].uri);
-        }
-        setModalVisible(false);
-      },
-    );
+    launchCamera({mediaType: 'photo'}, response => {
+      if (response.assets && response.assets.length > 0) {
+        const newImageUri = response.assets[0].uri;
+        setImageUri(newImageUri);
+      }
+      setModalVisible(false);
+    });
   };
 
   const handleImagePress = () => {
@@ -192,7 +280,7 @@ const AdminAddProduct = () => {
                 style={styles.avatarContainer}>
                 {imageUri ? (
                   <Image
-                    source={{uri: imageUri}}
+                    source={{uri: `${imageUri}`}}
                     style={styles.defaultAvatar}
                   />
                 ) : (
@@ -319,12 +407,48 @@ const AdminAddProduct = () => {
                 onToggle={isOn => handleToggle(isOn)}
               />
             </View>
+            <View style={{marginTop: 12, marginBottom: 16}}>
+              <ToggleSwitch
+                isOn={!!is_offer}
+                onColor="#eb0029"
+                offColor="#ccc"
+                label="Offer"
+                labelStyle={{
+                  color: '#333',
+                  fontWeight: '500',
+                  marginLeft: 24,
+                }}
+                size="small"
+                onToggle={isOn => handleIs_OfferToggle(isOn)}
+              />
+            </View>
+            {is_offer ? (
+              <>
+                <View style={{marginBottom: 16}}>
+                  <Text style={styles.title}>Offer Percentage</Text>
+                  <TextInput
+                    value={offer_percentage}
+                    onChangeText={setOffer_percentage}
+                    keyboardType="numeric"
+                    placeholder="Enter offer percentage"
+                    style={styles.input}
+                  />
+                </View>
+                <View style={{marginBottom: 16}}>
+                  <Text style={styles.title}>Offer Text</Text>
+                  <TextInput
+                    value={offer_text}
+                    onChangeText={setOffer_text}
+                    placeholder="Enter offer description"
+                    style={styles.input}
+                  />
+                </View>
+              </>
+            ) : null}
             <View>
               <TouchableOpacity
                 style={styles.signInButton}
-                onPress={() => {
-                  navigation.goBack();
-                }}>
+                onPress={handleSave}>
                 <Text style={styles.buttonText}>Save</Text>
               </TouchableOpacity>
             </View>

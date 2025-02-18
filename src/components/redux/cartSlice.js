@@ -4,8 +4,9 @@ const initialState = {
   items: [],
   wishList: [],
   searchHistory: [],
+  searchAdminHistory: [],
   orders: [],
-  pastOrders: [], // Added to keep track of past orders
+  pastOrders: [],
 };
 
 const cartSlice = createSlice({
@@ -81,6 +82,24 @@ const cartSlice = createSlice({
     clearHistory: state => {
       state.searchHistory = [];
     },
+    addAdminSearchHistory: (state, action) => {
+      if (!state.searchAdminHistory.includes(action.payload)) {
+        state.searchAdminHistory = [
+          action.payload,
+          ...state.searchAdminHistory,
+        ];
+      }
+    },
+
+    removeAdminSearchHistoryItem: (state, action) => {
+      state.searchAdminHistory = state.searchAdminHistory.filter(
+        item => item !== action.payload,
+      );
+    },
+
+    clearAdminHistory: state => {
+      state.searchAdminHistory = [];
+    },
 
     addOrder: (state, action) => {
       state.orders.push(action.payload);
@@ -99,26 +118,19 @@ const cartSlice = createSlice({
         order => order.id === action.payload.id,
       );
       if (orderIndex >= 0) {
-        // Update the order status to 'canceled'
         state.orders[orderIndex].status = 'canceled';
-
-        // Remove the order from orders
         const canceledOrder = state.orders.splice(orderIndex, 1)[0];
-
-        // Push the updated canceled order to pastOrders
         state.pastOrders.push(canceledOrder);
       }
     },
 
-    // New action to move order to past orders after a delay
     moveOrderToPast: (state, action) => {
       const orderIndex = state.orders.findIndex(
         order => order.id === action.payload.id,
       );
       if (orderIndex >= 0) {
-        const movedOrder = state.orders.splice(orderIndex, 1)[0]; // Remove the order from orders
-        state.pastOrders.push(movedOrder); // Push to past orders
-        // Optionally, remove from 'items' if the order was in progress
+        const movedOrder = state.orders.splice(orderIndex, 1)[0];
+        state.pastOrders.push(movedOrder);
         state.items = state.items.filter(item => item.id !== action.payload.id);
       }
     },
@@ -139,7 +151,10 @@ export const {
   clearOrders,
   clearCart,
   cancelOrder,
-  moveOrderToPast, // Export the moveOrderToPast action
+  moveOrderToPast,
+  addAdminSearchHistory,
+  removeAdminSearchHistoryItem,
+  clearAdminHistory,
 } = cartSlice.actions;
 
 export default cartSlice.reducer;

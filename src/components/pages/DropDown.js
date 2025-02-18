@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {View, Text, StyleSheet} from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 
@@ -24,6 +24,10 @@ const DropDown = ({value, setValue}) => {
     {label: 'Varanasi', value: 'Varanasi'},
     {label: 'Visakhapatnam', value: 'Visakhapatnam'},
   ]);
+
+  useEffect(() => {
+    items;
+  }, []);
 
   return (
     <View style={styles.container}>

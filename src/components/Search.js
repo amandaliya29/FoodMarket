@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  ToastAndroid,
   TouchableOpacity,
   View,
   useWindowDimensions,
@@ -21,7 +22,8 @@ import {
   clearHistory,
   removeSearchHistoryItem,
 } from './redux/cartSlice';
-import {foodList} from './foodlist';
+import axiosInstance from './axios/axiosInstance';
+import {IMAGE_API} from '@env';
 
 const Search = () => {
   const navigation = useNavigation();
@@ -29,14 +31,54 @@ const Search = () => {
   const width = useWindowDimensions().width;
   const [query, setQuery] = useState('');
   const searchHistory = useSelector(state => state.cart.searchHistory);
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const showToastWithGravityAndOffset = message => {
+    ToastAndroid.showWithGravityAndOffset(
+      message,
+      ToastAndroid.CENTER,
+      ToastAndroid.BOTTOM,
+      25,
+      50,
+    );
+  };
+
+  const GetList = async () => {
+    setLoading(true);
+    try {
+      const url = query
+        ? `/product/list?search=${encodeURIComponent(query)}`
+        : '/product/list';
+
+      const response = await axiosInstance.get(url);
+
+      const products = response.data.data.map(item => ({
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        image: item.image,
+        ingredients: item.ingredients,
+        stock: item.stock,
+        description: item.description,
+        rating: item.rate,
+      }));
+      setData(products);
+    } catch (error) {
+      showToastWithGravityAndOffset(error.response?.data?.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useFocusEffect(
     useCallback(() => {
+      GetList();
       setQuery('');
     }, []),
   );
 
-  const filteredFoodList = foodList.filter(item =>
+  const filteredFoodList = data.filter(item =>
     item.name.toLowerCase().includes(query.toLowerCase()),
   );
 
@@ -84,10 +126,14 @@ const Search = () => {
   const renderFoodItem = ({item}) => (
     <TouchableOpacity onPress={() => handleItemPress(item)}>
       <View style={styles.foodItem}>
-        <Image source={{uri: item.image}} style={styles.foodImage} />
+        <Image
+          style={styles.foodImage}
+          accessibilityLabel="A beautiful landscape"
+          source={{uri: `${IMAGE_API}/${item.image}`}}
+        />
         <View style={styles.foodInfo}>
           <Text style={styles.foodName}>{item.name}</Text>
-          <Text style={styles.foodPrice}>₹{item.price.toFixed(2)}</Text>
+          <Text style={styles.foodPrice}>₹{item.price}</Text>
         </View>
       </View>
     </TouchableOpacity>

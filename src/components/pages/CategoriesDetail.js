@@ -12,6 +12,7 @@ import {useNavigation, useRoute} from '@react-navigation/native';
 import Icon2 from 'react-native-vector-icons/MaterialIcons';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Icon3 from 'react-native-vector-icons/MaterialCommunityIcons';
+import {IMAGE_API} from '@env';
 
 const CategoriesDetail = () => {
   const route = useRoute();
@@ -25,15 +26,28 @@ const CategoriesDetail = () => {
     }
   }, [category]);
 
+  useEffect(() => {
+    IMAGE_API;
+    data;
+  }, []);
+
   const renderVerticalItem = ({item}) => (
     <TouchableOpacity
       key={item.id.toString()}
       style={styles.verticalBox}
       onPress={() => {
-        navigation.navigate('AdminDetail', {item});
+        if (route.params?.isAdmin) {
+          navigation.navigate('AdminDetail', {item});
+        } else {
+          navigation.navigate('FoodDetail', {item});
+        }
       }}>
       <View style={styles.verticalImageContainer}>
-        <Image style={styles.verticalImage} source={{uri: item.image}} />
+        <Image
+          style={styles.verticalImage}
+          source={{uri: `${IMAGE_API}/${item.image}`}}
+          accessibilityLabel="A beautiful landscape"
+        />
       </View>
       <View style={styles.verticalDetails}>
         <Text style={styles.foodName}>{item.name}</Text>

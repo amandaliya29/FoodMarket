@@ -14,6 +14,7 @@ import {useNavigation} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Icon2 from 'react-native-vector-icons/Ionicons';
 import axiosInstance from '../axios/axiosInstance';
+import {IMAGE_API} from '@env';
 
 const filters = [
   {id: '1', label: 'Sort By', type: 'sort'},
@@ -31,6 +32,7 @@ const FoodTab = () => {
   const [selectedFilter, setSelectedFilter] = useState(null);
   const [isDropdownVisible, setDropdownVisible] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [imageUri, setImageUri] = useState('');
 
   const showToastWithGravityAndOffset = message => {
     ToastAndroid.showWithGravityAndOffset(
@@ -66,6 +68,8 @@ const FoodTab = () => {
 
   useEffect(() => {
     GetList();
+    IMAGE_API;
+    data;
   }, []);
 
   useEffect(() => {
@@ -145,7 +149,11 @@ const FoodTab = () => {
         navigation.navigate('FoodDetail', {item});
       }}>
       <View style={styles.verticalImageContainer}>
-        <Image style={styles.verticalImage} source={{uri: item.image}} />
+        <Image
+          style={styles.verticalImage}
+          accessibilityLabel="A beautiful landscape"
+          source={{uri: `${IMAGE_API}/${item.image}`}}
+        />
       </View>
       <View style={styles.verticalDetails}>
         <Text style={styles.foodName}>{item.name}</Text>
@@ -356,7 +364,7 @@ const styles = StyleSheet.create({
     marginLeft: 5,
   },
   detailText: {
-    fontSize: 14,
+    fontSize: 13,
     color: '#666',
     marginTop: 4,
     marginBottom: 8,

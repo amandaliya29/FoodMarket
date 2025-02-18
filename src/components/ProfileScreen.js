@@ -33,7 +33,6 @@ const ProfileScreen = () => {
 
   useEffect(() => {
     fetchUserDetails();
-    imageUri;
   }, []);
   return (
     <SafeAreaView style={styles.container}>
@@ -45,6 +44,7 @@ const ProfileScreen = () => {
                 style={styles.picIcon}
                 resizeMode="cover"
                 source={{uri: imageUri}}
+                accessibilityLabel="user"
               />
             ) : (
               <UserAvatar size={100} name={userName || 'Food Market'} />

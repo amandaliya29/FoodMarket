@@ -1,5 +1,5 @@
 import {useNavigation} from '@react-navigation/native';
-import React, {useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   View,
   Text,
@@ -11,7 +11,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import {useSelector} from 'react-redux';
-
+import {IMAGE_API} from '@env';
 const PastOrders = () => {
   const pastOrders = useSelector(state => state.cart.pastOrders);
   const navigation = useNavigation();
@@ -24,6 +24,11 @@ const PastOrders = () => {
       setRefreshing(false);
     }, 2000);
   };
+
+  useEffect(() => {
+    IMAGE_API;
+    pastOrders;
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -77,7 +82,7 @@ const PastOrders = () => {
                       {item.items.slice(0, 3).map((orderItem, index) => (
                         <Image
                           key={index}
-                          source={{uri: orderItem.image}}
+                          source={{uri: `${IMAGE_API}/${orderItem.image}`}}
                           style={styles.image}
                         />
                       ))}
@@ -91,7 +96,7 @@ const PastOrders = () => {
                     item.items.map((orderItem, index) => (
                       <Image
                         key={index}
-                        source={{uri: orderItem.image}}
+                        source={{uri: `${IMAGE_API}/${orderItem.image}`}}
                         style={
                           item.items.length === 1
                             ? styles.singleImage

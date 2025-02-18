@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -8,7 +8,7 @@ import {
   Image,
   ToastAndroid,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import axiosInstance from '../../axios/axiosInstance';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Icon2 from 'react-native-vector-icons/Ionicons';
@@ -20,7 +20,9 @@ const AdminAddItem = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [is_active, setIs_active] = useState(false);
+  const [imageUri, setImageUri] = useState('');
   // const [filteredData, setFilteredData] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
 
   const showToastWithGravityAndOffset = message => {
     ToastAndroid.showWithGravityAndOffset(
@@ -32,27 +34,43 @@ const AdminAddItem = () => {
     );
   };
 
-  const handleToggle = async (isOn, itemId) => {
+  const handleToggle = async (isOn, item) => {
     // Update the is_active state for the specific item
-    const updatedData = data.map(item =>
-      item.id === itemId ? {...item, is_active: isOn} : item,
+    const updatedData = data.map(product =>
+      product.id === item.id ? {...item, is_active: isOn} : product,
     );
     setData(updatedData);
 
-    // try {
-    //   await axiosInstance.patch(`category/update/${item.id}`, {
-    //     is_hot: isOn ? 1 : 0,
-    //   });
-    //   showToastWithGravityAndOffset('Hot status updated successfully.');
-    // } catch (error) {
-    //   showToastWithGravityAndOffset(
-    //     error.response?.data?.message || 'Failed to update hot status.',
-    //   );
-    // }
+    try {
+      // const formData = new FormData();
+      // formData.append('name', name);
+      // formData.append('description', description);
+      // formData.append('ingredients', ingredients);
+      // formData.append('price', price);
+      // formData.append('stock', stock);
+      // formData.append('is_hot', is_hot);
+      // formData.append('is_active', is_active ? 1 : 0);
+      // console.log(is_active ? 1 : 0);
+      // formData.append('category_id', category);
+      // console.log(imageUri);
+
+      // formData.append('image', imageUri);
+      // formData.append('id', id);
+      await axiosInstance.post('product/save', {
+        ...item,
+        is_active: isOn ? 1 : 0,
+      });
+      showToastWithGravityAndOffset('Active status updated successfully.');
+    } catch (error) {
+      showToastWithGravityAndOffset(
+        error.response?.data?.message || 'Failed to update Active status.',
+      );
+    }
   };
 
   const fetchProductList = async () => {
     setLoading(true);
+    setRefreshing(true);
     try {
       const response = await axiosInstance.get('/product/list');
       const products = response.data.data.map(item => ({
@@ -66,21 +84,50 @@ const AdminAddItem = () => {
         rating: item.rate,
         category_id: item.category_id,
         is_hot: item.is_hot,
-        is_active: item.is_active === '1',
+        is_active: !!item.is_active,
       }));
       setData(products);
-      // setFilteredData(products);
     } catch (error) {
       showToast(error.response.data.message);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchProductList();
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchProductList();
+      IMAGE_API;
+    }, []),
+  );
 
   useEffect(() => {
+    onRefresh();
     fetchProductList();
-    setIs_active(data.is_hot || false);
   }, []);
+
+  useEffect(() => {
+    if (data.length > 0) {
+      setImageUri(data[0]?.image || '');
+      setIs_active(data[0]?.is_hot || false);
+    }
+  }, [data]);
+
+  const DeleteButton = async id => {
+    try {
+      await axiosInstance.delete(`product/delete/${id}`);
+      setData(prevData => prevData.filter(item => item.id !== id));
+
+      showToastWithGravityAndOffset('Item deleted successfully.');
+    } catch (error) {
+      showToastWithGravityAndOffset(error.response?.data?.message);
+    }
+  };
 
   const renderPlaceholder = () => (
     <View style={styles.verticalBox}>
@@ -114,7 +161,11 @@ const AdminAddItem = () => {
   const renderCategoryItem = ({item}) => (
     <View style={styles.container}>
       <View style={styles.verticalImageContainer}>
-        <Image style={styles.verticalImage} source={{uri: `${item.image}`}} />
+        <Image
+          style={styles.verticalImage}
+          source={{uri: `${IMAGE_API}/${item.image}`}}
+          accessibilityLabel="A beautiful landscape"
+        />
       </View>
       <View style={styles.detailsContainer}>
         <View
@@ -143,7 +194,7 @@ const AdminAddItem = () => {
               marginLeft: 24,
             }}
             size="small"
-            onToggle={isOn => handleToggle(isOn, item.id)}
+            onToggle={isOn => handleToggle(isOn, item)}
           />
         </View>
         <View style={styles.priceAndRatingContainer}>
@@ -174,7 +225,11 @@ const AdminAddItem = () => {
             }>
             <Text style={styles.buttonText}>Update</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.button, styles.deleteButton]}>
+          <TouchableOpacity
+            style={[styles.button, styles.deleteButton]}
+            onPress={() => {
+              DeleteButton(item.id);
+            }}>
             <Text style={styles.buttonText}>Delete</Text>
           </TouchableOpacity>
         </View>
@@ -184,7 +239,6 @@ const AdminAddItem = () => {
 
   return (
     <View style={styles.mainContainer}>
-      {/* {console.warn(is_active)} */}
       {loading ? (
         <FlatList
           data={Array(data.length || 16).fill({})}
@@ -196,6 +250,8 @@ const AdminAddItem = () => {
           data={data}
           keyExtractor={item => item.id.toString()}
           renderItem={renderCategoryItem}
+          refreshing={refreshing}
+          onRefresh={onRefresh}
         />
       )}
     </View>

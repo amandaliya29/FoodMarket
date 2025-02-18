@@ -14,6 +14,8 @@ import Icon2 from 'react-native-vector-icons/MaterialIcons';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import Quentity from './Quentity';
 import {addToCart, addToWishList, removeFromWishList} from '../redux/cartSlice';
+import {IMAGE_API} from '@env';
+import {ScrollView} from 'react-native-gesture-handler';
 
 const FoodDetails = () => {
   const navigation = useNavigation();
@@ -22,6 +24,11 @@ const FoodDetails = () => {
   const dispatch = useDispatch();
 
   const [quantity, setQuantity] = useState(1);
+
+  useEffect(() => {
+    // IMAGE_API;
+    item;
+  }, []);
 
   const wishList = useSelector(state => state.cart.wishList);
   const isFavorited = wishList.some(
@@ -81,7 +88,11 @@ const FoodDetails = () => {
             />
           </TouchableOpacity>
         </View>
-        <Image source={{uri: item.image}} style={styles.foodImage} />
+        <Image
+          source={{uri: `${IMAGE_API}/${item.image}`}}
+          style={styles.foodImage}
+          accessibilityLabel="A beautiful landscape"
+        />
       </View>
       <View style={styles.box}>
         <View style={{marginTop: 26, marginHorizontal: 16, marginBottom: 12}}>
@@ -115,7 +126,7 @@ const FoodDetails = () => {
             <Quentity onChangeQuantity={setQuantity} />
           </View>
         </View>
-        <View style={{marginHorizontal: 16, marginBottom: 16}}>
+        <View style={{marginHorizontal: 16, marginBottom: 8}}>
           <Text style={styles.detail}>
             {item.description ? item.description : item.detail}
           </Text>
@@ -184,7 +195,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderTopStartRadius: 20,
     borderTopEndRadius: 20,
-    marginTop: -20,
+    marginTop: -28,
   },
   title: {
     fontSize: 18,

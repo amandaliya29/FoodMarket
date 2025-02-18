@@ -14,11 +14,16 @@ import Icon2 from 'react-native-vector-icons/MaterialIcons';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import Quentity from '../pages/Quentity';
 import {addToCart, addToWishList, removeFromWishList} from '../redux/cartSlice';
-
+import {IMAGE_API} from '@env';
 const AdminDetail = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const {item} = route.params;
+
+  useEffect(() => {
+    IMAGE_API;
+    item;
+  }, []);
 
   const showToastWithGravityAndOffset = message => {
     ToastAndroid.showWithGravityAndOffset(
@@ -46,7 +51,10 @@ const AdminDetail = () => {
             />
           </TouchableOpacity>
         </View>
-        <Image source={{uri: item.image}} style={styles.foodImage} />
+        <Image
+          source={{uri: `${IMAGE_API}/${item.image}`}}
+          style={styles.foodImage}
+        />
       </View>
       <View style={styles.box}>
         <View style={{marginTop: 26, marginHorizontal: 16, marginBottom: 12}}>

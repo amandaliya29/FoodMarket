@@ -87,8 +87,6 @@ const SignIn = ({navigation}) => {
 
         navigation.navigate(isAdmin ? 'AdminHomeScreen' : 'TabNavigation');
       } catch (error) {
-        console.warn(error);
-
         showToastWithGravityAndOffset(error.response.data.message);
       }
     } else {

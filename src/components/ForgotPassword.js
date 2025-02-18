@@ -8,30 +8,51 @@ import {
   Modal,
   useWindowDimensions,
   Alert,
+  ToastAndroid,
 } from 'react-native';
-import React, {useState} from 'react';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import React, {useEffect, useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
+import axiosInstance from './axios/axiosInstance';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const {width, height} = useWindowDimensions();
   const navigation = useNavigation();
 
-  const handleResetPassword = () => {
-    Alert.alert(
-      'Password change',
-      'Please check your email to reset your password.',
-      [
-        {
-          text: 'OK',
-          onPress: () => {
-            navigation.navigate('SignIn');
-          },
-        },
-      ],
+  const showToastWithGravityAndOffset = message => {
+    ToastAndroid.showWithGravityAndOffset(
+      message,
+      ToastAndroid.CENTER,
+      ToastAndroid.BOTTOM,
+      25,
+      50,
     );
+  };
+
+  const forgotPassword = async () => {
+    if (!email.trim()) {
+      showToastWithGravityAndOffset('Please enter your email.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await axiosInstance.post('/forgot-password', {email});
+      showToastWithGravityAndOffset('Check your email to reset your password.');
+      navigation.navigate('SignIn');
+    } catch (error) {
+      showToastWithGravityAndOffset(error.response?.data?.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResetPassword = () => {
+    if (!loading) {
+      forgotPassword();
+    }
   };
 
   return (
@@ -58,12 +79,17 @@ const ForgotPassword = () => {
               placeholder="Enter your email"
               placeholderTextColor="grey"
               style={styles.input}
+              keyboardType="email-address"
+              autoCapitalize="none"
             />
 
             <TouchableOpacity
               style={styles.resetButton}
-              onPress={handleResetPassword}>
-              <Text style={styles.resetButtonText}>Send Email</Text>
+              onPress={handleResetPassword}
+              disabled={loading}>
+              <Text style={styles.resetButtonText}>
+                {loading ? 'Sending...' : 'Send Email'}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
