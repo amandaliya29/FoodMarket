@@ -1,3 +1,4 @@
+import React, {useEffect, useState, useCallback} from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -8,10 +9,10 @@ import {
   Image,
   ScrollView,
   ToastAndroid,
+  PermissionsAndroid,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Icon2 from 'react-native-vector-icons/EvilIcons';
-import React, {useEffect, useState} from 'react';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import {IMAGE_API} from '@env';
@@ -19,27 +20,24 @@ import axiosInstance from '../../axios/axiosInstance';
 import CheckBoxProductList from '../CheckBoxProductList';
 
 const AdminAddOffer = () => {
-  const route = useRoute();
-  const {item} = route.params || {};
-  const update = route.params?.update;
+  const {params: {item, update} = {}} = useRoute();
   const navigation = useNavigation();
 
-  const [imageUri, setImageUri] = useState('');
+  const [imageUri, setImageUri] = useState(
+    item?.banner ? `${IMAGE_API}/${item.banner}` : '',
+  );
   const [modalVisible, setModalVisible] = useState(false);
-  const [id, setId] = useState('');
+  const [id, setId] = useState(item?.id || '');
   const [data, setData] = useState([]);
+  const [selectedProducts, setSelectedProducts] = useState([]);
 
-  useEffect(() => {
-    if (update && item) {
-      setId(item.id || '');
-      setImageUri(item.banner ? `${IMAGE_API}/${item.banner}` : '');
-    } else {
-      setId('');
-      setImageUri('');
-    }
-  }, [item, update]);
+  // Function to handle selected products from CheckBoxProductList
+  // const handleSelectionChange = selectedIds => {
+  //   setSelectedProducts(selectedIds);
+  //   console.warn(selectedIds);
+  // };
 
-  const showToast = message => {
+  const showToastWithGravityAndOffset = message => {
     ToastAndroid.showWithGravityAndOffset(
       message,
       ToastAndroid.CENTER,
@@ -48,6 +46,20 @@ const AdminAddOffer = () => {
       50,
     );
   };
+
+  const showToast = useCallback(message => {
+    ToastAndroid.showWithGravityAndOffset(
+      message,
+      ToastAndroid.CENTER,
+      ToastAndroid.BOTTOM,
+      25,
+      50,
+    );
+  }, []);
+
+  useEffect(() => {
+    if (update) fetchData();
+  }, [update]);
 
   const fetchData = async () => {
     try {
@@ -63,67 +75,59 @@ const AdminAddOffer = () => {
   };
 
   const uploadImage = async () => {
-    if (!imageUri || imageUri.startsWith('http')) return imageUri;
+    if (!imageUri || imageUri.startsWith('http')) return imageUri; // Skip if already uploaded
 
     const formData = new FormData();
     formData.append('image', {
       uri: imageUri,
       type: 'image/jpeg',
-      name: 'category_image.jpg',
+      name: 'product_image.jpg',
     });
 
     try {
-      const {data} = await axiosInstance.post('category/upload', formData, {
+      const response = await axiosInstance.post('offer/upload', formData, {
         headers: {'Content-Type': 'multipart/form-data'},
       });
 
-      if (data.status && data.data.url) {
-        return data.data.url.replace(`${IMAGE_API}/`, '');
+      if (response.data.status && response.data.data.url) {
+        return response.data.data.url; // Return uploaded image URL
+      } else {
+        throw new Error('Image upload failed');
       }
-      throw new Error('Image upload failed');
     } catch (error) {
       console.error('Upload error:', error);
       return null;
     }
   };
 
-  const handleSave = async () => {
+  const requestCameraPermission = async () => {
     try {
-      const finalImageUri = imageUri.startsWith('file://')
-        ? await uploadImage()
-        : imageUri;
-
-      if (!finalImageUri) {
-        showToast('Image upload failed');
-        return;
-      }
-
-      const formData = new FormData();
-      formData.append('id', id);
-      formData.append('image', finalImageUri);
-
-      await axiosInstance.post('category/save', formData, {
-        headers: {'Content-Type': 'multipart/form-data'},
-      });
-
-      showToast(
-        update
-          ? 'Category updated successfully'
-          : 'Category added successfully',
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.CAMERA,
+        {
+          title: 'Camera Permission',
+          message: 'App needs access to your camera',
+          buttonNeutral: 'Ask Me Later',
+          buttonNegative: 'Cancel',
+          buttonPositive: 'OK',
+        },
       );
-      navigation.goBack();
-    } catch (error) {
-      console.log('Error:', error.response?.data);
-      showToast(error.response?.data?.message || 'Failed to save category.');
+      return granted === PermissionsAndroid.RESULTS.GRANTED;
+    } catch (err) {
+      console.warn(err);
+      return false;
     }
   };
 
-  useEffect(() => {
-    if (update) fetchData();
-  }, [update]);
-
   const handleImagePicker = async (fromCamera = false) => {
     const options = {mediaType: 'photo'};
+    if (fromCamera) {
+      const hasPermission = await requestCameraPermission();
+      if (!hasPermission) {
+        showToast('Camera permission denied');
+        return;
+      }
+    }
     const response = fromCamera
       ? await launchCamera(options)
       : await launchImageLibrary(options);
@@ -134,12 +138,66 @@ const AdminAddOffer = () => {
     setModalVisible(false);
   };
 
+  const handleSave = async () => {
+    try {
+      const finalImageUri = imageUri.startsWith('file://')
+        ? await uploadImage()
+        : imageUri;
+      if (!finalImageUri) {
+        showToast('Image upload failed');
+        return;
+      }
+
+      const formData = new FormData();
+      // formData.append('id', id);
+      formData.append('image', finalImageUri);
+      selectedProducts.forEach(id => {
+        formData.append('product_ids[]', id);
+      });
+
+      if (update) {
+        formData.append('id', id);
+        await axiosInstance.post('offer/save', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        showToastWithGravityAndOffset('offer updated successfully');
+      } else {
+        await uploadImage();
+        await axiosInstance.post('offer/save', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        showToastWithGravityAndOffset('offer added successfully');
+      }
+
+      navigation.goBack();
+    } catch (error) {
+      console.warn(error);
+
+      // console.error('Error:', error.response?.data);
+      showToast(error.response?.data?.message || 'Failed to save offer.');
+    }
+  };
+
+  // const handleImagePicker = async (fromCamera = false) => {
+  //   const options = {mediaType: 'photo'};
+  //   const response = fromCamera
+  //     ? await launchCamera(options)
+  //     : await launchImageLibrary(options);
+
+  //   if (response.assets?.length > 0) {
+  //     setImageUri(response.assets[0].uri);
+  //   }
+  //   setModalVisible(false);
+  // };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.head}>
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={styles.backButton}>
+        <TouchableOpacity onPress={navigation.goBack} style={styles.backButton}>
           <Icon
             name="chevron-back"
             size={24}
@@ -161,7 +219,7 @@ const AdminAddOffer = () => {
             {imageUri ? (
               <Image source={{uri: imageUri}} style={styles.defaultAvatar} />
             ) : (
-              <View>
+              <>
                 <Icon2
                   name="image"
                   size={50}
@@ -169,15 +227,18 @@ const AdminAddOffer = () => {
                   style={styles.iconCenter}
                 />
                 <Text style={styles.title}>Upload Offer image</Text>
-              </View>
+              </>
             )}
           </TouchableOpacity>
 
           <CheckBoxProductList
-            productData={update ? data : []}
+            productData={data}
             update={update}
             item={data}
+            onSelectProducts={ids => setSelectedProducts(ids)}
           />
+
+          {/* {console.warn(selectedProducts)} */}
 
           <TouchableOpacity style={styles.signInButton} onPress={handleSave}>
             <Text style={styles.buttonText}>Save</Text>
@@ -185,28 +246,21 @@ const AdminAddOffer = () => {
         </View>
       </ScrollView>
 
-      <Modal
-        visible={modalVisible}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setModalVisible(false)}>
+      <Modal visible={modalVisible} transparent animationType="slide">
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <TouchableOpacity
-              style={styles.modalButton}
-              onPress={() => handleImagePicker(false)}>
-              <Text style={styles.modalButtonText}>Open Gallery</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.modalButton}
-              onPress={() => handleImagePicker(true)}>
-              <Text style={styles.modalButtonText}>Open Camera</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.modalButton}
-              onPress={() => setModalVisible(false)}>
-              <Text style={styles.modalButtonText}>Cancel</Text>
-            </TouchableOpacity>
+            {['Open Gallery', 'Open Camera', 'Cancel'].map((option, index) => (
+              <TouchableOpacity
+                key={option}
+                style={styles.modalButton}
+                onPress={() =>
+                  index === 2
+                    ? setModalVisible(false)
+                    : handleImagePicker(index === 1)
+                }>
+                <Text style={styles.modalButtonText}>{option}</Text>
+              </TouchableOpacity>
+            ))}
           </View>
         </View>
       </Modal>
@@ -215,7 +269,6 @@ const AdminAddOffer = () => {
 };
 
 export default AdminAddOffer;
-
 const styles = StyleSheet.create({
   container: {flex: 1, paddingTop: 8, backgroundColor: '#fff'},
   text: {fontSize: 20, fontWeight: '500', color: 'black'},

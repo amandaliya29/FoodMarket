@@ -15,7 +15,12 @@ import axiosInstance from '../axios/axiosInstance';
 import {useRoute} from '@react-navigation/native';
 import {IMAGE_API} from '@env';
 
-const CheckBoxProductList = ({productData = [], update = false, item = {}}) => {
+const CheckBoxProductList = ({
+  productData = [],
+  update = false,
+  item = {},
+  onSelectProducts = () => {},
+}) => {
   const [formData, setFormData] = useState({});
   const [data, setData] = useState([]);
   const [dropdownVisible, setDropdownVisible] = useState(false);
@@ -54,13 +59,19 @@ const CheckBoxProductList = ({productData = [], update = false, item = {}}) => {
     );
   }, [item, update, productData]);
 
-  const handleCheckboxChange = useCallback(productId => {
-    setSelectedProducts(prev =>
-      prev.includes(productId)
-        ? prev.filter(id => id !== productId)
-        : [...prev, productId],
-    );
-  }, []);
+  const handleCheckboxChange = useCallback(
+    productId => {
+      const updatedSelectedProducts = selectedProducts.includes(productId)
+        ? selectedProducts.filter(id => id !== productId)
+        : [...selectedProducts, productId];
+
+      setSelectedProducts(updatedSelectedProducts);
+
+      // Pass the entire array of selected IDs to the parent component
+      onSelectProducts(updatedSelectedProducts);
+    },
+    [selectedProducts, onSelectProducts],
+  );
 
   const handleSave = useCallback(() => {
     if (!selectedProducts.length) {
