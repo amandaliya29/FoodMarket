@@ -70,7 +70,7 @@ const AnimatedFlatList = () => {
           alignItems: 'center',
           marginTop: 10,
         }}
-        onPress={() => navigation.navigate('Offer', {item})}>
+        onPress={() => navigation.navigate('Offer', item.id)}>
         <View style={[styles.box, {width: width - 30}]}>
           <View style={styles.imageContainer}>
             <Image

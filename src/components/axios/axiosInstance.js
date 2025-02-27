@@ -3,7 +3,7 @@ import axios from 'axios';
 
 const axiosInstance = axios.create({
   baseURL:
-    'https://1d7c-2402-a00-162-da1f-e1a4-d5de-ce07-7c87.ngrok-free.app/api',
+    'https://a7d1-2402-a00-162-da1f-9d5e-ae0b-8efa-9ac8.ngrok-free.app/api',
   headers: {
     'Content-Type': 'multipart/form-data',
   },

@@ -15,13 +15,19 @@ import {useNavigation, useRoute} from '@react-navigation/native';
 import Quentity from './Quentity';
 import {addToCart, addToWishList, removeFromWishList} from '../redux/cartSlice';
 import {IMAGE_API} from '@env';
+import {useNavigationState} from '@react-navigation/native';
 import {ScrollView} from 'react-native-gesture-handler';
 
 const FoodDetails = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const {item} = route.params;
+  const {item, offer_params} = route.params;
   const dispatch = useDispatch();
+
+  const routes = useNavigationState(state => state.routes);
+  const previousRouteName = routes[routes.length - 2];
+
+  // console.warn('Previous Route Name:', previousRouteName);
 
   const [quantity, setQuantity] = useState(1);
 

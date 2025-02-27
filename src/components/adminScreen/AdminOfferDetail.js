@@ -17,22 +17,15 @@ import {
   useRoute,
 } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import Icon2 from 'react-native-vector-icons/Ionicons';
 import axiosInstance from '../axios/axiosInstance';
 import {IMAGE_API} from '@env';
 
-const sortOptions = [
-  {id: '1', label: 'Filter', value: 'filter'},
-  {id: '2', label: 'Sort By', value: 'sort'},
-];
-
-const OfferPage = () => {
+const AdminOfferDetail = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const {item} = route.params || {};
   const [data, setData] = useState([]);
-  const [filteredData, setFilteredData] = useState([]);
-  const [selectedOption, setSelectedOption] = useState(null);
-  const [isDropdownVisible, setDropdownVisible] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const showToastWithGravityAndOffset = message => {
@@ -45,154 +38,33 @@ const OfferPage = () => {
     );
   };
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       if (route.params?.click && route.params?.item) {
-  //         // Case 1: Navigated by clicking on an item
-  //         const id = route.params.item.id;
-  //         const response = await axiosInstance.get(`/offer/get/${id}`);
-  //         const products = response.data.data.products.map(item => ({
-  //           id: item.id,
-  //           name: item.name,
-  //           price: item.price,
-  //           image: item.image,
-  //           ingredients: item.ingredients,
-  //           stock: item.stock,
-  //           description: item.description,
-  //           rating: item.rate,
-  //           offer_percentage: item.offer_percentage,
-  //           offer_text: item.offer_text,
-  //         }));
-  //         setData(products);
-  //       } else {
-  //         // Case 2: Navigated by pressing the Offer tab
-  //         const response = await axiosInstance.get('/offer/get');
-  //         const products = response.data.data.map(item => ({
-  //           id: item.id,
-  //           name: item.name,
-  //           price: item.price,
-  //           image: item.image,
-  //           ingredients: item.ingredients,
-  //           stock: item.stock,
-  //           description: item.description,
-  //           rating: item.rate,
-  //           offer_percentage: item.offer_percentage,
-  //           offer_text: item.offer_text,
-  //         }));
-  //         setData(products);
-  //       }
-  //     } catch (error) {
-  //       console.error(error);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-  //   fetchData();
-  // }, []);
-
-  // useEffect(() => {
-  //   fetchData();
-  //   IMAGE_API;
-  // }, []);
-
-  useFocusEffect(
-    useCallback(() => {
-      const unsubscribe = navigation.addListener('blur', () => {
-        navigation.setParams(null);
-      });
-
-      return unsubscribe;
-    }, [navigation]),
-  );
-
-  useFocusEffect(
-    useCallback(() => {
-      const fetchData = async (id = null) => {
-        try {
-          if (id) {
-            // Case 1: Navigated by clicking on an item
-            const response = await axiosInstance.get(`/offer/get/${id}`);
-
-            const products = response.data.data.products.map(item => ({
-              id: item.id,
-              name: item.name,
-              price: item.price,
-              image: item.image,
-              ingredients: item.ingredients,
-              stock: item.stock,
-              description: item.description,
-              rating: item.rate,
-              offer_percentage: item.offer_percentage,
-              offer_text: item.offer_text,
-            }));
-            setData(products);
-          } else {
-            // Case 2: Navigated by pressing the Offer tab
-            const response = await axiosInstance.get('/offer/get');
-            const products = response.data.data.map(item => ({
-              id: item.id,
-              name: item.name,
-              price: item.price,
-              image: item.image,
-              ingredients: item.ingredients,
-              stock: item.stock,
-              description: item.description,
-              rating: item.rate,
-              offer_percentage: item.offer_percentage,
-              offer_text: item.offer_text,
-            }));
-            setData(products);
-          }
-        } catch (error) {
-          console.error(error);
-        } finally {
-          setLoading(false);
-        }
-      };
-      fetchData(typeof route.params == 'object' ? null : route.params);
-    }, [route.params]),
-  );
-  // useEffect(() => {
-  //   GetList();
-  //   item;
-  // }, [item]);
+  const fetchData = async () => {
+    try {
+      const id = route.params;
+      const response = await axiosInstance.get(`/offer/get/${id}`);
+      const products = response.data.data.products.map(item => ({
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        image: item.image,
+        ingredients: item.ingredients,
+        stock: item.stock,
+        description: item.description,
+        rating: item.rate,
+        offer_percentage: item.offer_percentage,
+        offer_text: item.offer_text,
+      }));
+      setData(products);
+    } catch (error) {
+      showToastWithGravityAndOffset(error.response?.data?.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    if (!selectedOption) {
-      setFilteredData(data);
-    }
-  }, [data]);
-
-  const applySortOrFilter = option => {
-    let newData = [...data];
-    setSelectedOption(option.value);
-    setDropdownVisible(false);
-
-    if (option.value === 'filter') {
-      switch (option.label) {
-        case 'Cost Low to High':
-          newData.sort((a, b) => a.price - b.price);
-          break;
-        case 'Cost High to Low':
-          newData.sort((a, b) => b.price - a.price);
-          break;
-        case 'Rating High to Low':
-          newData.sort((a, b) => b.rating - a.rating);
-          break;
-        case 'A to Z':
-          newData.sort((a, b) => a.name.localeCompare(b.name));
-          break;
-        case 'Z to A':
-          newData.sort((a, b) => b.name.localeCompare(a.name));
-          break;
-      }
-    } else if (option.value === 'sort') {
-      applySortOrFilter({label: option.label, value: 'filter'});
-    }
-
-    setFilteredData(newData);
-  };
+    fetchData();
+  }, []);
 
   const renderPlaceholder = () => (
     <View style={styles.verticalBox}>
@@ -214,7 +86,7 @@ const OfferPage = () => {
       key={item.id.toString()}
       style={styles.verticalBox}
       onPress={() =>
-        navigation.navigate('FoodDetail', {
+        navigation.navigate('AdminDetail', {
           item: item,
           offer_params: route.params,
         })
@@ -266,69 +138,23 @@ const OfferPage = () => {
     <SafeAreaView style={styles.container}>
       <View>
         <View style={styles.head}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={styles.backButton}>
+            <Icon2
+              name="chevron-back"
+              size={24}
+              color="white"
+              backgroundColor="red"
+              style={{borderRadius: 5}}
+            />
+          </TouchableOpacity>
           <View>
             <Text style={styles.text}>Offer</Text>
             <Text style={styles.you}>Elevate your dining experience today</Text>
           </View>
         </View>
-        <ScrollView
-          horizontal
-          style={styles.filterBar}
-          showsHorizontalScrollIndicator={false}
-          showsVerticalScrollIndicator={false}>
-          {sortOptions.map(option => (
-            <TouchableOpacity
-              key={option.id}
-              style={[
-                styles.filterButton,
-                selectedOption === option.value ? styles.selectedButton : null,
-              ]}
-              onPress={() =>
-                option.value === 'sort' || option.value === 'filter'
-                  ? setDropdownVisible(!isDropdownVisible)
-                  : applySortOrFilter(option)
-              }>
-              <View style={styles.filterWithIcon}>
-                <Text
-                  style={[
-                    styles.filterText,
-                    selectedOption === option.value
-                      ? styles.selectedText
-                      : null,
-                  ]}>
-                  {option.label}
-                </Text>
-                <Icon
-                  name={option.value === 'filter' ? 'filter-outline' : 'sort'}
-                  size={16}
-                  color={selectedOption === option.value ? '#fff' : '#000'}
-                />
-              </View>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
       </View>
-      {isDropdownVisible && (
-        <View style={styles.dropdownMenu}>
-          {[
-            'Cost Low to High',
-            'Cost High to Low',
-            'Rating High to Low',
-            'A to Z',
-            'Z to A',
-          ].map(sortType => (
-            <TouchableOpacity
-              key={sortType}
-              style={styles.dropdownItem}
-              onPress={() =>
-                applySortOrFilter({label: sortType, value: 'sort'})
-              }>
-              <Text style={styles.dropdownText}>{sortType}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      )}
-
       {loading ? (
         <FlatList
           data={Array.from({length: data.length || 6})}
@@ -340,7 +166,7 @@ const OfferPage = () => {
         />
       ) : (
         <FlatList
-          data={filteredData}
+          data={data}
           keyExtractor={item => item.id.toString()}
           renderItem={renderVerticalItem}
           contentContainerStyle={styles.listContainer}
@@ -363,20 +189,23 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: 'black',
   },
+  horizontalList: {
+    paddingBottom: 16,
+  },
   you: {
     fontSize: 13,
     fontWeight: '300',
     color: '#8d92a3',
   },
   head: {
-    padding: 16,
-    paddingVertical: 2,
+    paddingLeft: 16,
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 6,
   },
-
+  backButton: {
+    marginRight: 16,
+  },
   filterBar: {
     flexDirection: 'row',
     paddingRight: 16,
@@ -524,4 +353,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default OfferPage;
+export default AdminOfferDetail;

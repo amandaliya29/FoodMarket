@@ -104,6 +104,9 @@ const BillPage = ({route}) => {
           contact: '9191919191',
           name: userDetails.data.user.name,
         },
+        notes: {
+          order_id: 123,
+        },
         theme: {color: '#eb0029'},
       };
       RazorpayCheckout.open(options)
@@ -115,7 +118,7 @@ const BillPage = ({route}) => {
           navigation.navigate('Cart');
         })
         .catch(error => {
-          Alert(`Error: ${error.code} | ${error.description}`);
+          alert(`Error: ${error.code} | ${error.description}`);
         });
     }
   };

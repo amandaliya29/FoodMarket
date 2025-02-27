@@ -10,15 +10,15 @@ import {
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import axiosInstance from '../../axios/axiosInstance';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import Icon2 from 'react-native-vector-icons/Ionicons';
 import {IMAGE_API} from '@env';
+import ToggleSwitch from 'toggle-switch-react-native';
 
 const AdminOffers = () => {
   const navigation = useNavigation();
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   // const [filteredData, setFilteredData] = useState([]);
+  const [is_active, setIs_active] = useState(false);
 
   const showToastWithGravityAndOffset = message => {
     ToastAndroid.showWithGravityAndOffset(
@@ -30,31 +30,80 @@ const AdminOffers = () => {
     );
   };
 
+  const handleToggle = async (isOn, item) => {
+    // Update the is_active state for the specific item
+    const updatedData = data.map(offer =>
+      offer.id === item.id ? {...item, is_active: isOn} : offer,
+    );
+    setData(updatedData);
+
+    try {
+      // const formData = new FormData();
+      // formData.append('name', name);
+      // formData.append('description', description);
+      // formData.append('ingredients', ingredients);
+      // formData.append('price', price);
+      // formData.append('stock', stock);
+      // formData.append('is_hot', is_hot);
+      // formData.append('is_active', is_active ? 1 : 0);
+      // console.log(is_active ? 1 : 0);
+      // formData.append('category_id', category);
+      // console.log(imageUri);
+
+      // formData.append('image', imageUri);
+      // formData.append('id', id);
+      await axiosInstance.get('/offer/list', {
+        ...item,
+        is_active: isOn ? 1 : 0,
+      });
+      showToastWithGravityAndOffset('Active status updated successfully.');
+    } catch (error) {
+      showToastWithGravityAndOffset(
+        error.response?.data?.message || 'Failed to update Active status.',
+      );
+      console.warn(error.response?.data?.message);
+    }
+  };
+
+  const DeleteButton = async id => {
+    console.warn(id);
+
+    // try {
+    //   await axiosInstance.delete(`offer/delete/${id}`);
+    //   setData(prevData => prevData.filter(item => item.id !== id));
+
+    //   showToastWithGravityAndOffset('Item deleted successfully.');
+    // } catch (error) {
+    //   showToastWithGravityAndOffset(error.response?.data?.message);
+    // }
+  };
+
   const fetchProductList = async () => {
     setLoading(true);
     try {
-      const response = await axiosInstance.get('/product/list');
+      const response = await axiosInstance.get('/offer/list');
       const products = response.data.data.map(item => ({
         id: item.id,
-        name: item.name,
-        price: item.price,
-        image: item.image,
-        ingredients: item.ingredients,
-        stock: item.stock,
-        description: item.description,
-        rating: item.rate,
+        banner: item.banner,
+        is_active: !!item.is_active,
       }));
       setData(products);
-      // setFilteredData(products);
     } catch (error) {
-      showToast(error.response.data.message);
+      showToastWithGravityAndOffset(error.response?.data?.message);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
+    if (data.length > 0) {
+      setIs_active(data[0]?.is_hot || false);
+    }
+  }, [data]);
+
+  useEffect(() => {
     fetchProductList();
+    data;
   }, []);
 
   const renderPlaceholder = () => (
@@ -88,15 +137,30 @@ const AdminOffers = () => {
 
   const renderCategoryItem = ({item}) => (
     <View style={styles.container}>
+      <View style={{marginTop: 2, marginBottom: 10}}>
+        <ToggleSwitch
+          isOn={item.is_active}
+          onColor="#eb0029"
+          offColor="#ccc"
+          label=""
+          labelStyle={{
+            color: '#333',
+            fontWeight: '500',
+            marginLeft: 24,
+          }}
+          size="small"
+          onToggle={isOn => handleToggle(isOn, item)}
+        />
+      </View>
       <View style={styles.verticalImageContainer}>
         <Image
           style={styles.verticalImage}
-          source={{uri: `${IMAGE_API}/${item.image}`}}
+          source={{uri: `${IMAGE_API}/${item.banner}`}}
           accessibilityLabel="A beautiful landscape"
         />
       </View>
       <View style={styles.detailsContainer}>
-        <Text style={styles.foodName}>{item.name}</Text>
+        {/* <Text style={styles.foodName}>{item.name}</Text>
         <View style={styles.priceAndRatingContainer}>
           <Text style={styles.foodPrice}>₹ {item.price}</Text>
           <View style={styles.ratingContainer}>
@@ -110,18 +174,26 @@ const AdminOffers = () => {
         <View style={styles.discountContainer}>
           <Icon name="brightness-percent" size={20} color="red" />
           <Text style={styles.discountText}>40% OFF</Text>
-        </View>
+        </View> */}
 
         <View style={styles.actions}>
           <TouchableOpacity
             style={[styles.button, styles.detailsButton]}
-            onPress={() => navigation.navigate('AdminDetail', {item})}>
+            onPress={() => navigation.navigate('AdminOfferDetail', item.id)}>
             <Text style={styles.buttonText}>View</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.button, styles.updateButton]}>
+          <TouchableOpacity
+            style={[styles.button, styles.updateButton]}
+            onPress={() =>
+              navigation.navigate('AdminAddOffer', {item, update: true})
+            }>
             <Text style={styles.buttonText}>Update</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.button, styles.deleteButton]}>
+          <TouchableOpacity
+            style={[styles.button, styles.deleteButton]}
+            onPress={() => {
+              DeleteButton(item.id);
+            }}>
             <Text style={styles.buttonText}>Delete</Text>
           </TouchableOpacity>
         </View>
@@ -131,6 +203,7 @@ const AdminOffers = () => {
 
   return (
     <View style={styles.mainContainer}>
+      {/* {console.warn(data)} */}
       {loading ? (
         <FlatList
           data={Array(data.length || 16).fill({})}
@@ -156,7 +229,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fcfcfc',
   },
   container: {
-    flexDirection: 'row',
+    // flexDirection: 'row',
     backgroundColor: '#fff',
     marginVertical: 8,
     marginHorizontal: 10,
@@ -169,8 +242,8 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   verticalImageContainer: {
-    width: 130,
-    height: 140,
+    width: '100%',
+    height: 200,
     borderRadius: 10,
     overflow: 'hidden',
     borderWidth: 0.5,
@@ -184,7 +257,7 @@ const styles = StyleSheet.create({
   detailsContainer: {
     flex: 1,
     justifyContent: 'space-between',
-    marginLeft: '4%',
+    // marginLeft: '4%',
   },
   categoryName: {
     fontSize: 16,

@@ -28,6 +28,8 @@ import AdminAddProduct from '../adminScreen/addItemAdminTab/AdminAddProduct';
 import AdminDetail from '../adminScreen/AdminDetail';
 import EditAddress from '../pages/EditAddress';
 import BillPage from '../pages/BillPage';
+import AdminOfferDetail from '../adminScreen/AdminOfferDetail';
+import AdminAddOffer from '../adminScreen/addItemAdminTab/AdminAddOffer';
 
 const Stack = createNativeStackNavigator();
 
@@ -87,6 +89,8 @@ const StackNavigation = () => {
         <Stack.Screen name="AdminSearch" component={AdminSearch} />
         <Stack.Screen name="AdminAddCategory" component={AdminAddCategory} />
         <Stack.Screen name="AdminAddProduct" component={AdminAddProduct} />
+        <Stack.Screen name="AdminOfferDetail" component={AdminOfferDetail} />
+        <Stack.Screen name="AdminAddOffer" component={AdminAddOffer} />
         <Stack.Screen name="AdminDetail" component={AdminDetail} />
         <Stack.Screen name="EditAddress" component={EditAddress} />
         <Stack.Screen name="BillPage" component={BillPage} />

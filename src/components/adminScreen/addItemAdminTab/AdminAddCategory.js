@@ -15,9 +15,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import Icon2 from 'react-native-vector-icons/EvilIcons';
 import React, {useEffect, useState} from 'react';
 import {useNavigation, useRoute} from '@react-navigation/native';
-import UserAvatar from '../../pages/UserAvatar';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {IMAGE_API} from '@env';
 import axiosInstance from '../../axios/axiosInstance';
 const AdminAddCategory = () => {
@@ -29,7 +27,6 @@ const AdminAddCategory = () => {
   const [description, setDescription] = useState();
   const [imageUri, setImageUri] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
-  const [userDetails, setUserDetail] = useState(null);
   const [name, setName] = useState('');
   const [id, setId] = useState('');
 
