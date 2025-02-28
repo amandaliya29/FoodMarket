@@ -9,6 +9,7 @@ import {
   ToastAndroid,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
 } from 'react-native';
 import React, {useState} from 'react';
 import Icon2 from 'react-native-vector-icons/FontAwesome';
@@ -21,6 +22,7 @@ const SignUp = () => {
   const navigation = useNavigation();
 
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [conformPassword, setConformPassword] = useState('');
   const [name, setName] = useState('');
@@ -31,6 +33,7 @@ const SignUp = () => {
   const {width} = useWindowDimensions();
 
   const [emailError, setEmailError] = useState('');
+  const [phoneError, setPhoneError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [confirmPasswordError, setConfirmPasswordError] = useState('');
   const [nameError, setNameError] = useState('');
@@ -46,6 +49,15 @@ const SignUp = () => {
       isValid = false;
     } else {
       setEmailError('');
+    }
+    if (!phone) {
+      setEmailError('Email is required');
+      isValid = false;
+    } else if (!/^\d{10}$/.test(phone)) {
+      setEmailError('Enter a valid 10-digit phone number');
+      isValid = false;
+    } else {
+      setPhoneError('');
     }
 
     if (!password) {
@@ -91,6 +103,7 @@ const SignUp = () => {
         const formData = new FormData();
         formData.append('email', email);
         formData.append('password', password);
+        formData.append('phone_no', phone);
         formData.append('name', name);
         formData.append('password_confirmation', conformPassword);
 
@@ -129,106 +142,121 @@ const SignUp = () => {
         <Text style={styles.text}>Sign Up</Text>
         <Text style={styles.letsGetSome}>Register and eat</Text>
       </View>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'position'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 50}
-        style={{alignItems: 'center', justifyContent: 'center'}}>
-        <View
-          style={[styles.formBox, {width: width >= 400 ? 500 : width - 20}]}>
-          <ImagePickerComponent
-            imageUri={imageUri}
-            setImageUri={setImageUri}
-            setFileDetails={setImageDetail}
-          />
-
-          <View style={{marginTop: 8, marginBottom: 8}}>
-            <Text style={styles.title}>Full Name</Text>
-            <TextInput
-              value={name}
-              onChangeText={setName}
-              placeholder="Type your full name"
-              placeholderTextColor={'grey'}
-              style={styles.input}
+      <ScrollView>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'position'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 50 : 10}
+          style={{alignItems: 'center', justifyContent: 'center'}}>
+          <View
+            style={[styles.formBox, {width: width >= 400 ? 500 : width - 20}]}>
+            <ImagePickerComponent
+              imageUri={imageUri}
+              setImageUri={setImageUri}
+              setFileDetails={setImageDetail}
             />
-            <Text style={styles.errorText}>{nameError}</Text>
-          </View>
 
-          <View style={{marginBottom: 8}}>
-            <Text style={styles.title}>Email Address</Text>
-            <TextInput
-              value={email}
-              onChangeText={setEmail}
-              placeholderTextColor={'grey'}
-              placeholder="Type your email address"
-              style={styles.input}
-            />
-            <Text style={styles.errorText}>{emailError}</Text>
-          </View>
-
-          <View style={{marginBottom: 8}}>
-            <Text style={styles.title}>Password</Text>
-            <View style={styles.passwordContainer}>
+            <View style={{marginTop: 8, marginBottom: 8}}>
+              <Text style={styles.title}>Full Name</Text>
               <TextInput
-                secureTextEntry={hidePass}
-                value={password}
-                onChangeText={setPassword}
-                placeholder="Type your password"
+                value={name}
+                onChangeText={setName}
+                placeholder="Type your full name"
                 placeholderTextColor={'grey'}
-                style={styles.inputWithIcon}
+                style={styles.input}
               />
-              <TouchableOpacity
-                onPress={() => setHidePass(!hidePass)}
-                style={styles.iconStyle}>
-                <Icon2
-                  name={hidePass ? 'eye-slash' : 'eye'}
-                  size={20}
-                  color="grey"
-                />
-              </TouchableOpacity>
+              <Text style={styles.errorText}>{nameError}</Text>
             </View>
-            <Text style={styles.errorText}>{passwordError}</Text>
-          </View>
 
-          <View style={{marginBottom: 8}}>
-            <Text style={styles.title}>Confirm Password</Text>
-            <View style={styles.passwordContainer}>
+            <View style={{marginBottom: 8}}>
+              <Text style={styles.title}>Email Address</Text>
               <TextInput
-                secureTextEntry={hideConfirmPass}
-                value={conformPassword}
-                onChangeText={setConformPassword}
-                placeholder="Retype your password"
+                value={email}
+                onChangeText={setEmail}
                 placeholderTextColor={'grey'}
-                style={styles.inputWithIcon}
+                placeholder="Type your email address"
+                style={styles.input}
               />
-              <TouchableOpacity
-                onPress={() => setHideConfirmPass(!hideConfirmPass)}
-                style={styles.iconStyle}>
-                <Icon2
-                  name={hideConfirmPass ? 'eye-slash' : 'eye'}
-                  size={20}
-                  color="grey"
-                />
-              </TouchableOpacity>
+              <Text style={styles.errorText}>{emailError}</Text>
             </View>
-            <Text style={styles.errorText}>{confirmPasswordError}</Text>
+            <View style={{marginBottom: 8}}>
+              <Text style={styles.title}>phone no</Text>
+              <TextInput
+                value={phone}
+                onChangeText={setPhone}
+                placeholderTextColor={'grey'}
+                placeholder="Type your phone number"
+                style={styles.input}
+              />
+              <Text style={styles.errorText}>{phoneError}</Text>
+            </View>
+
+            <View style={{marginBottom: 8}}>
+              <Text style={styles.title}>Password</Text>
+              <View style={styles.passwordContainer}>
+                <TextInput
+                  secureTextEntry={hidePass}
+                  value={password}
+                  onChangeText={setPassword}
+                  placeholder="Type your password"
+                  placeholderTextColor={'grey'}
+                  style={styles.inputWithIcon}
+                />
+                <TouchableOpacity
+                  onPress={() => setHidePass(!hidePass)}
+                  style={styles.iconStyle}>
+                  <Icon2
+                    name={hidePass ? 'eye-slash' : 'eye'}
+                    size={20}
+                    color="grey"
+                  />
+                </TouchableOpacity>
+              </View>
+              <Text style={styles.errorText}>{passwordError}</Text>
+            </View>
+
+            <View style={{marginBottom: 8}}>
+              <Text style={styles.title}>Confirm Password</Text>
+              <View style={styles.passwordContainer}>
+                <TextInput
+                  secureTextEntry={hideConfirmPass}
+                  value={conformPassword}
+                  onChangeText={setConformPassword}
+                  placeholder="Retype your password"
+                  placeholderTextColor={'grey'}
+                  style={styles.inputWithIcon}
+                />
+                <TouchableOpacity
+                  onPress={() => setHideConfirmPass(!hideConfirmPass)}
+                  style={styles.iconStyle}>
+                  <Icon2
+                    name={hideConfirmPass ? 'eye-slash' : 'eye'}
+                    size={20}
+                    color="grey"
+                  />
+                </TouchableOpacity>
+              </View>
+              <Text style={styles.errorText}>{confirmPasswordError}</Text>
+            </View>
+
+            <TouchableOpacity
+              style={styles.signInButton}
+              onPress={onSubmitHandler}>
+              <Text style={{color: 'white', fontWeight: '500', fontSize: 14}}>
+                Continue
+              </Text>
+            </TouchableOpacity>
           </View>
 
-          <TouchableOpacity
-            style={styles.signInButton}
-            onPress={onSubmitHandler}>
-            <Text style={{color: 'white', fontWeight: '500', fontSize: 14}}>
-              Continue
+          <View style={styles.createAnAccount}>
+            <Text style={styles.createAnAccount1}>
+              I Already Have an Account
             </Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.createAnAccount}>
-          <Text style={styles.createAnAccount1}>I Already Have an Account</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('SignIn')}>
-            <Text style={styles.signUp}>Log in</Text>
-          </TouchableOpacity>
-        </View>
-      </KeyboardAvoidingView>
+            <TouchableOpacity onPress={() => navigation.navigate('SignIn')}>
+              <Text style={styles.signUp}>Log in</Text>
+            </TouchableOpacity>
+          </View>
+        </KeyboardAvoidingView>
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -308,7 +336,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 5,
     marginTop: 8,
-    marginBottom: 8,
+    marginBottom: 16,
   },
   signUp: {
     fontWeight: 'bold',

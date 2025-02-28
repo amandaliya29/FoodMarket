@@ -95,6 +95,8 @@ const AdminPastOrder = () => {
     <View style={styles.allContainer}>
       <FlatList
         data={foodList}
+        showsHorizontalScrollIndicator={false}
+        showsVerticalScrollIndicator={false}
         keyExtractor={item => item.id.toString()}
         renderItem={renderVerticalItem}
       />

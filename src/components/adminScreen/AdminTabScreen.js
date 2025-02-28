@@ -1,6 +1,5 @@
-import React, {useState, useRef, useEffect} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
-  Animated,
   View,
   TouchableOpacity,
   StyleSheet,
@@ -9,11 +8,14 @@ import {
   SafeAreaView,
   Image,
   BackHandler,
+  FlatList,
 } from 'react-native';
 import {TabView, SceneMap} from 'react-native-tab-view';
 import AdminNewOrder from './adminTab/AdminNewOrder';
 import AdminPastOrder from './adminTab/AdminPastOrder';
 import AdminOutgoning from './adminTab/AdminOutgoning';
+import AdminDelivered from './adminTab/AdminDelivered';
+import AdminCancelled from './adminTab/AdminCancelled';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import UserAvatar from '../pages/UserAvatar';
 
@@ -23,77 +25,42 @@ const AdminTabScreen = () => {
   const [userDetails, setUserDetail] = useState(null);
   const [imageUri, setImageUri] = useState('');
   const [userName, setUserName] = useState('');
-  const [routes] = useState([
+
+  const routes = [
     {key: 'NewOrder', title: 'New Order'},
     {key: 'AdminOutgoning', title: 'Ongoing'},
     {key: 'pastOrder', title: 'Past Order'},
-  ]);
-  const tabTitleWidths = useRef([]);
-  const fixedIndicatorWidth = 40;
+    {key: 'delivered', title: 'Delivered'},
+    {key: 'cancelled', title: 'Cancelled'},
+  ];
 
-  const handleTextLayout = (event, i) => {
-    const {width} = event.nativeEvent.layout;
-    tabTitleWidths.current[i] = width;
-  };
-
-  const renderTabBar = props => {
-    const inputRange = props.navigationState.routes.map((_, i) => i);
-    const tabWidth = layout.width / props.navigationState.routes.length;
-
-    return (
-      <View style={styles.tabBar}>
-        {props.navigationState.routes.map((route, i) => {
-          const opacity = props.position.interpolate({
-            inputRange,
-            outputRange: inputRange.map(inputIndex =>
-              inputIndex === i ? 1 : 0.5,
-            ),
-          });
-
-          const color = index === i ? '#020202' : '#8D92A3';
-          const fontWeight = index === i ? 700 : 400;
-          return (
-            <TouchableOpacity
-              key={route.key}
-              style={styles.tabItem}
-              onPress={() => setIndex(i)}>
-              <Animated.Text
-                style={[{opacity}, {color}, {fontWeight}]}
-                onLayout={event => handleTextLayout(event, i)}>
-                {route.title}
-              </Animated.Text>
-            </TouchableOpacity>
-          );
-        })}
-
-        <Animated.View
-          style={[
-            styles.indicator,
-            {
-              width: fixedIndicatorWidth,
-              transform: [
-                {
-                  translateX: props.position.interpolate({
-                    inputRange,
-                    outputRange: inputRange.map(i => {
-                      const titleWidth = tabTitleWidths.current[i] || 0;
-                      const offsetX = (tabWidth - fixedIndicatorWidth) / 2;
-                      return i * tabWidth + offsetX;
-                    }),
-                  }),
-                },
-              ],
-            },
-          ]}
-        />
-      </View>
-    );
-  };
+  const renderTabBar = ({navigationState}) => (
+    <View style={styles.tabBar}>
+      <FlatList
+        data={navigationState.routes}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        keyExtractor={item => item.key}
+        renderItem={({item, index: i}) => (
+          <TouchableOpacity
+            key={item.key}
+            style={[styles.tabItem, index === i && styles.activeTab]}
+            onPress={() => setIndex(i)}>
+            <Text style={[styles.tabText, index === i && styles.activeTabText]}>
+              {item.title}
+            </Text>
+          </TouchableOpacity>
+        )}
+      />
+    </View>
+  );
 
   const renderScene = SceneMap({
     NewOrder: AdminNewOrder,
     pastOrder: AdminPastOrder,
     AdminOutgoning: AdminOutgoning,
+    delivered: AdminDelivered,
+    cancelled: AdminCancelled,
   });
 
   const fetchUserDetails = async () => {
@@ -102,37 +69,26 @@ const AdminTabScreen = () => {
       if (userDetails) {
         const parsedDetails = JSON.parse(userDetails);
         setUserDetail(parsedDetails);
-        setImageUri(
-          parsedDetails.data &&
-            parsedDetails.data.user &&
-            parsedDetails.data.user.avatar
-            ? `${IMAGE_API}/${parsedDetails.data.user.avatar}`
-            : null,
-        );
-        setUserName(parsedDetails.data.user.name);
+        setImageUri(parsedDetails.data?.user?.avatar || '');
+        setUserName(parsedDetails.data?.user?.name || 'Food Market');
       }
     } catch (error) {
       console.warn('Failed to load user details', error);
     }
   };
 
-  const backBtn = () => {
-    const backAction = () => {
-      BackHandler.exitApp();
-      return true;
-    };
-    const backHandler = BackHandler.addEventListener(
-      'hardwareBackPress',
-      backAction,
-    );
-    return () => backHandler.remove();
-  };
-
   useEffect(() => {
     fetchUserDetails();
-    imageUri;
-    backBtn();
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      () => {
+        BackHandler.exitApp();
+        return true;
+      },
+    );
+    return () => backHandler.remove();
   }, []);
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.head}>
@@ -140,21 +96,17 @@ const AdminTabScreen = () => {
           <Text style={styles.text}>FoodMarket</Text>
           <Text style={styles.letsGetSome}>Let's get some foods</Text>
         </View>
-        <View>
-          {imageUri ? (
-            <Image
-              alt="image"
-              style={styles.profileImage}
-              height={50}
-              width={50}
-              resizeMode="cover"
-              source={{uri: imageUri}}
-            />
-          ) : (
-            <UserAvatar size={45} name={userName || 'Food Market'} />
-          )}
-        </View>
+        {imageUri ? (
+          <Image
+            style={styles.profileImage}
+            source={{uri: imageUri}}
+            resizeMode="cover"
+          />
+        ) : (
+          <UserAvatar size={45} name={userName} />
+        )}
       </View>
+
       <TabView
         navigationState={{index, routes}}
         renderScene={renderScene}
@@ -166,26 +118,12 @@ const AdminTabScreen = () => {
   );
 };
 
-export default AdminTabScreen;
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingTop: 8,
-    backgroundColor: '#fff',
-  },
-  text: {
-    fontSize: 20,
-    fontWeight: '500',
-    color: 'black',
-  },
-  letsGetSome: {
-    fontSize: 13,
-    fontWeight: '300',
-    color: '#8d92a3',
-  },
+  container: {flex: 1, backgroundColor: '#fff'},
+  text: {fontSize: 20, fontWeight: '500', color: 'black'},
+  letsGetSome: {fontSize: 13, fontWeight: '300', color: '#8d92a3'},
   head: {
     padding: 16,
-    paddingVertical: 2,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -195,29 +133,23 @@ const styles = StyleSheet.create({
     height: 44,
     width: 44,
     borderRadius: 8,
-    borderWidth: 1,
   },
   tabBar: {
-    backgroundColor: '#fff',
     flexDirection: 'row',
-    paddingTop: 0,
-    position: 'relative',
     borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
     borderBottomColor: '#F2F2F2',
   },
   tabItem: {
-    flex: 1,
-    alignItems: 'center',
-    padding: 16,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
   },
-  indicator: {
-    position: 'absolute',
-    bottom: 0,
-    height: 4,
-    backgroundColor: '#020202',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 10,
+  activeTab: {
+    borderBottomWidth: 3,
+    borderRadius: 2,
+    borderBottomColor: '#020202',
   },
+  tabText: {color: '#8D92A3'},
+  activeTabText: {color: '#020202', fontWeight: '700'},
 });
+
+export default AdminTabScreen;

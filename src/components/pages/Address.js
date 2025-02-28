@@ -56,17 +56,6 @@ const Address = () => {
             },
           ]}>
           <View>
-            <View style={{marginBottom: 16}}>
-              <Text style={styles.title}>Phone No</Text>
-              <TextInput
-                value={phone}
-                onChangeText={setPhone}
-                keyboardType="number-pad"
-                placeholder="Type your phone number"
-                placeholderTextColor={'grey'}
-                style={styles.input}
-              />
-            </View>
             <Text style={styles.title}>House No</Text>
             <TextInput
               value={house}

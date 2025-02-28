@@ -31,6 +31,8 @@ const UserProfile = () => {
   const fetchUserDetails = async () => {
     try {
       const userDetails = await AsyncStorage.getItem('userDetails');
+      console.warn(userDetails);
+
       if (userDetails) {
         const parsedDetails = JSON.parse(userDetails);
         setUserDetail(parsedDetails);
