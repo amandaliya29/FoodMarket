@@ -41,8 +41,8 @@ const StackNavigation = () => {
       try {
         const userData = await AsyncStorage.getItem('userDetails');
         const parsedUserData = userData ? JSON.parse(userData) : null;
-        if (parsedUserData) {
-          const isAdmin = parsedUserData.data.user.is_admin === 1;
+        if (parsedUserData && parsedUserData.user) {
+          const isAdmin = parsedUserData.user.is_admin === 1;
           setInitialRoute(isAdmin ? 'AdminHomeScreen' : 'TabNavigation');
         } else {
           setInitialRoute('SignIn');

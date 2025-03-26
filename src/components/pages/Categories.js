@@ -41,7 +41,7 @@ const Categories = () => {
         }));
         setData(categories);
       } else {
-        setData([]); // Ensure setData doesn't get undefined
+        setData([]);
       }
     } catch (error) {
       console.warn(error);

@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -8,7 +8,7 @@ import {
   Image,
   ToastAndroid,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import axiosInstance from '../../axios/axiosInstance';
 import {IMAGE_API} from '@env';
 import ToggleSwitch from 'toggle-switch-react-native';
@@ -68,14 +68,14 @@ const AdminOffers = () => {
   const DeleteButton = async id => {
     console.warn(id);
 
-    // try {
-    //   await axiosInstance.delete(`offer/delete/${id}`);
-    //   setData(prevData => prevData.filter(item => item.id !== id));
+    try {
+      await axiosInstance.delete(`offer/delete/${id}`);
+      setData(prevData => prevData.filter(item => item.id !== id));
 
-    //   showToastWithGravityAndOffset('Item deleted successfully.');
-    // } catch (error) {
-    //   showToastWithGravityAndOffset(error.response?.data?.message);
-    // }
+      showToastWithGravityAndOffset('Item deleted successfully.');
+    } catch (error) {
+      showToastWithGravityAndOffset(error.response?.data?.message);
+    }
   };
 
   const fetchProductList = async () => {
@@ -105,6 +105,13 @@ const AdminOffers = () => {
     fetchProductList();
     data;
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchProductList();
+      IMAGE_API;
+    }, []),
+  );
 
   const renderPlaceholder = () => (
     <View style={styles.verticalBox}>

@@ -8,18 +8,48 @@ import {
   ScrollView,
   Image,
   Alert,
+  ToastAndroid,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {useNavigation} from '@react-navigation/native';
-import React, {useEffect} from 'react';
+import React, {useEffect, useMemo} from 'react';
 import {useDispatch} from 'react-redux';
 import {cancelOrder} from '../redux/cartSlice';
 import {IMAGE_API} from '@env';
+import axiosInstance from '../axios/axiosInstance';
 
 const InProgressDetail = ({route}) => {
   const {item, isPastOrder} = route.params;
   const navigation = useNavigation();
   const dispatch = useDispatch();
+
+  const showToastWithGravityAndOffset = message => {
+    ToastAndroid.showWithGravityAndOffset(
+      message,
+      ToastAndroid.CENTER,
+      ToastAndroid.BOTTOM,
+      25,
+      50,
+    );
+  };
+  const groupedProducts = useMemo(() => {
+    return Object.values(
+      item.products.reduce((acc, product) => {
+        if (acc[product.name]) {
+          acc[product.name].qty += 1;
+        } else {
+          acc[product.name] = {...product, qty: 1};
+        }
+        return acc;
+      }, {}),
+    );
+  }, [item.products]);
+
+  const totalAmount =
+    Number(item.receipt?.amount || 0) +
+    Number(item.receipt?.delivery_charges || 0) +
+    Number(item.receipt?.gst || 0) -
+    Number(item.receipt?.discount_applied || 0);
 
   useEffect(() => {
     IMAGE_API;
@@ -44,16 +74,16 @@ const InProgressDetail = ({route}) => {
           <Text style={styles.foodPrice}>₹{item.price}</Text>
         </View>
         <View style={styles.quantityContainer}>
-          <Text style={styles.quantityText}>{item.quantity}</Text>
+          <Text style={styles.quantityText}>{item.qty}</Text>
           <Text style={styles.quantityText}>
-            {item.quantity === 1 ? 'item' : 'items'}
+            {item.qty === 1 ? 'item' : 'items'}
           </Text>
         </View>
       </View>
     </TouchableOpacity>
   );
 
-  const handleCancelOrder = () => {
+  const handleCancelOrder = async () => {
     Alert.alert(
       'Cancel Order',
       'Are you sure you want to cancel this order?',
@@ -64,8 +94,22 @@ const InProgressDetail = ({route}) => {
         },
         {
           text: 'Yes',
-          onPress: () => {
-            dispatch(cancelOrder({id: item.id, status: 'canceled'}));
+          onPress: async (id = item.receipt.order_id) => {
+            try {
+              const formData = new FormData();
+              formData.append('order_id', id);
+              // formData.append('status', 'preparing');
+              await axiosInstance.post(`/order/cancel`, formData, {
+                headers: {'Content-Type': 'multipart/form-data'},
+              });
+              // console.warn(response.data);
+              // showToastWithGravityAndOffset(response.data.message);
+            } catch (error) {
+              console.warn(error);
+              // console.warn(error);
+
+              showToastWithGravityAndOffset(error.response.data.message);
+            }
             navigation.goBack();
           },
         },
@@ -76,6 +120,7 @@ const InProgressDetail = ({route}) => {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* {console.warn(item)} */}
       <View style={styles.head}>
         <TouchableOpacity
           onPress={() => {
@@ -96,18 +141,18 @@ const InProgressDetail = ({route}) => {
       </View>
       <ScrollView style={styles.scrollContainer}>
         <FlatList
-          data={item.items}
+          data={groupedProducts}
           keyExtractor={item => item.id.toString()}
           renderItem={renderVerticalItem}
           scrollEnabled={false}
         />
         <View style={styles.footerContainer}>
           <Text style={styles.footerTitle}>Payment Transaction</Text>
-          {item.items.map(detail => (
+          {groupedProducts.map(detail => (
             <View key={detail.id} style={styles.paymentDetailRow}>
               <Text style={styles.paymentDetailText}>{detail.name}</Text>
               <Text style={styles.paymentDetailText}>
-                ₹{detail.price * detail.quantity}
+                ₹{(detail.price * detail.qty).toFixed(2)}
               </Text>
             </View>
           ))}
@@ -115,14 +160,7 @@ const InProgressDetail = ({route}) => {
           <View style={styles.paymentDetailRow}>
             <Text style={styles.paymentDetailTotalText}>Total</Text>
             <Text style={styles.paymentDetailTotalText}>
-              ₹
-              {item.items
-                .reduce(
-                  (total, currentItem) =>
-                    total + currentItem.price * currentItem.quantity,
-                  0,
-                )
-                .toFixed(2)}
+              ₹{totalAmount.toFixed(2)}
             </Text>
           </View>
         </View>
@@ -130,23 +168,23 @@ const InProgressDetail = ({route}) => {
           <Text style={styles.sectionTitle}>Deliver To</Text>
           <View style={styles.row}>
             <Text style={styles.label}>Name:</Text>
-            <Text style={styles.value}>Food Market</Text>
+            <Text style={styles.value}>{item.user.name}</Text>
           </View>
           <View style={styles.row}>
             <Text style={styles.label}>Phone No:</Text>
-            <Text style={styles.value}>+91-1234567890</Text>
+            <Text style={styles.value}>{item.user.phone_no}</Text>
           </View>
           <View style={styles.row}>
             <Text style={styles.label}>House No:</Text>
-            <Text style={styles.value}>C-101</Text>
+            <Text style={styles.value}>{item.house_no}</Text>
           </View>
           <View style={styles.row}>
             <Text style={styles.label}>Address:</Text>
-            <Text style={styles.value}>123 Main Street</Text>
+            <Text style={styles.value}>{item.address}</Text>
           </View>
           <View style={styles.row}>
             <Text style={styles.label}>City:</Text>
-            <Text style={styles.value}>Surat</Text>
+            <Text style={styles.value}>{item.city}</Text>
           </View>
         </View>
         <View style={styles.section}>
@@ -159,7 +197,8 @@ const InProgressDetail = ({route}) => {
             }}>
             <Text style={styles.sectionTitle}>Payment Type</Text>
             <Text style={[styles.value, {color: 'green'}]}>
-              {item.paymentMethod === 'cash'
+              {/* {console.warn(item)} */}
+              {item.payment_type === 'cash'
                 ? 'Cash on Delivery'
                 : 'Online Payment'}
             </Text>
@@ -180,10 +219,10 @@ const InProgressDetail = ({route}) => {
                   styles.value,
                   {
                     fontSize: 16,
-                    color: item.status === 'canceled' ? 'red' : '#ccc',
+                    color: item.status === 'canceled' ? 'red' : 'grey',
                   },
                 ]}>
-                {item.status === 'canceled' ? 'Canceled' : 'Delivered'}
+                {item.status === 'cancelled' ? 'Canceled' : 'Delivered'}
               </Text>
             </View>
           )}

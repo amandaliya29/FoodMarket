@@ -1,88 +1,179 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   View,
   Text,
   FlatList,
   TouchableOpacity,
   StyleSheet,
-  ScrollView,
-  Image,
   ToastAndroid,
-  ActivityIndicator,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import Icon2 from 'react-native-vector-icons/Ionicons';
-import {foodList} from '../../foodlist';
+import {useFocusEffect} from '@react-navigation/native';
+import axiosInstance from '../../axios/axiosInstance';
 
 const AdminNewOrder = () => {
   const navigation = useNavigation();
-  const [data, setData] = useState([]);
+  const [orders, setOrders] = useState([]);
 
-  const orderDetails = [
-    {id: '1', item: 'Dal Makhani', qty: 2, price: '₹24.00'},
-    {id: '2', item: 'Simple Thali - Veg', qty: 1, price: '₹18.00'},
-    {id: '3', item: 'Deluxe Thali - Non Veg', qty: 2, price: '₹48.00'},
-    {id: '4', item: 'Missi Roti', qty: 5, price: '₹10.00'},
-    {id: '5', item: 'Butter Nan', qty: 2, price: '₹6.00'},
-  ];
+  useEffect(() => {
+    GetOrder();
+  }, []);
 
-  const renderVerticalItem = ({item}) => (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.iconContainer}>
-          <Icon name="truck-delivery" size={40} color="#EB0029" />
-        </View>
-        <View style={styles.headerInfo}>
-          <Text style={styles.name}>Angel James</Text>
-          <Text style={styles.time}>Today at 12:33 AM</Text>
-        </View>
-        <View style={styles.orderInfo}>
-          <Text style={styles.orderId}>Order id: 348</Text>
-          <Text style={styles.total}>Total: ₹106.00</Text>
-        </View>
-      </View>
+  const showToastWithGravityAndOffset = message => {
+    ToastAndroid.showWithGravityAndOffset(
+      message,
+      ToastAndroid.CENTER,
+      ToastAndroid.BOTTOM,
+      25,
+      50,
+    );
+  };
 
-      <FlatList
-        data={orderDetails}
-        keyExtractor={item => item.id}
-        renderItem={({item}) => (
-          <View style={styles.itemRow}>
-            <Text style={styles.itemName}>{item.item}</Text>
-            <Text style={styles.itemQty}>Qty: {item.qty}</Text>
-            <Text style={styles.itemPrice}>{item.price}</Text>
-          </View>
-        )}
-      />
-      <View style={styles.actions}>
-        {/* <TouchableOpacity style={[styles.button, styles.callButton]}>
-          <Text style={styles.buttonText}>Call Customer</Text>
-        </TouchableOpacity> */}
-        <TouchableOpacity
-          onPress={() => {
-            navigation.navigate('AdminOrderDetail', {inGoing: 'newOrder'});
-          }}
-          style={[styles.button, styles.detailsButton]}>
-          <Text style={styles.buttonText}>View Details</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.button, styles.cancelButton]}>
-          <Text style={styles.buttonText}>Cancel Order</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.button, styles.acceptButton]}>
-          <Text style={styles.buttonText}>Accept Order</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+  const GetOrder = async () => {
+    try {
+      const response = await axiosInstance.get(`/order/list?search=confirmed`);
+      const formattedOrders = response.data.data.map(order => ({
+        ...order,
+        products: order.products || [],
+      }));
+
+      setOrders(formattedOrders);
+
+      // setOrders(formattedOrders);
+      // showToastWithGravityAndOffset(response.data.message);
+    } catch (error) {
+      showToastWithGravityAndOffset(error.response.data.message);
+    }
+  };
+
+  const AcceptHandler = async id => {
+    // console.warn('AcceptHandler clicked with order IDs:', id);
+
+    try {
+      const formData = new FormData();
+      formData.append('order_id', id);
+      formData.append('status', 'preparing');
+      const response = await axiosInstance.post(`/order/status`, formData, {
+        headers: {'Content-Type': 'multipart/form-data'},
+      });
+      // console.warn(response.data);
+      showToastWithGravityAndOffset(response.data.message);
+    } catch (error) {
+      // console.warn(error);
+      showToastWithGravityAndOffset(error.response.data.message);
+    }
+  };
+  const cancelledHandler = async id => {
+    // console.warn('AcceptHandler clicked with order IDs:', id);
+
+    try {
+      const formData = new FormData();
+      formData.append('order_id', id);
+      // formData.append('status', 'preparing');
+      const response = await axiosInstance.post(`/order/cancel`, formData, {
+        headers: {'Content-Type': 'multipart/form-data'},
+      });
+      // console.warn(response.data);
+      showToastWithGravityAndOffset(response.data.message);
+    } catch (error) {
+      console.warn(error);
+      showToastWithGravityAndOffset(error.response.data.message);
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      GetOrder();
+    }, []),
   );
+
+  const renderOrderItem = ({item}) => {
+    // {
+    // console.warn(item);
+    // }
+    // Calculate totalAmount
+    const totalAmount =
+      Number(item.receipt?.amount || 0) +
+      Number(item.receipt?.delivery_charges || 0) +
+      Number(item.receipt?.gst || 0) -
+      Number(item.receipt?.discount_applied || 0);
+
+    // Group products by name and sum their quantities
+    const groupedProducts = item.products.reduce((acc, product) => {
+      if (acc[product.name]) {
+        acc[product.name].qty += 1; // Increase the quantity for duplicate items
+      } else {
+        acc[product.name] = {...product, qty: 1}; // Initialize with qty = 1
+      }
+      return acc;
+    }, {});
+
+    // Convert the grouped object back into an array
+    const uniqueProducts = Object.values(groupedProducts);
+
+    return (
+      <View style={styles.container}>
+        {/* {console.warn(orders)} */}
+        <View style={styles.header}>
+          <View style={styles.iconContainer}>
+            <Icon name="truck-delivery" size={40} color="#EB0029" />
+          </View>
+          <View style={styles.headerInfo}>
+            <Text style={styles.name}>{item.user?.name}</Text>
+            <Text style={styles.time}>Today at 12:33 AM</Text>
+          </View>
+          <View style={styles.orderInfo}>
+            <Text style={styles.orderId}>Order ID: {item.id}</Text>
+            <Text style={styles.total}>Total: ₹{totalAmount.toFixed(2)}</Text>
+          </View>
+        </View>
+
+        <FlatList
+          data={uniqueProducts}
+          keyExtractor={product => product.id.toString()}
+          renderItem={({item}) => (
+            <View style={styles.itemRow}>
+              <Text style={styles.itemName}>{item.name}</Text>
+              <Text style={styles.itemQty}>Qty: {item.qty}</Text>
+              <Text style={styles.itemPrice}>₹{item.price}</Text>
+            </View>
+          )}
+        />
+
+        <View style={styles.actions}>
+          <TouchableOpacity
+            onPress={() =>
+              navigation.navigate('AdminOrderDetail', {
+                inGoing: 'newOrder',
+                order: item,
+              })
+            }
+            style={[styles.button, styles.detailsButton]}>
+            <Text style={styles.buttonText}>View Details</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.button, styles.cancelButton]}
+            onPress={() => cancelledHandler(item.id)}>
+            <Text style={styles.buttonText}>Cancel Order</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.button, styles.acceptButton]}
+            onPress={() => AcceptHandler(item.id)}>
+            <Text style={styles.buttonText}>Accept Order</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  };
 
   return (
     <View style={styles.allContainer}>
       <FlatList
-        data={foodList}
-        showsHorizontalScrollIndicator={false}
-        showsVerticalScrollIndicator={false}
+        data={orders}
         keyExtractor={item => item.id.toString()}
-        renderItem={renderVerticalItem}
+        renderItem={renderOrderItem}
+        showsVerticalScrollIndicator={false}
       />
     </View>
   );
@@ -91,9 +182,7 @@ const AdminNewOrder = () => {
 export default AdminNewOrder;
 
 const styles = StyleSheet.create({
-  allContainer: {
-    flex: 1,
-  },
+  allContainer: {flex: 1},
   container: {
     margin: 10,
     padding: 10,
@@ -105,69 +194,21 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  profileImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    marginRight: 10,
-  },
-  headerInfo: {
-    flex: 1,
-  },
-  name: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#777',
-  },
-  time: {
-    fontSize: 12,
-    color: '#777',
-  },
-  orderInfo: {
-    alignItems: 'flex-end',
-  },
-  orderId: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#777',
-  },
-  total: {
-    fontSize: 14,
-    color: '#2ecc71',
-    fontWeight: '600',
-  },
+  header: {flexDirection: 'row', alignItems: 'center', marginBottom: 10},
+  headerInfo: {flex: 1},
+  name: {fontSize: 16, fontWeight: 'bold', color: '#777'},
+  time: {fontSize: 12, color: '#777'},
+  orderInfo: {alignItems: 'flex-end'},
+  orderId: {fontSize: 14, fontWeight: '600', color: '#777'},
+  total: {fontSize: 14, color: '#2ecc71', fontWeight: '600'},
   itemRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginVertical: 5,
   },
-  itemName: {
-    flex: 1,
-    fontSize: 14,
-    color: '#777',
-  },
-  itemQty: {
-    width: 60,
-    textAlign: 'center',
-    fontSize: 14,
-    color: '#777',
-  },
-  itemPrice: {
-    width: 80,
-    textAlign: 'right',
-    fontSize: 14,
-    color: '#777',
-  },
-  message: {
-    fontSize: 12,
-    color: '#333',
-    marginVertical: 10,
-  },
+  itemName: {flex: 1, fontSize: 14, color: '#777'},
+  itemQty: {width: 60, textAlign: 'center', fontSize: 14, color: '#777'},
+  itemPrice: {width: 80, textAlign: 'right', fontSize: 14, color: '#777'},
   actions: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -180,23 +221,10 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     alignItems: 'center',
   },
-  callButton: {
-    backgroundColor: '#f39c12',
-  },
-  detailsButton: {
-    backgroundColor: '#3498db',
-  },
-  cancelButton: {
-    backgroundColor: '#e74c3c',
-  },
-  acceptButton: {
-    backgroundColor: '#2ecc71',
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '600',
-  },
+  detailsButton: {backgroundColor: '#3498db'},
+  cancelButton: {backgroundColor: '#e74c3c'},
+  acceptButton: {backgroundColor: '#2ecc71'},
+  buttonText: {color: '#fff', fontSize: 14, fontWeight: '600'},
   iconContainer: {
     width: 40,
     height: 40,

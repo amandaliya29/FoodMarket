@@ -7,12 +7,13 @@ import {
   TextInput,
   useWindowDimensions,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import DropDown from './DropDown';
 import {useNavigation, useRoute} from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const EditAddress = () => {
-  const [phone, setPhone] = useState('');
+  const [userDetails, setUserDetail] = useState();
   const [address, setAddress] = useState('');
   const [house, setHouse] = useState('');
   const [city, setCity] = useState('');
@@ -22,6 +23,7 @@ const EditAddress = () => {
   const {width} = useWindowDimensions();
   const navigation = useNavigation();
   const route = useRoute();
+  const item = route.params.cartItems;
 
   const validateForm = () => {
     const newErrors = {};
@@ -36,12 +38,38 @@ const EditAddress = () => {
 
   const handleNext = () => {
     if (validateForm()) {
-      navigation.navigate('BillPage', route.params.cartItems);
+      navigation.navigate('BillPage', {
+        item: item,
+        house: house,
+        address: address,
+        city: city,
+      });
     }
   };
 
+  const fetchUserDetails = async () => {
+    try {
+      const userDetails = await AsyncStorage.getItem('userDetails');
+
+      if (userDetails) {
+        const parsedDetails = JSON.parse(userDetails);
+        setUserDetail(parsedDetails);
+        setAddress(parsedDetails.user.address);
+        setHouse(parsedDetails.user.house_no);
+        setCity(parsedDetails.user.city);
+      }
+    } catch (error) {
+      console.warn('Failed to load user details', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchUserDetails();
+  }, []);
+
   return (
     <SafeAreaView style={styles.container}>
+      {/* {console.warn(item)} */}
       <View style={styles.head}>
         <View>
           <Text style={styles.text}>Address</Text>

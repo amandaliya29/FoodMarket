@@ -11,7 +11,7 @@ import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import axiosInstance from '../../axios/axiosInstance';
 
-const AdminDelivered = () => {
+const AdminPreparingOrder = () => {
   const navigation = useNavigation();
   const [orders, setOrders] = useState([]);
 
@@ -31,7 +31,7 @@ const AdminDelivered = () => {
 
   const GetOrder = async () => {
     try {
-      const response = await axiosInstance.get(`/order/list?search=delivered`);
+      const response = await axiosInstance.get(`/order/list?search=preparing`);
       const formattedOrders = response.data.data.map(order => ({
         ...order,
         products: order.products || [],
@@ -44,30 +44,47 @@ const AdminDelivered = () => {
     }
   };
 
-  // const AcceptHandler = async id => {
-  //   // console.warn('AcceptHandler clicked with order IDs:', id);
+  const AcceptHandler = async id => {
+    // console.warn('AcceptHandler clicked with order IDs:', id);
 
-  //   try {
-  //     const formData = new FormData();
-  //     formData.append('order_id', id);
-  //     formData.append('status', 'delivered');
-  //     const response = await axiosInstance.post(`/order/status`, formData, {
-  //       headers: {'Content-Type': 'multipart/form-data'},
-  //     });
-  //     // console.warn(response.data);
-  //     showToastWithGravityAndOffset(response.data.message);
-  //   } catch (error) {
-  //     // console.warn(error);
-  //     showToastWithGravityAndOffset(error.response.data.message);
-  //   }
-  // };
+    try {
+      const formData = new FormData();
+      formData.append('order_id', id);
+      formData.append('status', 'out_for_delivery');
+      const response = await axiosInstance.post(`/order/status`, formData, {
+        headers: {'Content-Type': 'multipart/form-data'},
+      });
+      // console.warn(response.data);
+      // showToastWithGravityAndOffset(response.data.message);
+    } catch (error) {
+      // console.warn(error);
+      showToastWithGravityAndOffset(error.response.data.message);
+    }
+  };
+
+  const cancelledHandler = async id => {
+    // console.warn('AcceptHandler clicked with order IDs:', id);
+
+    try {
+      const formData = new FormData();
+      formData.append('order_id', id);
+      // formData.append('status', 'preparing');
+      const response = await axiosInstance.post(`/order/cancel`, formData, {
+        headers: {'Content-Type': 'multipart/form-data'},
+      });
+      // console.warn(response.data);
+      showToastWithGravityAndOffset(response.data.message);
+    } catch (error) {
+      console.warn(error);
+      showToastWithGravityAndOffset(error.response.data.message);
+    }
+  };
 
   useFocusEffect(
     useCallback(() => {
       GetOrder();
     }, []),
   );
-
   const renderOrderItem = ({item}) => {
     const totalAmount =
       Number(item.receipt?.amount || 0) +
@@ -120,21 +137,23 @@ const AdminDelivered = () => {
           <TouchableOpacity
             onPress={() =>
               navigation.navigate('AdminOrderDetail', {
-                inGoing: 'Delivered',
+                inGoing: 'Preparing',
                 order: item,
               })
             }
             style={[styles.button, styles.detailsButton]}>
             <Text style={styles.buttonText}>View Details</Text>
           </TouchableOpacity>
-          {/* <TouchableOpacity style={[styles.button, styles.cancelButton]}>
+          <TouchableOpacity
+            style={[styles.button, styles.cancelButton]}
+            onPress={() => cancelledHandler(item.id)}>
             <Text style={styles.buttonText}>Cancel Order</Text>
-          </TouchableOpacity> */}
-          {/* <TouchableOpacity
+          </TouchableOpacity>
+          <TouchableOpacity
             style={[styles.button, styles.acceptButton]}
             onPress={() => AcceptHandler(item.id)}>
             <Text style={styles.buttonText}>Accept Order</Text>
-          </TouchableOpacity> */}
+          </TouchableOpacity>
         </View>
       </View>
     );
@@ -152,7 +171,7 @@ const AdminDelivered = () => {
   );
 };
 
-export default AdminDelivered;
+export default AdminPreparingOrder;
 
 const styles = StyleSheet.create({
   allContainer: {flex: 1},

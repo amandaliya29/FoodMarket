@@ -11,7 +11,7 @@ import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import axiosInstance from '../../axios/axiosInstance';
 
-const AdminDelivered = () => {
+const AdminOutOfDelivery = () => {
   const navigation = useNavigation();
   const [orders, setOrders] = useState([]);
 
@@ -31,7 +31,9 @@ const AdminDelivered = () => {
 
   const GetOrder = async () => {
     try {
-      const response = await axiosInstance.get(`/order/list?search=delivered`);
+      const response = await axiosInstance.get(
+        `/order/list?search=out_for_delivery`,
+      );
       const formattedOrders = response.data.data.map(order => ({
         ...order,
         products: order.products || [],
@@ -44,23 +46,23 @@ const AdminDelivered = () => {
     }
   };
 
-  // const AcceptHandler = async id => {
-  //   // console.warn('AcceptHandler clicked with order IDs:', id);
+  const AcceptHandler = async id => {
+    // console.warn('AcceptHandler clicked with order IDs:', id);
 
-  //   try {
-  //     const formData = new FormData();
-  //     formData.append('order_id', id);
-  //     formData.append('status', 'delivered');
-  //     const response = await axiosInstance.post(`/order/status`, formData, {
-  //       headers: {'Content-Type': 'multipart/form-data'},
-  //     });
-  //     // console.warn(response.data);
-  //     showToastWithGravityAndOffset(response.data.message);
-  //   } catch (error) {
-  //     // console.warn(error);
-  //     showToastWithGravityAndOffset(error.response.data.message);
-  //   }
-  // };
+    try {
+      const formData = new FormData();
+      formData.append('order_id', id);
+      formData.append('status', 'delivered');
+      const response = await axiosInstance.post(`/order/status`, formData, {
+        headers: {'Content-Type': 'multipart/form-data'},
+      });
+      // console.warn(response.data);
+      showToastWithGravityAndOffset(response.data.message);
+    } catch (error) {
+      // console.warn(error);
+      showToastWithGravityAndOffset(error.response.data.message);
+    }
+  };
 
   useFocusEffect(
     useCallback(() => {
@@ -90,6 +92,7 @@ const AdminDelivered = () => {
 
     return (
       <View style={styles.container}>
+        {/* {console.warn(item)} */}
         <View style={styles.header}>
           <View style={styles.iconContainer}>
             <Icon name="truck-delivery" size={40} color="#EB0029" />
@@ -120,7 +123,7 @@ const AdminDelivered = () => {
           <TouchableOpacity
             onPress={() =>
               navigation.navigate('AdminOrderDetail', {
-                inGoing: 'Delivered',
+                inGoing: 'OutOfDelivery',
                 order: item,
               })
             }
@@ -130,11 +133,11 @@ const AdminDelivered = () => {
           {/* <TouchableOpacity style={[styles.button, styles.cancelButton]}>
             <Text style={styles.buttonText}>Cancel Order</Text>
           </TouchableOpacity> */}
-          {/* <TouchableOpacity
+          <TouchableOpacity
             style={[styles.button, styles.acceptButton]}
             onPress={() => AcceptHandler(item.id)}>
             <Text style={styles.buttonText}>Accept Order</Text>
-          </TouchableOpacity> */}
+          </TouchableOpacity>
         </View>
       </View>
     );
@@ -152,7 +155,7 @@ const AdminDelivered = () => {
   );
 };
 
-export default AdminDelivered;
+export default AdminOutOfDelivery;
 
 const styles = StyleSheet.create({
   allContainer: {flex: 1},

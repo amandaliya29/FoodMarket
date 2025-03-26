@@ -1,12 +1,36 @@
-import {createSlice} from '@reduxjs/toolkit';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {createSlice, createAsyncThunk} from '@reduxjs/toolkit';
+
+// Load data from AsyncStorage when the app starts
+export const loadCartData = createAsyncThunk('cart/loadCartData', async () => {
+  try {
+    const cartItems = await AsyncStorage.getItem('cartItems');
+    const wishList = await AsyncStorage.getItem('wishList');
+    const searchHistory = await AsyncStorage.getItem('searchHistory');
+
+    return {
+      items: cartItems ? JSON.parse(cartItems) : [],
+      wishList: wishList ? JSON.parse(wishList) : [],
+      searchHistory: searchHistory ? JSON.parse(searchHistory) : [],
+    };
+  } catch (error) {
+    console.error('Error loading data from storage:', error);
+    return {items: [], wishList: [], searchHistory: []};
+  }
+});
 
 const initialState = {
   items: [],
   wishList: [],
   searchHistory: [],
-  searchAdminHistory: [],
-  orders: [],
-  pastOrders: [],
+};
+
+const saveToStorage = async (key, value) => {
+  try {
+    await AsyncStorage.setItem(key, JSON.stringify(value));
+  } catch (error) {
+    console.error('Error saving data:', error);
+  }
 };
 
 const cartSlice = createSlice({
@@ -22,10 +46,17 @@ const cartSlice = createSlice({
       } else {
         state.items.push({...action.payload});
       }
+      saveToStorage('cartItems', state.items);
     },
 
     removeFromCart: (state, action) => {
       state.items = state.items.filter(item => item.id !== action.payload.id);
+      saveToStorage('cartItems', state.items);
+    },
+
+    clearCart: state => {
+      state.items = [];
+      AsyncStorage.removeItem('cartItems');
     },
 
     incrementQuantity: (state, action) => {
@@ -34,6 +65,7 @@ const cartSlice = createSlice({
       );
       if (itemIndex >= 0) {
         state.items[itemIndex].quantity += 1;
+        saveToStorage('cartItems', state.items);
       }
     },
 
@@ -49,15 +81,14 @@ const cartSlice = createSlice({
             item => item.id !== action.payload.id,
           );
         }
+        saveToStorage('cartItems', state.items);
       }
     },
 
     addToWishList: (state, action) => {
-      const itemIndex = state.wishList.findIndex(
-        item => item.id === action.payload.id,
-      );
-      if (itemIndex === -1) {
+      if (!state.wishList.some(item => item.id === action.payload.id)) {
         state.wishList.push({...action.payload});
+        saveToStorage('wishList', state.wishList);
       }
     },
 
@@ -65,11 +96,13 @@ const cartSlice = createSlice({
       state.wishList = state.wishList.filter(
         item => item.id !== action.payload.id,
       );
+      saveToStorage('wishList', state.wishList);
     },
 
     addSearchHistory: (state, action) => {
       if (!state.searchHistory.includes(action.payload)) {
         state.searchHistory = [action.payload, ...state.searchHistory];
+        saveToStorage('searchHistory', state.searchHistory);
       }
     },
 
@@ -77,69 +110,27 @@ const cartSlice = createSlice({
       state.searchHistory = state.searchHistory.filter(
         item => item !== action.payload,
       );
+      saveToStorage('searchHistory', state.searchHistory);
     },
 
     clearHistory: state => {
       state.searchHistory = [];
+      AsyncStorage.removeItem('searchHistory');
     },
-    addAdminSearchHistory: (state, action) => {
-      if (!state.searchAdminHistory.includes(action.payload)) {
-        state.searchAdminHistory = [
-          action.payload,
-          ...state.searchAdminHistory,
-        ];
-      }
-    },
-
-    removeAdminSearchHistoryItem: (state, action) => {
-      state.searchAdminHistory = state.searchAdminHistory.filter(
-        item => item !== action.payload,
-      );
-    },
-
-    clearAdminHistory: state => {
-      state.searchAdminHistory = [];
-    },
-
-    addOrder: (state, action) => {
-      state.orders.push(action.payload);
-    },
-
-    clearOrders: state => {
-      state.orders = [];
-    },
-
-    clearCart: state => {
-      state.items = [];
-    },
-
-    cancelOrder: (state, action) => {
-      const orderIndex = state.orders.findIndex(
-        order => order.id === action.payload.id,
-      );
-      if (orderIndex >= 0) {
-        state.orders[orderIndex].status = 'canceled';
-        const canceledOrder = state.orders.splice(orderIndex, 1)[0];
-        state.pastOrders.push(canceledOrder);
-      }
-    },
-
-    moveOrderToPast: (state, action) => {
-      const orderIndex = state.orders.findIndex(
-        order => order.id === action.payload.id,
-      );
-      if (orderIndex >= 0) {
-        const movedOrder = state.orders.splice(orderIndex, 1)[0];
-        state.pastOrders.push(movedOrder);
-        state.items = state.items.filter(item => item.id !== action.payload.id);
-      }
-    },
+  },
+  extraReducers: builder => {
+    builder.addCase(loadCartData.fulfilled, (state, action) => {
+      state.items = action.payload.items;
+      state.wishList = action.payload.wishList;
+      state.searchHistory = action.payload.searchHistory;
+    });
   },
 });
 
 export const {
   addToCart,
   removeFromCart,
+  clearCart,
   incrementQuantity,
   decrementQuantity,
   addToWishList,
@@ -147,14 +138,6 @@ export const {
   addSearchHistory,
   removeSearchHistoryItem,
   clearHistory,
-  addOrder,
-  clearOrders,
-  clearCart,
-  cancelOrder,
-  moveOrderToPast,
-  addAdminSearchHistory,
-  removeAdminSearchHistoryItem,
-  clearAdminHistory,
 } = cartSlice.actions;
 
 export default cartSlice.reducer;

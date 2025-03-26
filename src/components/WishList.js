@@ -1,4 +1,4 @@
-import React, {useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {addToWishList, removeFromWishList} from './redux/cartSlice';
 import {
@@ -18,6 +18,7 @@ import {foodList} from './foodlist';
 import {StarRatingDisplay} from 'react-native-star-rating-widget';
 import Icon2 from 'react-native-vector-icons/Ionicons';
 import Icon from 'react-native-vector-icons/Ionicons';
+import {IMAGE_API} from '@env';
 
 const WishList = () => {
   const dispatch = useDispatch();
@@ -42,36 +43,9 @@ const WishList = () => {
     dispatch(removeFromWishList(item));
   };
 
-  const TopDeal = () => {
-    return (
-      <View>
-        <Text
-          style={{
-            marginHorizontal: 16,
-            marginVertical: 16,
-            fontSize: 16,
-            color: '#020202',
-            marginBottom: 10,
-          }}>
-          Top Deal
-        </Text>
-        <View>
-          <View>
-            <FlatList
-              data={foodList}
-              showsVerticalScrollIndicator={false}
-              showsHorizontalScrollIndicator={false}
-              horizontal={true}
-              keyExtractor={item => item.id.toString()}
-              renderItem={renderHorizontalItem}
-              ItemSeparatorComponent={<View style={{width: 16}}></View>}
-              style={styles.horizontalList}
-            />
-          </View>
-        </View>
-      </View>
-    );
-  };
+  useEffect(() => {
+    IMAGE_API;
+  }, []);
 
   const renderHorizontalItem = ({item, index}) => {
     const isLastItem = index === foodList.length - 1;
@@ -88,7 +62,12 @@ const WishList = () => {
           navigation.navigate('FoodDetail', {item});
         }}>
         <View style={styles.imageContainer(width, height)}>
-          <Image style={styles.image} source={{uri: item.image}} />
+          <Image
+            style={styles.image}
+            source={{uri: `${IMAGE_API}/${item.image}`}}
+            alt="image"
+            accessibilityLabel="A beautiful landscape"
+          />
         </View>
 
         <View style={{paddingLeft: 12}}>
@@ -125,7 +104,12 @@ const WishList = () => {
         navigation.navigate('FoodDetail', {item});
       }}>
       <View style={styles.verticalImageContainer}>
-        <Image style={styles.verticalImage} source={{uri: item.image}} />
+        <Image
+          style={styles.verticalImage}
+          source={{uri: `${IMAGE_API}/${item.image}`}}
+          alt="image"
+          accessibilityLabel="A beautiful landscape"
+        />
       </View>
       <View
         style={{
@@ -136,7 +120,7 @@ const WishList = () => {
         }}>
         <View style={styles.verticalDetails}>
           <Text style={styles.foodName}>{item.name}</Text>
-          <Text style={styles.foodPrice}>₹{item.price.toFixed(2)}</Text>
+          <Text style={styles.foodPrice}>₹{item.price}</Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -192,7 +176,6 @@ const WishList = () => {
                 </Text>
               </View>
             </View>
-            <TopDeal />
           </View>
         </ScrollView>
       ) : (
@@ -206,7 +189,6 @@ const WishList = () => {
             showsHorizontalScrollIndicator={false}
             keyExtractor={item => item.id.toString()}
             renderItem={renderVerticalItem}
-            ListFooterComponent={<TopDeal />}
           />
         </>
       )}

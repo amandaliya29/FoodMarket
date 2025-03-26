@@ -1,37 +1,55 @@
 import {Image, StyleSheet, Text, View} from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import ProfileTabBar from './profileTab/ProfileTabBar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import UserAvatar from './pages/UserAvatar';
 import {IMAGE_API} from '@env';
+import {useFocusEffect} from '@react-navigation/native';
 
 const ProfileScreen = () => {
   const [userDetails, setUserDetail] = useState(null);
   const [imageUri, setImageUri] = useState('');
   const [userName, setUserName] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   const fetchUserDetails = async () => {
+    setLoading(true);
+    setRefreshing(true);
     try {
       const userDetails = await AsyncStorage.getItem('userDetails');
+
       if (userDetails) {
         const parsedDetails = JSON.parse(userDetails);
         setUserDetail(parsedDetails);
         setImageUri(
-          parsedDetails.data &&
-            parsedDetails.data.user &&
-            parsedDetails.data.user.avatar
-            ? `${IMAGE_API}/${parsedDetails.data.user.avatar}`
+          parsedDetails.user && parsedDetails.user.avatar
+            ? `${parsedDetails.user.avatar}`
             : null,
         );
-        setUserName(parsedDetails.data.user.name);
+        setUserName(parsedDetails.user.name);
       }
     } catch (error) {
       console.warn('Failed to load user details', error);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
     }
   };
 
+  useFocusEffect(
+    useCallback(() => {
+      fetchUserDetails();
+    }, []),
+  );
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchUserDetails();
+  };
   useEffect(() => {
+    onRefresh();
+    // IMAGE_API;
     fetchUserDetails();
   }, []);
   return (
@@ -43,7 +61,11 @@ const ProfileScreen = () => {
               <Image
                 style={styles.picIcon}
                 resizeMode="cover"
-                source={{uri: imageUri}}
+                source={{
+                  uri: imageUri.includes('file')
+                    ? imageUri
+                    : `${IMAGE_API}/${imageUri}`,
+                }}
                 accessibilityLabel="user"
               />
             ) : (
@@ -52,10 +74,10 @@ const ProfileScreen = () => {
           </View>
         </View>
         <Text style={styles.nameText}>
-          {userDetails ? userDetails.data.user.name : 'User'}
+          {userDetails ? userDetails.user.name : 'User'}
         </Text>
         <Text style={styles.emailText}>
-          {userDetails ? userDetails.data.user.email : 'user123@gmail.com'}
+          {userDetails ? userDetails.user.email : 'user123@gmail.com'}
         </Text>
       </View>
       <View style={{flex: 1, marginTop: 60}}>

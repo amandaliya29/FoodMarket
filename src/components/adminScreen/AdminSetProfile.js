@@ -9,6 +9,7 @@ import {
   Modal,
   Image,
   PermissionsAndroid,
+  Platform,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import React, {useEffect, useState} from 'react';
@@ -17,7 +18,8 @@ import UserAvatar from '../pages/UserAvatar';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {IMAGE_API} from '@env';
-const UserProfile = () => {
+import axiosInstance from '../axios/axiosInstance';
+const AdminSetProfile = () => {
   const navigation = useNavigation();
   const {width} = useWindowDimensions();
   const [phone, setPhone] = useState();
@@ -27,21 +29,56 @@ const UserProfile = () => {
   const [userDetails, setUserDetail] = useState(null);
   const [userName, setUserName] = useState('');
 
+  const UpdateDetails = async () => {
+    try {
+      const formData = new FormData();
+      formData.append('phone_no', phone);
+      formData.append('name', userName);
+      if (imageUri) {
+        formData.append('avatar', imageUri);
+      }
+
+      // console.log(userDetails);
+
+      await AsyncStorage.setItem(
+        'userDetails',
+        JSON.stringify({
+          user: {
+            ...userDetails.user,
+            phone_no: phone,
+            name: userName,
+            avatar: imageUri,
+          },
+          token: userDetails.token,
+        }),
+      );
+
+      await axiosInstance.post('/profile', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+    } catch (error) {
+      console.warn(error);
+    }
+  };
+
   const fetchUserDetails = async () => {
     try {
       const userDetails = await AsyncStorage.getItem('userDetails');
+      // console.warn(userDetails);
+
       if (userDetails) {
         const parsedDetails = JSON.parse(userDetails);
         setUserDetail(parsedDetails);
         setImageUri(
-          parsedDetails.data &&
-            parsedDetails.data.user &&
-            parsedDetails.data.user.avatar
-            ? `${IMAGE_API}/${parsedDetails.data.user.avatar}`
+          parsedDetails.user && parsedDetails.user.avatar
+            ? `${parsedDetails.user.avatar}`
             : null,
         );
-        setUserName(parsedDetails.data.user.name);
-        setEmail(parsedDetails.data.user.email);
+        setUserName(parsedDetails.user.name);
+        setEmail(parsedDetails.user.email);
+        setPhone(parsedDetails.user.phone_no);
       }
     } catch (error) {
       console.warn('Failed to load user details', error);
@@ -63,11 +100,13 @@ const UserProfile = () => {
       response => {
         if (response.assets && response.assets.length > 0) {
           setImageUri(response.assets[0].uri);
+          console.warn(response.assets[0].uri);
         }
         setModalVisible(false);
       },
     );
   };
+
   const requestCameraPermission = async () => {
     if (Platform.OS === 'android') {
       try {
@@ -106,6 +145,7 @@ const UserProfile = () => {
         } else if (response.errorMessage) {
         } else if (response.assets && response.assets.length > 0) {
           setImageUri(response.assets[0].uri);
+          console.warn(response.assets[0].uri);
         }
         setModalVisible(false);
       },
@@ -149,8 +189,14 @@ const UserProfile = () => {
               <TouchableOpacity onPress={handleImagePress}>
                 {imageUri ? (
                   <Image
-                    source={{uri: imageUri}}
+                    alt="image"
+                    source={{
+                      uri: imageUri.includes('file')
+                        ? imageUri
+                        : `${IMAGE_API}/${imageUri}`,
+                    }}
                     style={styles.defaultAvatar}
+                    accessibilityLabel="user"
                   />
                 ) : (
                   <UserAvatar size={100} name={userName || 'Food Market'} />
@@ -195,6 +241,7 @@ const UserProfile = () => {
             <TouchableOpacity
               style={styles.signInButton}
               onPress={() => {
+                UpdateDetails();
                 navigation.goBack();
               }}>
               <Text style={styles.buttonText}>Update</Text>
@@ -202,7 +249,6 @@ const UserProfile = () => {
           </View>
         </View>
       </View>
-      {/* Modal for selecting image */}
       <Modal
         visible={modalVisible}
         transparent={true}
@@ -232,7 +278,7 @@ const UserProfile = () => {
   );
 };
 
-export default UserProfile;
+export default AdminSetProfile;
 
 const styles = StyleSheet.create({
   container: {

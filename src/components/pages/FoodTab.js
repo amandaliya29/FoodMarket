@@ -18,7 +18,6 @@ import {IMAGE_API} from '@env';
 
 const filters = [
   {id: '1', label: 'Sort By', type: 'sort'},
-  {id: '2', label: 'New on Food Market', type: 'filter', value: 'new'},
   {id: '3', label: 'Rating 4.0+', type: 'filter', value: 'rating4Plus'},
   {id: '4', label: 'Offers', type: 'filter', value: 'offers'},
   {id: '5', label: '₹300 - ₹600', type: 'filter', value: 'price300to600'},
@@ -57,6 +56,9 @@ const FoodTab = () => {
         stock: item.stock,
         description: item.description,
         rating: item.rate,
+        is_offer: item.is_offer,
+        offer_percentage: item.offer_percentage,
+        offer_text: item.offer_text,
       }));
       setData(products);
     } catch (error) {
@@ -101,9 +103,6 @@ const FoodTab = () => {
       }
     } else if (filter.type === 'filter') {
       switch (filter.value) {
-        case 'new':
-          newData = newData.filter(item => item.isNew);
-          break;
         case 'rating4Plus':
           newData = newData.filter(item => item.rating >= 4);
           break;
@@ -116,7 +115,8 @@ const FoodTab = () => {
           newData = newData.filter(item => item.price < 300);
           break;
         case 'offers':
-          newData = newData.filter(item => item.hasOffers);
+          newData = newData.filter(item => item.is_offer === 1);
+
           break;
       }
     }
@@ -190,6 +190,7 @@ const FoodTab = () => {
 
   return (
     <View style={styles.container}>
+      {/* {console.warn(data)} */}
       <ScrollView
         horizontal
         style={styles.filterBar}

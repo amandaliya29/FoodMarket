@@ -1,5 +1,5 @@
-import {useNavigation} from '@react-navigation/native';
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
+import {useSelector} from 'react-redux';
 import {
   View,
   Text,
@@ -10,29 +10,51 @@ import {
   ScrollView,
   RefreshControl,
 } from 'react-native';
-import {useSelector} from 'react-redux';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {IMAGE_API} from '@env';
+import axiosInstance from '../axios/axiosInstance';
+
 const PastOrders = () => {
-  const pastOrders = useSelector(state => state.cart.pastOrders);
+  const [items, setItems] = useState([]);
+  // const [currentItems, setCurrentItems] = useState(items);
   const navigation = useNavigation();
   const [refreshing, setRefreshing] = useState(false);
   const flatListRef = useRef(null);
 
-  const onRefresh = () => {
+  const onRefresh = async () => {
     setRefreshing(true);
-    setTimeout(() => {
-      setRefreshing(false);
-    }, 2000);
+    await GetList();
+    setRefreshing(false);
   };
 
-  useEffect(() => {
-    IMAGE_API;
-    pastOrders;
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      GetList();
+    }, []),
+  );
 
+  const GetList = async () => {
+    try {
+      const response = await axiosInstance.get('/order/past-order');
+      const data = response?.data?.data ?? [];
+      setItems(data);
+    } catch (error) {
+      console.warn(error);
+    }
+  };
+
+  // useEffect(() => {
+  //   setCurrentItems(items);
+  // }, [items]);
+
+  useEffect(() => {
+    GetList();
+    IMAGE_API;
+    items;
+  }, []);
   return (
     <View style={styles.container}>
-      {pastOrders.length === 0 ? (
+      {Array.isArray(items) && items.length === 0 ? (
         <ScrollView
           contentContainerStyle={styles.emptyContainer}
           refreshControl={
@@ -53,7 +75,7 @@ const PastOrders = () => {
                   marginBottom: 10,
                 },
               ]}>
-              Your Past Order is Empty!
+              Your In Progress Order is Empty!
             </Text>
             <Text style={styles.emptyCartText}>Seems like you have not</Text>
             <Text style={styles.emptyCartText}>ordered any food yet</Text>
@@ -61,63 +83,75 @@ const PastOrders = () => {
         </ScrollView>
       ) : (
         <FlatList
+          showsHorizontalScrollIndicator={false}
+          showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
-          data={[...pastOrders].reverse()}
+          data={items}
           keyExtractor={(item, index) => index.toString()}
-          renderItem={({item}) => (
-            <TouchableOpacity
-              style={styles.order}
-              onPress={() => {
-                navigation.navigate('InProgressDetail', {
-                  item,
-                  isPastOrder: true,
-                });
-              }}>
-              <View style={styles.orderContent}>
-                <View style={styles.imageContainer}>
-                  {item.items && item.items.length > 3 ? (
-                    <>
-                      {item.items.slice(0, 3).map((orderItem, index) => (
+          renderItem={({item}) => {
+            const totalAmount =
+              Number(item.receipt?.amount || 0) +
+              Number(item.receipt?.delivery_charges || 0) +
+              Number(item.receipt?.gst || 0) -
+              Number(item.receipt?.discount_applied || 0);
+
+            return (
+              <TouchableOpacity
+                style={styles.order}
+                onPress={() => {
+                  navigation.navigate('InProgressDetail', {
+                    item,
+                    isPastOrder: true,
+                  });
+                }}>
+                <View style={styles.orderContent}>
+                  <View style={styles.imageContainer}>
+                    {item.products && item.products.length > 3 ? (
+                      <>
+                        {item.products.slice(0, 3).map((orderItem, index) => (
+                          <Image
+                            key={index}
+                            source={{uri: `${IMAGE_API}/${orderItem.image}`}}
+                            style={styles.image}
+                          />
+                        ))}
+                        <View style={styles.countContainer}>
+                          <Text style={styles.countText}>
+                            +{item.products.length - 3}
+                          </Text>
+                        </View>
+                      </>
+                    ) : (
+                      item.products.map((orderItem, index) => (
                         <Image
                           key={index}
                           source={{uri: `${IMAGE_API}/${orderItem.image}`}}
-                          style={styles.image}
+                          style={
+                            item.products.length === 1
+                              ? styles.singleImage
+                              : styles.image
+                          }
                         />
-                      ))}
-                      <View style={styles.countContainer}>
-                        <Text style={styles.countText}>
-                          +{item.items.length - 3}
-                        </Text>
-                      </View>
-                    </>
-                  ) : (
-                    item.items.map((orderItem, index) => (
-                      <Image
-                        key={index}
-                        source={{uri: `${IMAGE_API}/${orderItem.image}`}}
-                        style={
-                          item.items.length === 1
-                            ? styles.singleImage
-                            : styles.image
-                        }
-                      />
-                    ))
-                  )}
+                      ))
+                    )}
+                  </View>
+                  <View style={styles.textContainer}>
+                    <Text style={styles.text}>
+                      Order Date: {item.orderDate}
+                    </Text>
+                    <Text style={styles.text}>
+                      Total Price: ₹{totalAmount.toFixed(2)}
+                    </Text>
+                    <Text style={styles.text}>
+                      Payment Method: {item.payment_type}
+                    </Text>
+                  </View>
                 </View>
-                <View style={styles.textContainer}>
-                  <Text style={styles.text}>Order Date: {item.orderDate}</Text>
-                  <Text style={styles.text}>
-                    Total Price: ₹{item.totalPrice}
-                  </Text>
-                  <Text style={styles.text}>
-                    Payment Method: {item.paymentMethod}
-                  </Text>
-                </View>
-              </View>
-            </TouchableOpacity>
-          )}
+              </TouchableOpacity>
+            );
+          }}
         />
       )}
     </View>
@@ -129,21 +163,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 8,
     paddingTop: 4,
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  emptyImage: {
-    width: 200,
-    height: 200,
-    resizeMode: 'contain',
-  },
-  emptyText: {
-    marginTop: 10,
-    fontSize: 16,
-    color: '#666',
   },
   order: {
     marginHorizontal: 8,
@@ -197,9 +216,28 @@ const styles = StyleSheet.create({
     flex: 1,
     marginLeft: 10,
   },
+  textContainer: {
+    flex: 1,
+    marginLeft: 10,
+  },
   text: {
     fontSize: 14,
     color: '#333',
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyImage: {
+    width: 200,
+    height: 200,
+    resizeMode: 'contain',
+  },
+  emptyText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: '#666',
   },
   emptyCartText: {
     fontSize: 14,

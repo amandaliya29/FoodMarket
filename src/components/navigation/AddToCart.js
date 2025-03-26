@@ -158,80 +158,6 @@ const AddToCart = () => {
     );
   };
 
-  const TopDeal = () => {
-    return (
-      <View>
-        <Text
-          style={{
-            marginHorizontal: 16,
-            marginVertical: 16,
-            fontSize: 16,
-            color: '#020202',
-            marginBottom: 10,
-          }}>
-          Top Deal
-        </Text>
-        <View>
-          <View>
-            <FlatList
-              data={foodList}
-              showsVerticalScrollIndicator={false}
-              showsHorizontalScrollIndicator={false}
-              horizontal={true}
-              keyExtractor={item => item.id.toString()}
-              renderItem={renderHorizontalItem}
-              ItemSeparatorComponent={<View style={{width: 16}}></View>}
-              style={styles.horizontalList}
-            />
-          </View>
-        </View>
-      </View>
-    );
-  };
-
-  const renderHorizontalItem = ({item, index}) => {
-    const isLastItem = index === foodList.length - 1;
-
-    return (
-      <TouchableOpacity
-        key={item.id.toString()}
-        style={[
-          styles.box,
-          isLastItem && {marginRight: 16},
-          index === 0 && {marginLeft: 16},
-        ]}
-        onPress={() => {
-          navigation.navigate('FoodDetail', {item});
-        }}>
-        <View style={styles.imageContainer(width, height)}>
-          <Image style={styles.image} source={{uri: item.image}} />
-        </View>
-
-        <View style={{paddingLeft: 12}}>
-          <Text style={styles.foodName}>{item.name}</Text>
-          <View style={{flexDirection: 'row', marginTop: 6}}>
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                alignContent: 'center',
-                justifyContent: 'center',
-                borderRadius: 8,
-                padding: 2,
-                paddingHorizontal: 6,
-                backgroundColor: 'green',
-              }}>
-              <Text style={{color: '#fff', fontSize: 14, paddingRight: 2}}>
-                {item.rating.toFixed(1)}
-              </Text>
-              <Icon2 name="star" color={'#fff'} size={12} />
-            </View>
-          </View>
-        </View>
-      </TouchableOpacity>
-    );
-  };
-
   const renderItem = ({item}) => (
     <View style={{marginHorizontal: 16, marginVertical: 5}}>
       <View key={item.id.toString()} style={[styles.verticalBox]}>
@@ -379,7 +305,6 @@ const AddToCart = () => {
               <Text style={styles.emptyCartText}>ordered any food yet</Text>
             </View>
           </View>
-          <TopDeal />
           <Wishlist />
         </ScrollView>
       ) : (
@@ -394,7 +319,6 @@ const AddToCart = () => {
             renderItem={renderItem}
             ListFooterComponent={
               <View>
-                <TopDeal />
                 <Wishlist />
               </View>
             }

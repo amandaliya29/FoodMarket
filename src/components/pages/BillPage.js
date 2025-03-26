@@ -9,6 +9,7 @@ import {
   Image,
   Alert,
   Modal,
+  ToastAndroid,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {useNavigation} from '@react-navigation/native';
@@ -20,23 +21,50 @@ import {RAZORPAY_KEY} from '@env';
 import Icon2 from 'react-native-vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useDispatch} from 'react-redux';
+import axiosInstance from '../axios/axiosInstance';
 
 const BillPage = ({route}) => {
-  const {item} = route.params;
+  const {item, house, address, city} = route.params;
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const [isModalVisible, setModalVisible] = useState(false);
   const [userDetails, setUserDetails] = useState(null);
+  // const ids = item.map(i => i.id);
+
+  const ids = item.flatMap(i => Array(i.quantity).fill(i.id));
+  const [order_id, setOrder_id] = useState('');
+  const gst =
+    item.reduce(
+      (total, currentItem) => total + currentItem.price * currentItem.quantity,
+      0,
+    ) * 0.05;
+  const discount =
+    item.reduce(
+      (total, currentItem) => total + currentItem.price * currentItem.quantity,
+      0,
+    ) * 0.03;
+
   const fetchUserDetails = async () => {
     try {
       const userDetails = await AsyncStorage.getItem('userDetails');
       if (userDetails) {
         const parsedDetails = JSON.parse(userDetails);
+
         setUserDetails(parsedDetails);
       }
     } catch (error) {
       console.warn('Failed to load user details', error);
     }
+  };
+
+  const showToastWithGravityAndOffset = message => {
+    ToastAndroid.showWithGravityAndOffset(
+      message,
+      ToastAndroid.CENTER,
+      ToastAndroid.BOTTOM,
+      25,
+      50,
+    );
   };
 
   useEffect(() => {
@@ -46,51 +74,89 @@ const BillPage = ({route}) => {
   }, []);
 
   const totalCartPrice =
-    route.params.reduce(
+    item.reduce(
       (total, currentItem) => total + currentItem.price * currentItem.quantity,
       0,
     ) +
-    route.params.reduce(
-      (total, currentItem) => total + currentItem.price * currentItem.quantity,
-      0,
-    ) *
-      0.05 +
+    gst +
     10 +
     10 -
-    route.params.reduce(
-      (total, currentItem) => total + currentItem.price * currentItem.quantity,
-      0,
-    ) *
-      0.03;
+    discount;
 
-  const handleCheckout = () => {
-    setModalVisible(true);
+  const handleCheckout = async () => {
+    try {
+      const formData = new FormData();
+      // formData.append('product_ids', ids);
+      ids.forEach(id => {
+        formData.append('product_ids[]', id);
+      });
+
+      formData.append('gst', gst);
+      formData.append('delivery_charges', 10);
+      formData.append('discount_applied', discount);
+      formData.append('house_no', house);
+      formData.append('address', address);
+      formData.append('city', city);
+
+      const response = await axiosInstance.post('/order/create', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      showToastWithGravityAndOffset(response.data.message);
+      setOrder_id(response.data.data.order_id);
+
+      setModalVisible(true);
+    } catch (error) {
+      showToastWithGravityAndOffset(error.response.data.message);
+    }
   };
   const closeModal = () => {
     setModalVisible(false);
   };
-  const handlePaymentOption = option => {
-    const orderDetails = {
-      items: route.params,
-      totalPrice: totalCartPrice,
-      paymentMethod: option,
-      orderDate: (() => {
-        const now = new Date();
-        const date = now.toLocaleDateString();
-        const time = now.toLocaleTimeString();
-        return `${date} ${time}`;
-      })(),
-      status: 'inProgress',
-    };
+  const handlePaymentOption = async option => {
+    // const orderDetails = {
+    //   items: item,
+    //   totalPrice: totalCartPrice,
+    //   paymentMethod: option,
+    //   orderDate: (() => {
+    //     const now = new Date();
+    //     const date = now.toLocaleDateString();
+    //     const time = now.toLocaleTimeString();
+    //     return `${date} ${time}`;
+    //   })(),
+    //   status: 'inProgress',
+    // };
 
     closeModal();
 
     if (option === 'cash') {
-      dispatch(addOrder(orderDetails));
-      dispatch(clearCart());
-      console.log('Cash on Delivery selected');
-      moveToPastOrdersAfterDelay(orderDetails);
-      navigation.navigate('Cart');
+      // moveToPastOrdersAfterDelay(orderDetails);
+      try {
+        const formData = new FormData();
+        formData.append('order_id', order_id);
+
+        const response = await axiosInstance.post(
+          '/order/cash-order',
+          formData,
+          {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          },
+        );
+        // console.warn(response);
+        // let items = response.data.data;
+        // dispatch(addOrder(items));
+        dispatch(clearCart());
+        showToastWithGravityAndOffset(response.data.message);
+        navigation.navigate('Cart');
+      } catch (error) {
+        // console.warn(error);
+
+        showToastWithGravityAndOffset(error.response.data.message);
+      }
     } else if (option === 'online') {
       var options = {
         description: 'Credits towards consultation',
@@ -100,36 +166,40 @@ const BillPage = ({route}) => {
         amount: totalCartPrice * 100,
         name: 'Food Market',
         prefill: {
-          email: userDetails.data.user.email,
-          contact: '9191919191',
-          name: userDetails.data.user.name,
+          email: userDetails.user.email,
+          contact: userDetails?.user?.phone_no,
+          name: userDetails.user.name,
         },
         notes: {
-          order_id: 123,
+          order_id: order_id,
         },
         theme: {color: '#eb0029'},
       };
       RazorpayCheckout.open(options)
         .then(data => {
-          dispatch(addOrder(orderDetails));
+          // dispatch(addOrder(orderDetails));
           dispatch(clearCart());
-          alert(`Success: ${data.razorpay_payment_id}`);
-          moveToPastOrdersAfterDelay(orderDetails);
+          // alert(`Success: ${data.razorpay_payment_id}`);
+          // moveToPastOrdersAfterDelay(orderDetails);
           navigation.navigate('Cart');
+          showToastWithGravityAndOffset('order is place in your order Address');
         })
         .catch(error => {
-          alert(`Error: ${error.code} | ${error.description}`);
+          showToastWithGravityAndOffset(
+            `Error: ${error.code} | ${error.description}`,
+          );
         });
     }
   };
 
-  const moveToPastOrdersAfterDelay = orderDetails => {
-    setTimeout(() => {
-      dispatch(moveOrderToPast(orderDetails));
-    }, 30000);
-  };
+  // const moveToPastOrdersAfterDelay = orderDetails => {
+  //   setTimeout(() => {
+  //     dispatch(moveOrderToPast(orderDetails));
+  //   }, 30000);
+  // };
   return (
     <SafeAreaView style={styles.container}>
+      {/* {console.warn(userDetails.user.phone_no)} */}
       <View style={styles.head}>
         {/* <TouchableOpacity
           onPress={() => {
@@ -151,7 +221,7 @@ const BillPage = ({route}) => {
       <ScrollView style={styles.scrollContainer}>
         <View style={styles.footerContainer}>
           <Text style={styles.footerTitle}>Order Detail</Text>
-          {route.params.map(detail => (
+          {item.map(detail => (
             <View key={detail.id} style={styles.paymentDetailRow}>
               <Text style={styles.paymentDetailText}>{detail.name}</Text>
               <Text style={styles.paymentDetailText}>
@@ -162,16 +232,7 @@ const BillPage = ({route}) => {
           <View style={styles.divider} />
           <View style={styles.paymentDetailRow}>
             <Text style={styles.paymentDetailText}>GST (5%)</Text>
-            <Text style={styles.paymentDetailText}>
-              ₹
-              {(
-                route.params.reduce(
-                  (total, currentItem) =>
-                    total + currentItem.price * currentItem.quantity,
-                  0,
-                ) * 0.05
-              ).toFixed(2)}
-            </Text>
+            <Text style={styles.paymentDetailText}>₹{gst.toFixed(2)}</Text>
           </View>
           <View style={styles.paymentDetailRow}>
             <Text style={styles.paymentDetailText}>Order Packaging Charge</Text>
@@ -185,13 +246,7 @@ const BillPage = ({route}) => {
             <Text style={styles.paymentDetailText}>Discount (3%)</Text>
             <Text style={styles.paymentDetailText}>
               -₹
-              {(
-                route.params.reduce(
-                  (total, currentItem) =>
-                    total + currentItem.price * currentItem.quantity,
-                  0,
-                ) * 0.03
-              ).toFixed(2)}
+              {discount.toFixed(2)}
             </Text>
           </View>
           <View style={styles.divider} />
@@ -204,25 +259,15 @@ const BillPage = ({route}) => {
             <Text style={styles.paymentDetailTotalText}>
               ₹
               {(
-                route.params.reduce(
+                item.reduce(
                   (total, currentItem) =>
                     total + currentItem.price * currentItem.quantity,
                   0,
                 ) +
-                route.params.reduce(
-                  (total, currentItem) =>
-                    total + currentItem.price * currentItem.quantity,
-                  0,
-                ) *
-                  0.05 +
+                gst +
                 10 +
                 10 -
-                route.params.reduce(
-                  (total, currentItem) =>
-                    total + currentItem.price * currentItem.quantity,
-                  0,
-                ) *
-                  0.03
+                discount
               ).toFixed(2)}
             </Text>
           </View>

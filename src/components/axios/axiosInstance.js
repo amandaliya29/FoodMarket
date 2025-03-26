@@ -11,9 +11,13 @@ const axiosInstance = axios.create({
 const requestHandler = async request => {
   let idToken;
   const userDetails = await AsyncStorage.getItem('userDetails');
+  // console.log(userDetails);
   if (userDetails) {
     const parsedDetails = JSON.parse(userDetails);
-    idToken = parsedDetails.data.token;
+
+    if (parsedDetails) {
+      idToken = parsedDetails.token;
+    }
   }
   request.headers.Authorization = 'Bearer ' + idToken;
   return request;

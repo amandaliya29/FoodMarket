@@ -121,7 +121,7 @@ const SignUp = () => {
           },
         });
 
-        const userDetails = response.data;
+        const userDetails = response.data.data;
 
         await AsyncStorage.setItem('userDetails', JSON.stringify(userDetails));
 
@@ -129,7 +129,9 @@ const SignUp = () => {
 
         navigation.navigate('TabNavigation');
       } catch (error) {
-        showToastWithGravityAndOffset(error.response.data.message);
+        console.log(error);
+
+        // showToastWithGravityAndOffset(error.response.data.message);
       }
     } else {
       showToastWithGravityAndOffset('Please fill all fields correctly');

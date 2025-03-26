@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState, useCallback} from 'react';
 import {
   FlatList,
   Image,
@@ -10,7 +10,9 @@ import {
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {useFocusEffect} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+
 import UserAvatar from '../pages/UserAvatar';
 import {IMAGE_API} from '@env';
 import axiosInstance from '../axios/axiosInstance';
@@ -58,32 +60,40 @@ const AdminProfile = ({navigation}) => {
         const parsedDetails = JSON.parse(storedDetails);
         setUserDetails(parsedDetails);
         setImageUri(
-          parsedDetails?.data?.user?.avatar
-            ? `${IMAGE_API}/${parsedDetails.data.user.avatar}`
+          parsedDetails?.user?.avatar
+            ? `${IMAGE_API}/${parsedDetails.user.avatar}`
             : '',
         );
-        setUserName(parsedDetails?.data?.user?.name || '');
+        setUserName(parsedDetails?.user?.name || '');
       }
     } catch (error) {
       console.warn('Failed to load user details', error);
     }
   };
 
-  useEffect(() => {
-    fetchUserDetails();
-    imageUri;
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchUserDetails();
+    }, []),
+  );
 
   const menuOptions = [
     {id: 1, name: 'Edit Profile', screen: 'AdminSetProfile', icon: 'person'},
     {
       id: 2,
-      name: 'Reset Password',
-      screen: 'ForgotPassword',
-      icon: 'password',
-      params: {hideAccountSection: true},
+      name: 'Privacy & Policy',
+      screen: 'PrivacyPolicyScreen',
+      icon: 'privacy-tip',
     },
-    {id: 5, name: 'LogOut', action: handleLogout, icon: 'logout'},
+    {
+      id: 3,
+      name: 'Terms & Conditions',
+      screen: 'TermsConditionsScreen',
+      icon: 'gavel',
+    },
+    {id: 4, name: 'Help & Support', screen: 'Help', icon: 'support-agent'},
+    {id: 5, name: 'About Us', screen: 'AboutUs', icon: 'info'},
+    {id: 6, name: 'LogOut', action: handleLogout, icon: 'logout'},
   ];
 
   return (
@@ -102,11 +112,9 @@ const AdminProfile = ({navigation}) => {
             )}
           </View>
         </View>
-        <Text style={styles.userName}>
-          {userDetails?.data?.user?.name || 'User'}
-        </Text>
+        <Text style={styles.userName}>{userDetails?.user?.name || 'User'}</Text>
         <Text style={styles.userEmail}>
-          {userDetails?.data?.user?.email || 'user123@gmail.com'}
+          {userDetails?.user?.email || 'user123@gmail.com'}
         </Text>
       </View>
 

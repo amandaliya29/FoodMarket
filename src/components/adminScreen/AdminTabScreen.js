@@ -12,12 +12,13 @@ import {
 } from 'react-native';
 import {TabView, SceneMap} from 'react-native-tab-view';
 import AdminNewOrder from './adminTab/AdminNewOrder';
-import AdminPastOrder from './adminTab/AdminPastOrder';
-import AdminOutgoning from './adminTab/AdminOutgoning';
+import AdminOutgoning from './adminTab/AdminOutOfDelivery';
 import AdminDelivered from './adminTab/AdminDelivered';
 import AdminCancelled from './adminTab/AdminCancelled';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import UserAvatar from '../pages/UserAvatar';
+import AdminPreparingOrder from './adminTab/AdminPriparingOrder';
+import AdminOutOfDelivery from './adminTab/AdminOutOfDelivery';
 
 const AdminTabScreen = () => {
   const layout = useWindowDimensions();
@@ -28,8 +29,8 @@ const AdminTabScreen = () => {
 
   const routes = [
     {key: 'NewOrder', title: 'New Order'},
-    {key: 'AdminOutgoning', title: 'Ongoing'},
-    {key: 'pastOrder', title: 'Past Order'},
+    {key: 'Preparing', title: 'Preparing'},
+    {key: 'AdminOutOfDelivery', title: 'Out Of Delivery'},
     {key: 'delivered', title: 'Delivered'},
     {key: 'cancelled', title: 'Cancelled'},
   ];
@@ -57,8 +58,8 @@ const AdminTabScreen = () => {
 
   const renderScene = SceneMap({
     NewOrder: AdminNewOrder,
-    pastOrder: AdminPastOrder,
-    AdminOutgoning: AdminOutgoning,
+    Preparing: AdminPreparingOrder,
+    AdminOutOfDelivery: AdminOutOfDelivery,
     delivered: AdminDelivered,
     cancelled: AdminCancelled,
   });
@@ -69,8 +70,8 @@ const AdminTabScreen = () => {
       if (userDetails) {
         const parsedDetails = JSON.parse(userDetails);
         setUserDetail(parsedDetails);
-        setImageUri(parsedDetails.data?.user?.avatar || '');
-        setUserName(parsedDetails.data?.user?.name || 'Food Market');
+        setImageUri(parsedDetails?.avatar || '');
+        setUserName(parsedDetails.user?.name || 'Food Market');
       }
     } catch (error) {
       console.warn('Failed to load user details', error);

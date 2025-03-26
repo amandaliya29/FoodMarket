@@ -39,18 +39,22 @@ const HomeScreen = () => {
         const parsedDetails = JSON.parse(userDetails);
         setUserDetail(parsedDetails);
         setImageUri(
-          parsedDetails.data &&
-            parsedDetails.data.user &&
-            parsedDetails.data.user.avatar
-            ? `${IMAGE_API}/${parsedDetails.data.user.avatar}`
+          parsedDetails.user && parsedDetails.user.avatar
+            ? `${parsedDetails.user.avatar}`
             : null,
         );
-        setUserName(parsedDetails.data.user.name);
+        setUserName(parsedDetails.user.name);
       }
     } catch (error) {
       console.warn('Failed to load user details', error);
     }
   };
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchUserDetails();
+    }, []),
+  );
 
   const backBtn = () => {
     const backAction = () => {
@@ -85,7 +89,11 @@ const HomeScreen = () => {
             height={50}
             width={50}
             resizeMode="cover"
-            source={{uri: imageUri}}
+            source={{
+              uri: imageUri.includes('file')
+                ? imageUri
+                : `${IMAGE_API}/${imageUri}`,
+            }}
             accessibilityLabel="user profile photo"
           />
         ) : (

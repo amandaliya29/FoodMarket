@@ -6,67 +6,138 @@ import {
   TouchableOpacity,
   ScrollView,
   SafeAreaView,
+  ToastAndroid,
 } from 'react-native';
 import Icon2 from 'react-native-vector-icons/MaterialCommunityIcons';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import * as OpenAnything from 'react-native-openanything';
+import axiosInstance from '../axios/axiosInstance';
 
 const AdminOrderDetail = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const {inGoing} = route.params;
+  const {inGoing, order} = route.params;
 
   const [orderState, setOrderState] = useState(() => {
     if (inGoing === 'newOrder') return 'New Order';
-    if (inGoing === 'inGoing') return 'In Progress';
-    if (inGoing === 'pastOrder') return 'Order Delivered';
+    if (inGoing === 'Preparing') return 'Preparing';
+    if (inGoing === 'OutOfDelivery') return 'OutOfDelivery';
+    if (inGoing === 'Delivered') return 'Delivered';
+    if (inGoing === 'Cancelled') return 'Cancelled';
+    return 'Unknown';
+  });
+  const [state, setState] = useState(() => {
+    if (orderState === 'New Order') return 'preparing';
+    if (orderState === 'Preparing') return 'out_for_delivery';
+    if (orderState === 'OutOfDelivery') return 'delivered';
+    // if (inGoing === 'Delivered') return 'Delivered';
+    // if (inGoing === 'Cancelled') return 'Cancelled';
     return 'Unknown';
   });
 
-  const items = [
-    {name: 'Dal Makhani', quantity: 2, price: 24.0},
-    {name: 'Simple Thali - Veg', quantity: 1, price: 18.0},
-    {name: 'Deluxe Thali - Non Veg', quantity: 2, price: 48.0},
-    {name: 'Missi Roti', quantity: 5, price: 10.0},
-    {name: 'Butter Nan', quantity: 2, price: 6.0},
-  ];
+  const totalAmount =
+    Number(order.receipt.amount) +
+    Number(order.receipt.delivery_charges) +
+    Number(order.receipt.gst) -
+    Number(order.receipt.discount_applied);
 
   const callButton = () => {
-    OpenAnything.Call('8469272004');
+    OpenAnything.Call(order.user.phone_no);
   };
 
   const EmailButton = () => {
-    OpenAnything.Email(
-      'user1@gmail.com',
+    OpenAnything.Email(`
+      ${order.user.email},
       'Food Order Details',
       'Hi, \n\n' +
-        'We hope this email finds you well! Below are the details of your recent food order:\n\n' +
-        'Order Summary:\n' +
-        '- Item: [Food Item Name]\n' +
-        '- Quantity: [Quantity]\n' +
-        '- Total Price: [Total Price]\n\n' +
-        'Delivery Details:\n' +
-        '- Name: [Customer Name]\n' +
-        '- Address: [Delivery Address]\n' +
-        '- Contact: [Phone Number]\n\n' +
-        'If you have any questions or need further assistance, feel free to reply to this email.\n\n' +
-        'Thank you for choosing FoodMarket!\n\n' +
-        'Best regards,\n' +
-        'FoodMarket Team',
+      'We hope this email finds you well! Below are the details of your recent food order:\n\n' +
+      'Order Summary:\n' +
+
+      ${uniqueProducts.map((item, index) => (
+        <View style={styles.itemRow} key={index}>
+          <Text style={styles.itemName}>{item.name}</Text>
+          <Text style={styles.itemQuantity}>Qty: {item.qty}</Text>
+        </View>
+      ))}
+      '- Total Price: ${totalAmount}\n\n' +
+      'Delivery Details:\n' +
+      '- Name: [Customer Name]\n' +
+      '- Address: [Delivery Address]\n' +
+      '- Contact: [Phone Number]\n\n' +
+      'If you have any questions or need further assistance, feel free to reply to this email.\n\n' +
+      'Thank you for choosing FoodMarket!\n\n' +
+      'Best regards,\n' +
+      'FoodMarket Team',
+      `);
+  };
+
+  const showToastWithGravityAndOffset = message => {
+    ToastAndroid.showWithGravityAndOffset(
+      message,
+      ToastAndroid.CENTER,
+      ToastAndroid.BOTTOM,
+      25,
+      50,
     );
   };
 
-  const handleCancelOrder = () => {
-    setOrderState('Cancelled');
+  const AcceptHandler = async (id, state) => {
+    // console.warn(id, state);
+
+    try {
+      const formData = new FormData();
+      formData.append('order_id', id);
+      formData.append('status', state);
+      const response = await axiosInstance.post(`/order/status`, formData, {
+        headers: {'Content-Type': 'multipart/form-data'},
+      });
+      // console.warn(response.data);
+      showToastWithGravityAndOffset(response.data.message);
+      navigation.goBack();
+    } catch (error) {
+      // console.warn(error);
+      showToastWithGravityAndOffset(error.response.data.message);
+    }
   };
 
-  const handleAcceptOrder = () => {
-    setOrderState('In Progress');
+  const cancelledHandler = async id => {
+    // console.warn('AcceptHandler clicked with order IDs:', id);
+
+    try {
+      const formData = new FormData();
+      formData.append('order_id', id);
+      // formData.append('status', 'preparing');
+      const response = await axiosInstance.post(`/order/cancel`, formData, {
+        headers: {'Content-Type': 'multipart/form-data'},
+      });
+      // console.warn(response.data);
+      showToastWithGravityAndOffset(response.data.message);
+    } catch (error) {
+      console.warn(error);
+      showToastWithGravityAndOffset(error.response.data.message);
+    }
   };
+
+  // const handleAcceptOrder = () => {
+  //   setOrderState('In Progress');
+  // };
+
+  const groupedProducts = order.products.reduce((acc, product) => {
+    if (acc[product.name]) {
+      acc[product.name].qty += 1; // Increase the quantity for duplicate items
+    } else {
+      acc[product.name] = {...product, qty: 1}; // Initialize with qty = 1
+    }
+    return acc;
+  }, {});
+
+  // Convert the grouped object back into an array
+  const uniqueProducts = Object.values(groupedProducts);
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* {console.warn(order)} */}
       <View style={styles.head}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
@@ -93,23 +164,23 @@ const AdminOrderDetail = () => {
             <Icon2 name="truck-delivery" size={40} color="#EB0029" />
           </View>
           <View style={styles.headerText}>
-            <Text style={styles.name}>Angel James</Text>
+            <Text style={styles.name}>{order.user.name}</Text>
             <Text style={styles.timestamp}>Today at 12:33 AM</Text>
           </View>
-          <Text style={styles.orderId}>Order id: 348</Text>
+          <Text style={styles.orderId}>Order id: {order.id}</Text>
         </View>
 
         <View style={styles.contactSection}>
           <View style={styles.contactRow}>
             <Icon size={16} name="call" color={'#EB0029'} />
-            <Text style={styles.contactText}>+1 234 5678 910</Text>
+            <Text style={styles.contactText}>+91 {order.user.phone_no}</Text>
             <TouchableOpacity onPress={callButton} style={styles.contactButton}>
               <Text style={styles.buttonText}>Call</Text>
             </TouchableOpacity>
           </View>
           <View style={styles.contactRow}>
             <Icon size={16} name="mail" color={'#EB0029'} />
-            <Text style={styles.contactText}>johndoe@gmail.com</Text>
+            <Text style={styles.contactText}>{order.user.email}</Text>
             <TouchableOpacity
               style={styles.contactButton}
               onPress={EmailButton}>
@@ -119,18 +190,18 @@ const AdminOrderDetail = () => {
           <View style={styles.contactRow}>
             <Icon size={16} name="location-sharp" color={'#EB0029'} />
             <Text style={styles.contactText}>
-              3322 Sweetwater Springs Blvd, Spring Valley, CA 91977, USA
+              {order.house_no}, {order.address}, {order.city}
             </Text>
           </View>
         </View>
 
         <View style={styles.itemsSection}>
           <Text style={styles.sectionTitle}>Items</Text>
-          {items.map((item, index) => (
+          {uniqueProducts.map((item, index) => (
             <View style={styles.itemRow} key={index}>
               <Text style={styles.itemName}>{item.name}</Text>
-              <Text style={styles.itemQuantity}>Qty: {item.quantity}</Text>
-              <Text style={styles.itemPrice}>₹{item.price.toFixed(2)}</Text>
+              <Text style={styles.itemQuantity}>Qty: {item.qty}</Text>
+              <Text style={styles.itemPrice}>₹{item.price}</Text>
             </View>
           ))}
         </View>
@@ -138,48 +209,55 @@ const AdminOrderDetail = () => {
         <View style={styles.summarySection}>
           <View style={styles.summaryRow}>
             <Text style={{color: '#777'}}>Subtotal:</Text>
-            <Text style={{color: '#777'}}>₹106.00</Text>
+            <Text style={{color: '#777'}}>₹{order.receipt.amount}</Text>
           </View>
           <View style={styles.summaryRow}>
             <Text style={{color: '#777'}}>Delivery Fee:</Text>
-            <Text style={{color: '#777'}}>₹0.00</Text>
+            <Text style={{color: '#777'}}>
+              ₹{order.receipt.delivery_charges}
+            </Text>
           </View>
           <View style={styles.summaryRow}>
-            <Text style={{color: '#777'}}>+ Service tax (20%):</Text>
-            <Text style={{color: '#777'}}>₹21.20</Text>
+            <Text style={{color: '#777'}}>+ Service tax (5%):</Text>
+            <Text style={{color: '#777'}}>₹{order.receipt.gst}</Text>
           </View>
           <View style={styles.summaryRow}>
-            <Text style={{color: '#777'}}>- Discount (20%):</Text>
-            <Text style={{color: '#777'}}>-₹21.20</Text>
+            <Text style={{color: '#777'}}>- Discount (3%):</Text>
+            <Text style={{color: '#777'}}>
+              -₹{order.receipt.discount_applied}
+            </Text>
           </View>
           <View style={styles.totalRow}>
             <Text style={{color: '#777'}}>Total:</Text>
-            <Text style={{color: '#777'}}>₹106.00</Text>
+            <Text style={{color: '#777'}}>₹{totalAmount.toFixed(2)}</Text>
           </View>
         </View>
       </ScrollView>
 
       <View style={styles.actionButtons}>
-        {orderState === 'New Order' && (
+        {/* {console.warn(order.id)} */}
+        {['New Order', 'Preparing'].includes(orderState) && (
           <>
             <TouchableOpacity
               style={styles.cancelButton}
-              onPress={handleCancelOrder}>
+              onPress={() => cancelledHandler(item.id)}>
               <Text style={styles.button2Text}>Cancel Order</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.acceptButton}
-              onPress={handleAcceptOrder}>
+              onPress={() => AcceptHandler(order.id, state)}>
               <Text style={styles.button2Text}>Accept Order</Text>
             </TouchableOpacity>
           </>
         )}
-        {orderState === 'In Progress' && (
+        {['Delivered', 'OutOfDelivery'].includes(orderState) && (
           <View
             style={{
               flex: 1,
-              flexDirection: 'row',
-              justifyContent: 'space-between',
+              // flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: 10,
             }}>
             <View
               style={{
@@ -193,14 +271,9 @@ const AdminOrderDetail = () => {
               </Text>
               <Text style={{color: 'green', fontSize: 16}}> {orderState}</Text>
             </View>
-            <TouchableOpacity
-              style={[styles.cancelButton, {flex: 0.8, marginRight: 0}]}
-              onPress={handleCancelOrder}>
-              <Text style={styles.button2Text}>Cancel Order</Text>
-            </TouchableOpacity>
           </View>
         )}
-        {orderState === 'Order Delivered' && (
+        {orderState === 'Cancelled' && (
           <View
             style={{
               flex: 1,

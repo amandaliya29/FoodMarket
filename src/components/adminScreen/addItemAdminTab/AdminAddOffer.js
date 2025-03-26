@@ -69,6 +69,8 @@ const AdminAddOffer = () => {
         name,
       }));
       setData(products);
+
+      setSelectedProducts(products.map(product => product.id));
     } catch (error) {
       showToast(error.response?.data?.message || 'Error fetching data');
     }
@@ -151,6 +153,7 @@ const AdminAddOffer = () => {
       const formData = new FormData();
       // formData.append('id', id);
       formData.append('image', finalImageUri);
+      formData.append('is_active', true);
       selectedProducts.forEach(id => {
         formData.append('product_ids[]', id);
       });

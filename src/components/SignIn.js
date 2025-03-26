@@ -78,10 +78,10 @@ const SignIn = ({navigation}) => {
           },
         });
 
-        const userDetails = response.data;
+        const userDetails = response.data.data;
 
         await AsyncStorage.setItem('userDetails', JSON.stringify(userDetails));
-        const isAdmin = userDetails.data.user.is_admin === 1;
+        const isAdmin = userDetails.user.is_admin === 1;
 
         showToastWithGravityAndOffset(response.data.message);
 

@@ -142,6 +142,8 @@ const OfferPage = () => {
               offer_percentage: item.offer_percentage,
               offer_text: item.offer_text,
             }));
+            // console.warn(products);
+
             setData(products);
           }
         } catch (error) {
@@ -276,7 +278,7 @@ const OfferPage = () => {
           style={styles.filterBar}
           showsHorizontalScrollIndicator={false}
           showsVerticalScrollIndicator={false}>
-          {sortOptions.map(option => (
+          {/* {sortOptions.map(option => (
             <TouchableOpacity
               key={option.id}
               style={[
@@ -305,10 +307,10 @@ const OfferPage = () => {
                 />
               </View>
             </TouchableOpacity>
-          ))}
+          ))} */}
         </ScrollView>
       </View>
-      {isDropdownVisible && (
+      {/* {isDropdownVisible && (
         <View style={styles.dropdownMenu}>
           {[
             'Cost Low to High',
@@ -327,7 +329,7 @@ const OfferPage = () => {
             </TouchableOpacity>
           ))}
         </View>
-      )}
+      )} */}
 
       {loading ? (
         <FlatList

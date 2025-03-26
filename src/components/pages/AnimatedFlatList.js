@@ -10,7 +10,6 @@ import {
   FlatList,
   ToastAndroid,
 } from 'react-native';
-import {foodList} from '../foodlist';
 import {useNavigation} from '@react-navigation/native';
 import axiosInstance from '../axios/axiosInstance';
 import {IMAGE_API} from '@env';
@@ -50,15 +49,18 @@ const AnimatedFlatList = () => {
   }, []);
 
   useEffect(() => {
+    if (data.length === 0) return;
+
     const interval = setInterval(() => {
       setCurrentIndex(prevIndex => {
-        const newIndex = prevIndex === foodList.length - 1 ? 0 : prevIndex + 1;
+        const newIndex = prevIndex === data.length - 1 ? 0 : prevIndex + 1;
         flatListRef.current?.scrollToIndex({index: newIndex, animated: true});
         return newIndex;
       });
-    }, 30000000000);
+    }, 3000);
+
     return () => clearInterval(interval);
-  }, []);
+  }, [data.length]);
 
   const renderHorizontalItem = ({item}) => {
     return (
@@ -90,7 +92,7 @@ const AnimatedFlatList = () => {
   const renderDots = () => {
     return (
       <View style={styles.dotContainer}>
-        {foodList.map((_, i) => {
+        {data.map((_, i) => {
           const opacity = scrollX.interpolate({
             inputRange: [(i - 1) * width, i * width, (i + 1) * width],
             outputRange: [0.3, 1, 0.3],
